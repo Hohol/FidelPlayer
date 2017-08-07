@@ -1,7 +1,6 @@
 package fidel;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static fidel.Command.*;
@@ -9,17 +8,34 @@ import static fidel.Direction.*;
 import static fidel.TileType.*;
 
 public class BestMoveFinder {
-    public List<Command> findBestMoves(GameState gameState) {
-        boolean[][] visited = new boolean[gameState.height][gameState.width];
-        Cell[][] from = new Cell[gameState.height][gameState.width];
-        List<Command> r = new ArrayList<>();
-        dfs(gameState, gameState.findEntrance(), visited, r);
-        r.add(ENTER);
-        return r;
+
+    private final GameState gameState;
+    List<Command> bestMoves = null;
+    double bestEvaluation = Double.NEGATIVE_INFINITY;
+    final List<Command> curMoves = new ArrayList<>();
+    final Cell exit;
+
+    public BestMoveFinder(GameState gameState) {
+        this.gameState = gameState;
+        exit = gameState.findExit();
     }
 
-    private boolean dfs(GameState gameState, Cell cur, boolean[][] visited, List<Command> r) {
-        if (gameState.get(cur) == EXIT) {
+    public static List<Command> findBestMoves(GameState gameState) {
+        return new BestMoveFinder(gameState).findBestMoves0(gameState);
+    }
+
+    private List<Command> findBestMoves0(GameState gameState) {
+        dfs(gameState.findEntrance(), new PlayerState());
+        return bestMoves;
+    }
+
+    private boolean dfs(Cell cur, PlayerState ps) {
+        if (cur.equals(exit)) {
+            double evaluation = evaluate(ps);
+            if (evaluation > bestEvaluation) {
+                bestEvaluation = evaluation;
+                bestMoves = new ArrayList<>(curMoves);
+            }
             return true;
         }
         for (Direction dir : DIRS) {
@@ -27,22 +43,40 @@ public class BestMoveFinder {
             if (!gameState.inside(to)) {
                 continue;
             }
-            if (!visited[to.row][to.col]) {
-                visited[to.row][to.col] = true;
-                r.add(dir.command);
-
-                if (dfs(gameState, to, visited, r)) {
-                    return true;
-                }
-
-                pop(r);
-                visited[to.row][to.col] = false;
+            if (!passable(gameState.get(to))) {
+                continue;
             }
+            TileType oldTile = gameState.get(to);
+            int oldGold = ps.gold;
+            if (oldTile == COIN) {
+                ps.gold++;
+            }
+
+            gameState.set(to, VISITED);
+            curMoves.add(dir.command);
+
+            dfs(to, ps);
+
+            pop(curMoves);
+            gameState.set(to, oldTile);
+            ps.gold = oldGold;
         }
         return false;
     }
 
+    private boolean passable(TileType tile) {
+        return tile != ENTRANCE && tile != VISITED;
+    }
+
+    private double evaluate(PlayerState ps) {
+        return ps.gold;
+    }
+
     private void pop(List<Command> r) {
         r.remove(r.size() - 1);
+    }
+
+    static class PlayerState {
+        int gold;
     }
 }

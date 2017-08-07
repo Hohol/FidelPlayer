@@ -8,7 +8,7 @@ import static fidel.TileType.*;
 public class GameState {
     public final int height;
     public final int width;
-    private final TileType[][] map;
+    public final TileType[][] map;
 
     public GameState(int height, int width) {
         this.height = height;
@@ -66,5 +66,9 @@ public class GameState {
 
     private boolean inside(int row, int col) {
         return row >= 0 && col >= 0 && row < height && col < width;
+    }
+
+    public void set(Cell to, TileType tileType) {
+        set(to.row, to.col, tileType);
     }
 }

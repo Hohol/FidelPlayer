@@ -11,15 +11,28 @@ import static org.testng.Assert.*;
 
 @Test
 public class BestMoveFinderTest {
-
-    BestMoveFinder bestMoveFinder = new BestMoveFinder();
+    @Test
+    void testEmpty() {
+        check(
+                new TileType[][]{{ENTRANCE, EMPTY, EMPTY, EXIT}},
+                Arrays.asList(RIGHT, RIGHT, RIGHT)
+        );
+    }
 
     @Test
-    void test() {
-        GameState gameState = new GameState(
-                new TileType[][]{{ENTRANCE, EMPTY, EMPTY, EXIT}}
+    void collectCoins() {
+        check(
+                new TileType[][]{
+                        {COIN, EMPTY},
+                        {ENTRANCE, EXIT},
+                },
+                Arrays.asList(UP, RIGHT, DOWN)
         );
-        List<Command> bestMoves = bestMoveFinder.findBestMoves(gameState);
-        assertEquals(bestMoves, Arrays.asList(RIGHT, RIGHT, RIGHT, ENTER));
+    }
+
+    private void check(TileType[][] map, List<Command> expected) {
+        GameState gameState = new GameState(map);
+        List<Command> bestMoves = BestMoveFinder.findBestMoves(gameState);
+        assertEquals(bestMoves, expected);
     }
 }
