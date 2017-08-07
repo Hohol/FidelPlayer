@@ -48,6 +48,10 @@ public class GameStateReader {
         saveTile(tileImages[1][6], EXIT);
         saveTile(tileImages[1][2], SPIDER);
         saveTile(tileImages[1][4], SNAKE);*/
+        /*saveTile(tileImages[2][0], EMPTY);
+        if (true) {
+            return null;
+        }*/
 
         Map<TileType, List<BufferedImage>> tileTypeImgs = loadTiles();
         GameState gameState = new GameState(h, w);
@@ -66,7 +70,15 @@ public class GameStateReader {
     }
 
     private void saveTile(BufferedImage img, TileType tileType) {
-        writeImg(img, "tiles/" + tileType, false);
+        int cnt = 0;
+        while (true) {
+            String name = "tiles/" + tileType + (cnt == 0 ? "" : ("-" + cnt));
+            if (!(new File(name + ".png").exists())) {
+                writeImg(img, name, false);
+                break;
+            }
+            cnt++;
+        }
     }
 
     private BufferedImage[][] getTileImages(BufferedImage img, int startX, int startY, int h, int w) {
