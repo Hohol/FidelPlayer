@@ -51,6 +51,8 @@ public class BestMoveFinder {
             if (oldTile == COIN) {
                 ps.gold++;
             }
+            int oldXp = ps.xp;
+            ps.xp += calcXp(oldTile);
 
             gameState.set(to, VISITED);
             curMoves.add(dir.command);
@@ -60,8 +62,19 @@ public class BestMoveFinder {
             pop(curMoves);
             gameState.set(to, oldTile);
             ps.gold = oldGold;
+            ps.xp = oldXp;
         }
         return false;
+    }
+
+    private int calcXp(TileType tile) {
+        if (tile == SPIDER) {
+            return 1;
+        }
+        if (tile == SNAKE) {
+            return 5;
+        }
+        return 0;
     }
 
     private boolean passable(TileType tile) {
@@ -69,7 +82,7 @@ public class BestMoveFinder {
     }
 
     private double evaluate(PlayerState ps) {
-        return ps.gold;
+        return ps.gold * 10 + ps.xp;
     }
 
     private void pop(List<Command> r) {
@@ -78,5 +91,14 @@ public class BestMoveFinder {
 
     static class PlayerState {
         int gold;
+        int xp;
+
+        @Override
+        public String toString() {
+            return "PlayerState{" +
+                    "gold=" + gold +
+                    ", xp=" + xp +
+                    '}';
+        }
     }
 }

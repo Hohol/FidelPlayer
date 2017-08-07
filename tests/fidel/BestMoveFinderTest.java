@@ -30,6 +30,17 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void collectXp() {
+        check(
+                new TileType[][]{
+                        {SPIDER, EMPTY},
+                        {ENTRANCE, EXIT},
+                },
+                Arrays.asList(UP, RIGHT, DOWN)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         GameState gameState = new GameState(map);
         List<Command> bestMoves = BestMoveFinder.findBestMoves(gameState);
