@@ -11,4 +11,5 @@ public enum TileType {
     SMALL_SPIDER,
     RED_SPIDER,
     CHEST,
+    VAMPIRE,
 }

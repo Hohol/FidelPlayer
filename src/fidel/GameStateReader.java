@@ -44,13 +44,12 @@ public class GameStateReader {
         BufferedImage[][] tileImages = getTileImages(img, startX, startY, h, w);
 
         //saveTile(tileImages[1][0], ENTRANCE);
-        /*saveTile(tileImages[0][3], EMPTY);
-        if (true) {
+        /*if (true) {
             return null;
         }/**/
 
         Map<TileType, List<BufferedImage>> tileTypeImgs = loadTiles();
-        GameState gameState = new GameState(h, w);
+        GameState gameState = new GameState(h, w, 2);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
                 gameState.set(row, col, findMostSimilar(tileTypeImgs, tileImages[row][col]));
@@ -203,7 +202,7 @@ public class GameStateReader {
     private static TileType getTileType(String fullName) {
         char c = fullName.contains("-") ? '-' : '.';
         String name = fullName.substring(0, fullName.indexOf(c));
-        for (TileType type : TileType.values()) {
+        for (TileType type : values()) {
             if (name.equalsIgnoreCase(type.toString())) {
                 return type;
             }

@@ -44,6 +44,7 @@ public class BestMoveFinderTest {
     @Test
     void tripleKill() {
         check(
+                3,
                 new TileType[][]{
                         {ENTRANCE, SPIDER, SPIDER, EMPTY, SPIDER},
                         {EMPTY, EMPTY, SPIDER, EXIT, EMPTY},
@@ -63,9 +64,24 @@ public class BestMoveFinderTest {
         );
     }
 
-    private void check(TileType[][] map, List<Command> expected) {
-        GameState gameState = new GameState(map);
+    @Test
+    void dontDie() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, SPIDER, SPIDER},
+                        {EMPTY, EMPTY, EMPTY, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, DOWN, RIGHT)
+        );
+    }
+
+    private void check(int initialHp, TileType[][] map, List<Command> expected) {
+        GameState gameState = new GameState(map, initialHp);
         List<Command> actual = BestMoveFinder.findBestMoves(gameState);
         assertEquals(actual, expected, actual.toString());
+    }
+
+    private void check(TileType[][] map, List<Command> expected) {
+        check(2, map, expected);
     }
 }

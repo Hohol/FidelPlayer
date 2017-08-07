@@ -9,24 +9,27 @@ public class GameState {
     public final int height;
     public final int width;
     public final TileType[][] map;
+    public final int initialHp;
 
-    public GameState(int height, int width) {
+    public GameState(int height, int width, int initialHp) {
         this.height = height;
         this.width = width;
+        this.initialHp = initialHp;
         map = new TileType[height][width];
     }
 
-    public GameState(TileType[][] tileTypes) {
+    public GameState(TileType[][] tileTypes, int initialHp) {
         map = tileTypes;
+        this.initialHp = initialHp;
         height = map.length;
         width = map[0].length;
     }
 
     @Override
     public String toString() {
-        return "{" + Stream.of(map)
+        return Stream.of(map)
                 .map(row -> "{" + Stream.of(row).map(Enum::toString).collect(Collectors.joining(",")) + "}")
-                .collect(Collectors.joining(",\n")) + "}";
+                .collect(Collectors.joining(",\n"));
     }
 
     public void set(int row, int col, TileType tile) {

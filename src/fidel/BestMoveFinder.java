@@ -11,6 +11,7 @@ public class BestMoveFinder {
     private final GameState gameState;
     List<Command> bestMoves = null;
     double bestEvaluation = Double.NEGATIVE_INFINITY;
+    PlayerState bestState = null;
     final List<Command> curMoves = new ArrayList<>();
     final Cell exit;
 
@@ -24,15 +25,20 @@ public class BestMoveFinder {
     }
 
     private List<Command> findBestMoves0(GameState gameState) {
-        dfs(gameState.findEntrance(), new PlayerState(0, 0, 0, false));
+        dfs(gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.initialHp));
+        System.out.println(bestState);
         return bestMoves;
     }
 
     private boolean dfs(Cell cur, PlayerState ps) {
+        if (ps.hp < 0) {
+            return false;
+        }
         if (cur.equals(exit)) {
             double evaluation = evaluate(ps);
             if (evaluation > bestEvaluation) {
                 bestEvaluation = evaluation;
+                bestState = ps;
                 bestMoves = new ArrayList<>(curMoves);
             }
             return true;
@@ -65,6 +71,7 @@ public class BestMoveFinder {
             gold++;
         }
         int addXp = calcXp(tile, ps.afterTriple);
+        int dmg = calcDmg(tile, ps.hp);
         int xp = ps.xp + addXp;
 
         int streak = ps.streak;
@@ -81,7 +88,19 @@ public class BestMoveFinder {
             streak = 0;
         }
 
-        return new PlayerState(gold, xp, streak, afterTriple);
+        int hp = ps.hp - dmg;
+
+        return new PlayerState(gold, xp, streak, afterTriple, hp);
+    }
+
+    private int calcDmg(TileType tile, int hp) {
+        if (tile == SPIDER) {
+            return 1;
+        }
+        if (tile == VAMPIRE) {
+            return hp;
+        }
+        return 0;
     }
 
     private int calcXp(TileType tile, boolean afterTriple) {
@@ -97,6 +116,9 @@ public class BestMoveFinder {
             } else {
                 return 1;
             }
+        }
+        if (tile == VAMPIRE) {
+            return 1;
         }
         return 0;
     }
@@ -118,12 +140,14 @@ public class BestMoveFinder {
         final int xp;
         final int streak;
         final boolean afterTriple;
+        final int hp;
 
-        PlayerState(int gold, int xp, int streak, boolean afterTriple) {
+        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp) {
             this.gold = gold;
             this.xp = xp;
             this.streak = streak;
             this.afterTriple = afterTriple;
+            this.hp = hp;
         }
 
         @Override
@@ -133,6 +157,7 @@ public class BestMoveFinder {
                     ", xp=" + xp +
                     ", streak=" + streak +
                     ", afterTriple=" + afterTriple +
+                    ", hp=" + hp +
                     '}';
         }
     }
