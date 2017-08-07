@@ -42,16 +42,11 @@ public class GameStateReader {
         int h = 3;
 
         BufferedImage[][] tileImages = getTileImages(img, startX, startY, h, w);
-        /*saveTile(tileImages[1][0], ENTRANCE);
-        saveTile(tileImages[1][1], EMPTY);
-        saveTile(tileImages[2][0], COIN);
-        saveTile(tileImages[1][6], EXIT);
-        saveTile(tileImages[1][2], SPIDER);
-        saveTile(tileImages[1][4], SNAKE);*/
-        /*saveTile(tileImages[2][0], EMPTY);
-        if (true) {
+
+        //saveTile(tileImages[1][0], ENTRANCE);
+        /*if (true) {
             return null;
-        }*/
+        }/**/
 
         Map<TileType, List<BufferedImage>> tileTypeImgs = loadTiles();
         GameState gameState = new GameState(h, w);

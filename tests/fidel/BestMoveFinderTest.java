@@ -52,6 +52,17 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void redSpider() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY, RED_SPIDER, EMPTY},
+                        {SMALL_SPIDER, SMALL_SPIDER, SMALL_SPIDER, EXIT},
+                },
+                Arrays.asList(DOWN, RIGHT, RIGHT, UP, RIGHT, DOWN)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         GameState gameState = new GameState(map);
         List<Command> actual = BestMoveFinder.findBestMoves(gameState);

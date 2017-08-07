@@ -24,7 +24,7 @@ public class BestMoveFinder {
     }
 
     private List<Command> findBestMoves0(GameState gameState) {
-        dfs(gameState.findEntrance(), new PlayerState(0, 0, 0));
+        dfs(gameState.findEntrance(), new PlayerState(0, 0, 0, false));
         return bestMoves;
     }
 
@@ -64,29 +64,39 @@ public class BestMoveFinder {
         if (tile == COIN) {
             gold++;
         }
-        int addXp = calcXp(tile);
+        int addXp = calcXp(tile, ps.afterTriple);
         int xp = ps.xp + addXp;
 
         int streak = ps.streak;
-        if (addXp > 0) {
+        if (addXp > 0 || tile == SMALL_SPIDER) {
             streak++;
         } else {
             streak = 0;
         }
+
+        boolean afterTriple = streak == 3 || ps.afterTriple && streak == 0;
+
         if (streak == 3) {
             xp += 3;
             streak = 0;
         }
 
-        return new PlayerState(gold, xp, streak);
+        return new PlayerState(gold, xp, streak, afterTriple);
     }
 
-    private int calcXp(TileType tile) {
+    private int calcXp(TileType tile, boolean afterTriple) {
         if (tile == SPIDER) {
             return 1;
         }
         if (tile == SNAKE) {
             return 5;
+        }
+        if (tile == RED_SPIDER) {
+            if (afterTriple) {
+                return 4;
+            } else {
+                return 1;
+            }
         }
         return 0;
     }
@@ -107,11 +117,13 @@ public class BestMoveFinder {
         final int gold;
         final int xp;
         final int streak;
+        final boolean afterTriple;
 
-        PlayerState(int gold, int xp, int streak) {
+        PlayerState(int gold, int xp, int streak, boolean afterTriple) {
             this.gold = gold;
             this.xp = xp;
             this.streak = streak;
+            this.afterTriple = afterTriple;
         }
 
         @Override
@@ -120,6 +132,7 @@ public class BestMoveFinder {
                     "gold=" + gold +
                     ", xp=" + xp +
                     ", streak=" + streak +
+                    ", afterTriple=" + afterTriple +
                     '}';
         }
     }
