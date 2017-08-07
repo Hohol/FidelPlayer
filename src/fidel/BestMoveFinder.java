@@ -3,7 +3,6 @@ package fidel;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fidel.Command.*;
 import static fidel.Direction.*;
 import static fidel.TileType.*;
 
@@ -25,7 +24,7 @@ public class BestMoveFinder {
     }
 
     private List<Command> findBestMoves0(GameState gameState) {
-        dfs(gameState.findEntrance(), new PlayerState());
+        dfs(gameState.findEntrance(), new PlayerState(0, 0));
         return bestMoves;
     }
 
@@ -47,24 +46,26 @@ public class BestMoveFinder {
                 continue;
             }
             TileType oldTile = gameState.get(to);
-            int oldGold = ps.gold;
-            if (oldTile == COIN) {
-                ps.gold++;
-            }
-            int oldXp = ps.xp;
-            ps.xp += calcXp(oldTile);
+            PlayerState newPs = calcNewPs(ps, oldTile);
 
             gameState.set(to, VISITED);
             curMoves.add(dir.command);
 
-            dfs(to, ps);
+            dfs(to, newPs);
 
             pop(curMoves);
             gameState.set(to, oldTile);
-            ps.gold = oldGold;
-            ps.xp = oldXp;
         }
         return false;
+    }
+
+    private PlayerState calcNewPs(PlayerState ps, TileType tile) {
+        int gold = ps.gold;
+        if (tile == COIN) {
+            gold++;
+        }
+        int xp = ps.xp + calcXp(tile);
+        return new PlayerState(gold, xp);
     }
 
     private int calcXp(TileType tile) {
@@ -90,8 +91,13 @@ public class BestMoveFinder {
     }
 
     static class PlayerState {
-        int gold;
-        int xp;
+        final int gold;
+        final int xp;
+
+        PlayerState(int gold, int xp) {
+            this.gold = gold;
+            this.xp = xp;
+        }
 
         @Override
         public String toString() {
