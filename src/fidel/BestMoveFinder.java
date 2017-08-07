@@ -25,7 +25,7 @@ public class BestMoveFinder {
     }
 
     private List<Command> findBestMoves0(GameState gameState) {
-        dfs(gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.initialHp));
+        dfs(gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.initialHp, 0, gameState.initialHp));
         System.out.println(bestState);
         return bestMoves;
     }
@@ -88,9 +88,12 @@ public class BestMoveFinder {
             streak = 0;
         }
 
-        int hp = ps.hp - dmg;
+        int poison = Math.min(ps.maxHp, ps.poison + (tile == SNAKE ? 1 : 0));
 
-        return new PlayerState(gold, xp, streak, afterTriple, hp);
+        int hp = ps.hp - dmg;
+        hp = Math.min(hp, ps.maxHp - poison);
+
+        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp);
     }
 
     private int calcDmg(TileType tile, int hp) {
@@ -141,13 +144,17 @@ public class BestMoveFinder {
         final int streak;
         final boolean afterTriple;
         final int hp;
+        final int poison;
+        final int maxHp;
 
-        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp) {
+        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp) {
             this.gold = gold;
             this.xp = xp;
             this.streak = streak;
             this.afterTriple = afterTriple;
             this.hp = hp;
+            this.poison = poison;
+            this.maxHp = maxHp;
         }
 
         @Override
@@ -158,6 +165,7 @@ public class BestMoveFinder {
                     ", streak=" + streak +
                     ", afterTriple=" + afterTriple +
                     ", hp=" + hp +
+                    ", poison=" + poison +
                     '}';
         }
     }

@@ -75,6 +75,17 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void poison() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SNAKE, SPIDER, SPIDER},
+                        {EMPTY, EMPTY, EMPTY, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, DOWN, RIGHT)
+        );
+    }
+
     private void check(int initialHp, TileType[][] map, List<Command> expected) {
         GameState gameState = new GameState(map, initialHp);
         List<Command> actual = BestMoveFinder.findBestMoves(gameState);
