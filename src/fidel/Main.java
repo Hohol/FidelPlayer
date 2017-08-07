@@ -1,9 +1,6 @@
 package fidel;
 
-import java.util.Arrays;
 import java.util.List;
-
-import static fidel.Command.*;
 
 public class Main {
 
@@ -13,6 +10,9 @@ public class Main {
         BestMoveFinder bestMoveFinder = new BestMoveFinder();
 
         GameState gameState = gameStateReader.readGameState();
+
+        System.out.println(gameState);
+
         List<Command> bestMoves = bestMoveFinder.findBestMoves(gameState);
 
         moveMaker.makeMoves(bestMoves);
