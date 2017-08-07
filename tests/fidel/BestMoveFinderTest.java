@@ -76,13 +76,12 @@ public class BestMoveFinderTest {
     }
 
     @Test
-    void poison() {
+    void swapGates() {
         check(
                 new TileType[][]{
-                        {ENTRANCE, SNAKE, SPIDER, SPIDER},
-                        {EMPTY, EMPTY, EMPTY, EXIT},
+                        {ENTRANCE, RED_SPIDER, SMALL_SPIDER, SMALL_SPIDER, SMALL_SPIDER, EXIT},
                 },
-                Arrays.asList(RIGHT, RIGHT, DOWN, RIGHT)
+                Arrays.asList(ENTER, LEFT, LEFT, LEFT, LEFT, LEFT)
         );
     }
 

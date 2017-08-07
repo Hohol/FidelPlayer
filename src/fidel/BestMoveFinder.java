@@ -3,6 +3,7 @@ package fidel;
 import java.util.ArrayList;
 import java.util.List;
 
+import static fidel.Command.*;
 import static fidel.Direction.*;
 import static fidel.TileType.*;
 
@@ -21,13 +22,23 @@ public class BestMoveFinder {
     }
 
     public static List<Command> findBestMoves(GameState gameState) {
-        return new BestMoveFinder(gameState).findBestMoves0(gameState);
+        MovesAndEvaluation first = new BestMoveFinder(gameState).findBestMoves0();
+        gameState.swap();
+        MovesAndEvaluation second = new BestMoveFinder(gameState).findBestMoves0();
+        if (first.evaluation >= second.evaluation) {
+            return first.moves;
+        } else {
+            List<Command> r = new ArrayList<>();
+            r.add(ENTER);
+            r.addAll(second.moves);
+            return r;
+        }
     }
 
-    private List<Command> findBestMoves0(GameState gameState) {
+    private MovesAndEvaluation findBestMoves0() {
         dfs(gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.initialHp, 0, gameState.initialHp));
         System.out.println(bestState);
-        return bestMoves;
+        return new MovesAndEvaluation(bestMoves, evaluate(bestState));
     }
 
     private boolean dfs(Cell cur, PlayerState ps) {
@@ -130,12 +141,22 @@ public class BestMoveFinder {
         return tile != ENTRANCE && tile != VISITED && tile != CHEST;
     }
 
-    private double evaluate(PlayerState ps) {
+    private int evaluate(PlayerState ps) {
         return ps.gold * 10 + ps.xp;
     }
 
     private void pop(List<Command> r) {
         r.remove(r.size() - 1);
+    }
+
+    static class MovesAndEvaluation {
+        final List<Command> moves;
+        final int evaluation;
+
+        MovesAndEvaluation(List<Command> moves, int evaluation) {
+            this.moves = moves;
+            this.evaluation = evaluation;
+        }
     }
 
     static class PlayerState {

@@ -74,4 +74,11 @@ public class GameState {
     public void set(Cell to, TileType tileType) {
         set(to.row, to.col, tileType);
     }
+
+    public void swap() {
+        Cell entrance = findEntrance();
+        Cell exit = findExit();
+        set(entrance, EXIT);
+        set(exit, ENTRANCE);
+    }
 }
