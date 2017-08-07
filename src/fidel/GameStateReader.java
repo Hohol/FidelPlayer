@@ -44,7 +44,8 @@ public class GameStateReader {
         BufferedImage[][] tileImages = getTileImages(img, startX, startY, h, w);
 
         //saveTile(tileImages[1][0], ENTRANCE);
-        /*if (true) {
+        /*saveTile(tileImages[0][3], EMPTY);
+        if (true) {
             return null;
         }/**/
 

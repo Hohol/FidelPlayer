@@ -24,9 +24,9 @@ public class GameState {
 
     @Override
     public String toString() {
-        return Stream.of(map)
-                .map(row -> Stream.of(row).map(Enum::toString).collect(Collectors.joining(",")))
-                .collect(Collectors.joining("\n"));
+        return "{" + Stream.of(map)
+                .map(row -> "{" + Stream.of(row).map(Enum::toString).collect(Collectors.joining(",")) + "}")
+                .collect(Collectors.joining(",\n")) + "}";
     }
 
     public void set(int row, int col, TileType tile) {
