@@ -102,7 +102,7 @@ public class BestMoveFinder {
     }
 
     private boolean passable(TileType tile) {
-        return tile != ENTRANCE && tile != VISITED;
+        return tile != ENTRANCE && tile != VISITED && tile != CHEST;
     }
 
     private double evaluate(PlayerState ps) {

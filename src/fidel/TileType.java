@@ -9,5 +9,6 @@ public enum TileType {
     SPIDER,
     VISITED,
     SMALL_SPIDER,
-    RED_SPIDER
+    RED_SPIDER,
+    CHEST,
 }
