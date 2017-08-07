@@ -63,7 +63,7 @@ public class BestMoveFinder {
                 continue;
             }
             TileType oldTile = gameState.get(to);
-            PlayerState newPs = calcNewPs(ps, oldTile);
+            PlayerState newPs = calcNewPs(ps, oldTile, dir);
 
             gameState.set(to, VISITED);
             curMoves.add(dir.command);
@@ -76,13 +76,13 @@ public class BestMoveFinder {
         return false;
     }
 
-    private PlayerState calcNewPs(PlayerState ps, TileType tile) {
+    private PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir) {
         int gold = ps.gold;
         if (tile == COIN) {
             gold++;
         }
-        int addXp = calcXp(tile, ps.afterTriple);
-        int dmg = calcDmg(tile, ps.hp);
+        int addXp = calcXp(tile, ps.afterTriple, dir);
+        int dmg = calcDmg(tile, ps.hp, dir);
         int xp = ps.xp + addXp;
 
         int streak = ps.streak;
@@ -107,17 +107,24 @@ public class BestMoveFinder {
         return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp);
     }
 
-    private int calcDmg(TileType tile, int hp) {
+    private int calcDmg(TileType tile, int hp, Direction dir) {
         if (tile == SPIDER) {
             return 1;
         }
         if (tile == VAMPIRE) {
             return hp;
         }
+        if (tile.isTurtle()) {
+            if (dir == tile.dir) {
+                return 0;
+            } else {
+                return 2;
+            }
+        }
         return 0;
     }
 
-    private int calcXp(TileType tile, boolean afterTriple) {
+    private int calcXp(TileType tile, boolean afterTriple, Direction dir) {
         if (tile == SPIDER) {
             return 1;
         }
@@ -133,6 +140,13 @@ public class BestMoveFinder {
         }
         if (tile == VAMPIRE) {
             return 1;
+        }
+        if (tile.isTurtle()) {
+            if (dir == tile.dir) {
+                return 4;
+            } else {
+                return 1;
+            }
         }
         return 0;
     }
