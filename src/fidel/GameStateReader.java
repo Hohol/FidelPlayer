@@ -24,8 +24,8 @@ public class GameStateReader {
     private final Robot robot = tryy(() -> new Robot());
 
     public GameState readGameState() {
-        BufferedImage img = getImageFromFile();
-        //BufferedImage img = getImageFromCapture();
+        //BufferedImage img = getImageFromFile();
+        BufferedImage img = getImageFromCapture();
         /*if (true) {
             writeImg(img, "img", true);
             return null;
