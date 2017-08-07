@@ -24,7 +24,7 @@ public class BestMoveFinder {
     }
 
     private List<Command> findBestMoves0(GameState gameState) {
-        dfs(gameState.findEntrance(), new PlayerState(0, 0));
+        dfs(gameState.findEntrance(), new PlayerState(0, 0, 0));
         return bestMoves;
     }
 
@@ -64,8 +64,21 @@ public class BestMoveFinder {
         if (tile == COIN) {
             gold++;
         }
-        int xp = ps.xp + calcXp(tile);
-        return new PlayerState(gold, xp);
+        int addXp = calcXp(tile);
+        int xp = ps.xp + addXp;
+
+        int streak = ps.streak;
+        if (addXp > 0) {
+            streak++;
+        } else {
+            streak = 0;
+        }
+        if (streak == 3) {
+            xp += 3;
+            streak = 0;
+        }
+
+        return new PlayerState(gold, xp, streak);
     }
 
     private int calcXp(TileType tile) {
@@ -93,10 +106,12 @@ public class BestMoveFinder {
     static class PlayerState {
         final int gold;
         final int xp;
+        final int streak;
 
-        PlayerState(int gold, int xp) {
+        PlayerState(int gold, int xp, int streak) {
             this.gold = gold;
             this.xp = xp;
+            this.streak = streak;
         }
 
         @Override
@@ -104,6 +119,7 @@ public class BestMoveFinder {
             return "PlayerState{" +
                     "gold=" + gold +
                     ", xp=" + xp +
+                    ", streak=" + streak +
                     '}';
         }
     }

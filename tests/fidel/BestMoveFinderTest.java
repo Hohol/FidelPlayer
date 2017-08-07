@@ -41,9 +41,20 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void tripleKill() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, SPIDER, EMPTY, SPIDER},
+                        {EMPTY, EMPTY, SPIDER, EXIT, EMPTY},
+                },
+                Arrays.asList(RIGHT, RIGHT, DOWN, RIGHT)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         GameState gameState = new GameState(map);
-        List<Command> bestMoves = BestMoveFinder.findBestMoves(gameState);
-        assertEquals(bestMoves, expected);
+        List<Command> actual = BestMoveFinder.findBestMoves(gameState);
+        assertEquals(actual, expected, actual.toString());
     }
 }
