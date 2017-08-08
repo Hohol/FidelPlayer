@@ -5,8 +5,9 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        GameStateReader gameStateReader = new GameStateReader();
         MoveMaker moveMaker = new MoveMaker();
+
+        GameStateReader gameStateReader = new GameStateReader();
 
         GameState gameState = gameStateReader.readGameState();
 
