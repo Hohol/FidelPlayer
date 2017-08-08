@@ -28,6 +28,7 @@ public enum TileType {
     ALIEN,
     ABORIGINE,
     ANGRY_ABORIGINE,
+    ROBODOOR,
     GNOME;
 
     public final Direction dir;

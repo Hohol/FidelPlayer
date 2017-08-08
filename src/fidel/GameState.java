@@ -78,7 +78,7 @@ public class GameState {
         return find(EXIT);
     }
 
-    private Cell find(TileType tileType) {
+    public Cell find(TileType tileType) {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 if (map[i][j] == tileType) {
@@ -86,7 +86,7 @@ public class GameState {
                 }
             }
         }
-        throw new RuntimeException();
+        return null;
     }
 
     public TileType get(Cell cell) {

@@ -1,10 +1,11 @@
 package fidel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static fidel.Command.*;
-import static fidel.Direction.*;
+import static fidel.Direction.DIRS;
 import static fidel.TileType.*;
 import static java.lang.Math.min;
 
@@ -23,6 +24,10 @@ public class BestMoveFinder {
     }
 
     public static List<Command> findBestMoves(GameState gameState) {
+        if (gameState.find(ROBODOOR) != null) {
+            return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
+                    UP, RIGHT, RIGHT);
+        }
         MovesAndEvaluation first = new BestMoveFinder(gameState).findBestMoves0(gameState); // todo refactor
         gameState.swapInPlace();
         MovesAndEvaluation second = new BestMoveFinder(gameState).findBestMoves0(gameState);
@@ -38,7 +43,7 @@ public class BestMoveFinder {
 
     private MovesAndEvaluation findBestMoves0(GameState gameState) {
         start = System.currentTimeMillis();
-        alienLevel = checkAlienLevel(gameState);
+        alienLevel = gameState.find(ALIEN) != null;
         try {
             dfs(gameState, gameState.findEntrance(),
                     new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0),
@@ -47,17 +52,6 @@ public class BestMoveFinder {
         }
         System.out.println(bestState);
         return new MovesAndEvaluation(bestMoves, evaluate(bestState, bestMoves));
-    }
-
-    private boolean checkAlienLevel(GameState gameState) {
-        for (int i = 0; i < gameState.height; i++) {
-            for (int j = 0; j < gameState.width; j++) {
-                if (gameState.get(i, j) == ALIEN) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private boolean dfs(GameState gameState, Cell cur, PlayerState ps, int round) {

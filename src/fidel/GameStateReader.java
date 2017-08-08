@@ -15,6 +15,7 @@ import java.util.Map;
 import static fidel.TileType.*;
 import static fidel.Tryy.*;
 import static java.awt.Color.*;
+import static java.lang.Math.min;
 
 public class GameStateReader {
 
@@ -25,8 +26,7 @@ public class GameStateReader {
 
     public GameState readGameState() {
         BufferedImage img = getImageFromCapture();
-        //BufferedImage img = getImageFromF
-        // ile();
+//        BufferedImage img = getImageFromFile();
         writeImg(img, "img", true);
         return parseImage(img);
     }
@@ -34,7 +34,7 @@ public class GameStateReader {
     GameState parseImage(BufferedImage img) {
         BufferedImage[][] tileImages = getTileImages(img);
 
-        /*saveTile(tileImages[2][6], SPIDER);
+        /*saveTile(tileImages[1][6], ROBODOOR);
         if (true) {
             return null;
         }/**/
@@ -83,7 +83,7 @@ public class GameStateReader {
     }
 
     private BufferedImage[][] getTileImages(BufferedImage img) {
-        if (firstLevel(img)) {
+        if (is3by7Level(img)) {
             return getTileImages(img, 26, 418, 3, 7);
         } else {
             return getTileImages(img, 26, 58, 7, 7);
@@ -100,11 +100,16 @@ public class GameStateReader {
         return r;
     }
 
-    private boolean firstLevel(BufferedImage img) {
+    private boolean is3by7Level(BufferedImage img) {
         BufferedImage actualImg = img.getSubimage(140, 290, 70, 50);
+
+        writeImg(actualImg, "fignya", true);
+
         BufferedImage firstLevelImg = tryy(() -> ImageIO.read(new File("detect-1-lvl.png")));
+        BufferedImage intermission1Img = tryy(() -> ImageIO.read(new File("detect-intermission1.png")));
         double diff = getDifference(actualImg, firstLevelImg, Double.POSITIVE_INFINITY);
-        return diff < 1000;
+        double diff2 = getDifference(actualImg, intermission1Img, Double.POSITIVE_INFINITY);
+        return diff < 1000 || diff2 < 100000;
     }
 
     private void showMarkedTiles(BufferedImage img, int tileWidth, int tileHeight, int x, int y, int h, int w) {
