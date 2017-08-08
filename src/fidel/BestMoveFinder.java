@@ -14,6 +14,7 @@ public class BestMoveFinder {
     PlayerState bestState = null;
     final List<Command> curMoves = new ArrayList<>();
     final Cell exit;
+    long start;
 
     public BestMoveFinder(GameState gameState) {
         exit = gameState.findExit();
@@ -34,7 +35,11 @@ public class BestMoveFinder {
     }
 
     private MovesAndEvaluation findBestMoves0(GameState gameState) {
-        dfs(gameState, gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false));
+        start = System.currentTimeMillis();
+        try {
+            dfs(gameState, gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false));
+        } catch (TimeoutException e) {
+        }
         System.out.println(bestState);
         return new MovesAndEvaluation(bestMoves, evaluate(bestState));
     }
@@ -52,8 +57,12 @@ public class BestMoveFinder {
                 bestEvaluation = evaluation;
                 bestState = ps;
                 bestMoves = new ArrayList<>(curMoves);
+                System.out.println("cur best " + ps);
             }
             return true;
+        }
+        if (bestMoves != null && tooLate()) {
+            throw new TimeoutException();
         }
         for (Direction dir : DIRS) {
             Cell to = cur.add(dir);
@@ -82,6 +91,10 @@ public class BestMoveFinder {
         }
 
         return false;
+    }
+
+    private boolean tooLate() {
+        return System.currentTimeMillis() - start > 15000;
     }
 
     private static boolean exitReachable(GameState gameState, Cell cur, Cell exit) {
@@ -285,6 +298,9 @@ public class BestMoveFinder {
         }
     }
 
+    static class TimeoutException extends RuntimeException {
+    }
+
     static class PlayerState {
         final int gold;
         final int xp;
@@ -315,6 +331,8 @@ public class BestMoveFinder {
                     ", afterTriple=" + afterTriple +
                     ", hp=" + hp +
                     ", poison=" + poison +
+                    ", maxHp=" + maxHp +
+                    ", switchUsed=" + switchUsed +
                     '}';
         }
     }
