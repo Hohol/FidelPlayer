@@ -130,6 +130,28 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void flowers() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, BIG_FLOWER, SMALL_FLOWER},
+                        {EMPTY, EMPTY, SMALL_FLOWER, EXIT},
+                },
+                Arrays.asList(RIGHT, DOWN, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void flowers2() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, BIG_FLOWER, SMALL_FLOWER, EXIT},
+                        {EMPTY, SMALL_FLOWER, EMPTY, EMPTY},
+                },
+                Arrays.asList(ENTER, LEFT, DOWN, LEFT, UP, LEFT)
+        );
+    }
+
     private void check(int initialHp, TileType[][] map, List<Command> expected) {
         GameState gameState = new GameState(map, initialHp);
         List<Command> actual = BestMoveFinder.findBestMoves(gameState);

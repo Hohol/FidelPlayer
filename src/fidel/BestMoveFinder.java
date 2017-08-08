@@ -64,7 +64,7 @@ public class BestMoveFinder {
                 continue;
             }
             TileType oldTile = gameState.get(to);
-            PlayerState newPs = calcNewPs(ps, oldTile, dir);
+            PlayerState newPs = calcNewPs(ps, oldTile, dir, gameState, to);
 
             GameState newGameState = gameState.setAndCopy(to, VISITED);
             curMoves.add(dir.command);
@@ -139,13 +139,14 @@ public class BestMoveFinder {
         }
     }
 
-    private PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir) {
+    private PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir, GameState gameState, Cell cell) {
         int gold = ps.gold;
         if (tile == COIN) {
             gold++;
         }
-        int addXp = calcXp(tile, ps.afterTriple, dir, ps.hp);
-        int dmg = calcDmg(tile, ps.hp, dir, ps.switchUsed);
+        boolean smallFlowersNearby = tile == BIG_FLOWER && smallFlowersNearby(gameState, cell);
+        int addXp = calcXp(tile, ps.afterTriple, dir, ps.hp, smallFlowersNearby);
+        int dmg = calcDmg(tile, ps.hp, dir, ps.switchUsed, smallFlowersNearby);
         int xp = ps.xp + addXp;
 
         int streak = ps.streak;
@@ -180,7 +181,7 @@ public class BestMoveFinder {
         return hp;
     }
 
-    private int calcDmg(TileType tile, int hp, Direction dir, boolean switchUsed) {
+    private int calcDmg(TileType tile, int hp, Direction dir, boolean switchUsed, boolean smallFlowersNearby) {
         if (tile == SPIDER || tile == CROWNED_SPIDER) {
             return 1;
         }
@@ -197,11 +198,31 @@ public class BestMoveFinder {
         if (tile == SPIKES && !switchUsed) {
             return 2;
         }
+        if (tile == BIG_FLOWER) {
+            if (smallFlowersNearby) {
+                return 2;
+            } else {
+                return 0;
+            }
+        }
         return 0;
     }
 
+    private boolean smallFlowersNearby(GameState gameState, Cell cell) {
+        for (Direction dir : DIRS) {
+            Cell to = cell.add(dir);
+            if (!gameState.inside(to)) {
+                continue;
+            }
+            if (gameState.get(to) == SMALL_FLOWER) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    private int calcXp(TileType tile, boolean afterTriple, Direction dir, int hp) {
+
+    private int calcXp(TileType tile, boolean afterTriple, Direction dir, int hp, boolean smallFlowersNearby) {
         if (tile == SPIDER) {
             return 1;
         }
@@ -230,6 +251,13 @@ public class BestMoveFinder {
                 return 4;
             } else {
                 return 1;
+            }
+        }
+        if (tile == BIG_FLOWER) {
+            if (smallFlowersNearby) {
+                return 1;
+            } else {
+                return 4;
             }
         }
         return 0;

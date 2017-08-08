@@ -1,6 +1,7 @@
 package fidel;
 
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static fidel.TileType.*;
@@ -39,9 +40,20 @@ public class GameState {
 
     @Override
     public String toString() {
+        //noinspection ConstantConditions
+        int[] colWidth = IntStream.range(0, width).map(col ->
+                IntStream.range(0, height).map(row -> map[row][col].name().length()).max().getAsInt()
+        ).toArray();
         return Stream.of(map)
-                .map(row -> "{" + Stream.of(row).map(Enum::toString).collect(Collectors.joining(",")) + "}")
+                .map(row -> "{"
+                        + IntStream.range(0, width).mapToObj(col -> padRight(row[col].name(), colWidth[col])).collect(Collectors.joining(", "))
+                        + "}"
+                )
                 .collect(Collectors.joining(",\n"));
+    }
+
+    public static String padRight(String s, int n) {
+        return String.format("%1$-" + n + "s", s);
     }
 
     public void setInPlace(int row, int col, TileType tile) {

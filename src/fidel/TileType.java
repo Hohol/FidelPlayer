@@ -23,6 +23,8 @@ public enum TileType {
     CROWNED_SPIDER,
     SPIKES,
     SWITCH,
+    BIG_FLOWER,
+    SMALL_FLOWER,
     GNOME;
 
     public final Direction dir;

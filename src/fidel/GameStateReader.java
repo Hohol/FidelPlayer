@@ -28,7 +28,7 @@ public class GameStateReader {
         BufferedImage img = getImageFromCapture();
         BufferedImage[][] tileImages = getTileImages(img);
 
-        /*saveTile(tileImages[0][3], EXIT);
+        /*saveTile(tileImages[4][5], SMALL_FLOWER);
         if (true) {
             return null;
         }/**/
