@@ -93,7 +93,7 @@ public class GameState {
         return get(cell.row, cell.col);
     }
 
-    private TileType get(int row, int col) {
+    public TileType get(int row, int col) {
         return map[row][col];
     }
 

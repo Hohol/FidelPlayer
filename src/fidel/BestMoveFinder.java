@@ -6,6 +6,7 @@ import java.util.List;
 import static fidel.Command.*;
 import static fidel.Direction.*;
 import static fidel.TileType.*;
+import static java.lang.Math.min;
 
 public class BestMoveFinder {
 
@@ -15,6 +16,7 @@ public class BestMoveFinder {
     final List<Command> curMoves = new ArrayList<>();
     final Cell exit;
     long start;
+    boolean alienLevel;
 
     public BestMoveFinder(GameState gameState) {
         exit = gameState.findExit();
@@ -36,15 +38,27 @@ public class BestMoveFinder {
 
     private MovesAndEvaluation findBestMoves0(GameState gameState) {
         start = System.currentTimeMillis();
+        alienLevel = checkAlienLevel(gameState);
         try {
-            dfs(gameState, gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false));
+            dfs(gameState, gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false), 1);
         } catch (TimeoutException e) {
         }
         System.out.println(bestState);
         return new MovesAndEvaluation(bestMoves, evaluate(bestState));
     }
 
-    private boolean dfs(GameState gameState, Cell cur, PlayerState ps) {
+    private boolean checkAlienLevel(GameState gameState) {
+        for (int i = 0; i < gameState.height; i++) {
+            for (int j = 0; j < gameState.width; j++) {
+                if (gameState.get(i, j) == ALIEN) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean dfs(GameState gameState, Cell cur, PlayerState ps, int round) {
         if (ps.hp < 0) {
             return false;
         }
@@ -73,12 +87,12 @@ public class BestMoveFinder {
                 continue;
             }
             TileType oldTile = gameState.get(to);
-            PlayerState newPs = calcNewPs(ps, oldTile, dir, gameState, to);
+            PlayerState newPs = calcNewPs(ps, oldTile, dir, gameState, to, round);
 
             GameState newGameState = gameState.setAndCopy(to, VISITED);
             curMoves.add(dir.command);
 
-            dfs(newGameState, to, newPs);
+            dfs(newGameState, to, newPs, round + 1);
 
             pop(curMoves);
         }
@@ -86,7 +100,7 @@ public class BestMoveFinder {
         GameState afterBarking = afterBarking(gameState, cur);
         if (afterBarking != null) {
             curMoves.add(BARK);
-            dfs(afterBarking, cur, ps);
+            dfs(afterBarking, cur, ps, round + 1);
             pop(curMoves);
         }
 
@@ -152,7 +166,7 @@ public class BestMoveFinder {
         }
     }
 
-    private PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir, GameState gameState, Cell cell) {
+    private PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir, GameState gameState, Cell cell, int round) {
         int gold = ps.gold;
         if (tile == COIN) {
             gold++;
@@ -176,9 +190,12 @@ public class BestMoveFinder {
             streak = 0;
         }
 
-        int poison = Math.min(ps.maxHp, ps.poison + (tile == SNAKE ? 1 : 0));
+        int poison = min(ps.maxHp, ps.poison + (tile == SNAKE ? 1 : 0));
 
         int hp = calcHp(ps, tile, dmg, poison);
+        if (alienLevel && round % 10 == 0 && (cell.row == exit.row || cell.col == exit.col)) {
+            hp = min(hp, 0);
+        }
 
         boolean switchUsed = ps.switchUsed || tile == SWITCH;
 
@@ -187,7 +204,7 @@ public class BestMoveFinder {
 
     private int calcHp(PlayerState ps, TileType tile, int dmg, int poison) {
         int hp = ps.hp - dmg;
-        hp = Math.min(hp, ps.maxHp - poison);
+        hp = min(hp, ps.maxHp - poison);
         if (tile == MEDIKIT) {
             hp = ps.maxHp - poison;
         }

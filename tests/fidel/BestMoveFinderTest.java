@@ -152,20 +152,31 @@ public class BestMoveFinderTest {
         );
     }
 
-    @Test (enabled = false)
+    @Test(enabled = false)
     void performance() {
         GameState gameState = new GameState(
                 new TileType[][]{
-                        {EMPTY   , MEDIKIT, EMPTY, ALIEN, EMPTY  , ALIEN  , ALIEN},
-                        {EMPTY   , EMPTY  , ALIEN, EMPTY, MEDIKIT, EMPTY  , ALIEN},
-                        {EMPTY   , ALIEN  , ALIEN, EMPTY, ALIEN  , ALIEN  , EMPTY},
-                        {ENTRANCE, EMPTY  , EMPTY, EXIT , EMPTY  , ALIEN  , ALIEN},
-                        {MEDIKIT , EMPTY  , EMPTY, ALIEN, EMPTY  , MEDIKIT, EMPTY},
-                        {ALIEN   , EMPTY  , EMPTY, ALIEN, EMPTY  , EMPTY  , EMPTY},
-                        {EMPTY   , EMPTY  , ALIEN, ALIEN, MEDIKIT, ALIEN  , EMPTY}
+                        {EMPTY, MEDIKIT, EMPTY, ALIEN, EMPTY, ALIEN, ALIEN},
+                        {EMPTY, EMPTY, ALIEN, EMPTY, MEDIKIT, EMPTY, ALIEN},
+                        {EMPTY, ALIEN, ALIEN, EMPTY, ALIEN, ALIEN, EMPTY},
+                        {ENTRANCE, EMPTY, EMPTY, EXIT, EMPTY, ALIEN, ALIEN},
+                        {MEDIKIT, EMPTY, EMPTY, ALIEN, EMPTY, MEDIKIT, EMPTY},
+                        {ALIEN, EMPTY, EMPTY, ALIEN, EMPTY, EMPTY, EMPTY},
+                        {EMPTY, EMPTY, ALIEN, ALIEN, MEDIKIT, ALIEN, EMPTY}
                 }, 3
         );
         BestMoveFinder.findBestMoves(gameState);
+    }
+
+    @Test
+    void alienLaser() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, ALIEN, EXIT},
+                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, DOWN, RIGHT, RIGHT, UP, RIGHT)
+        );
     }
 
     private void check(int initialHp, TileType[][] map, List<Command> expected) {
