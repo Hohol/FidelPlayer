@@ -168,7 +168,7 @@ public class BestMoveFinderTest {
         BestMoveFinder.findBestMoves(gameState);
     }
 
-    @Test
+    @Test (enabled = false)
     void alienLaser() {
         check(
                 new TileType[][]{
@@ -176,6 +176,26 @@ public class BestMoveFinderTest {
                         {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
                 },
                 Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, DOWN, RIGHT, RIGHT, UP, RIGHT)
+        );
+    }
+
+    @Test
+    void aborigine() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, ABORIGINE, EXIT},
+                },
+                Arrays.asList(ENTER, LEFT, LEFT, LEFT)
+        );
+    }
+
+    @Test
+    void aborigineAndVampire() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, ABORIGINE, VAMPIRE, EXIT}
+                },
+                Arrays.asList(BARK, RIGHT, RIGHT, RIGHT)
         );
     }
 

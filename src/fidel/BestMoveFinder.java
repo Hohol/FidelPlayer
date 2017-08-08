@@ -90,8 +90,11 @@ public class BestMoveFinder {
             }
             TileType oldTile = gameState.get(to);
             PlayerState newPs = calcNewPs(ps, oldTile, dir, gameState, to, round);
-
             GameState newGameState = gameState.setAndCopy(to, VISITED);
+            if (newPs.xp > ps.xp) {
+                awakeAborigines(newGameState, to);
+            }
+
             curMoves.add(dir.command);
 
             dfs(newGameState, to, newPs, round + 1);
@@ -109,6 +112,21 @@ public class BestMoveFinder {
         return false;
     }
 
+    private boolean awakeAborigines(GameState gameState, Cell cell) {
+        boolean found = false;
+        for (Direction dir : DIRS) {
+            Cell to = cell.add(dir);
+            if (!gameState.inside(to)) {
+                continue;
+            }
+            if (gameState.get(to) == ABORIGINE) {
+                found = true;
+                gameState.setInPlace(to, ANGRY_ABORIGINE);
+            }
+        }
+        return found;
+    }
+
     private boolean finished(Cell cur, PlayerState ps) {
         if (alienLevel && ps.aliensKilled < 15) {
             return false;
@@ -117,6 +135,7 @@ public class BestMoveFinder {
     }
 
     private boolean tooLate() {
+        //return false; // todo revert
         return System.currentTimeMillis() - start > 15000;
     }
 
@@ -168,6 +187,7 @@ public class BestMoveFinder {
                 }
             }
         }
+        somethingChanged |= awakeAborigines(newGameState, cur);
         if (somethingChanged) {
             return newGameState;
         } else {
@@ -245,6 +265,12 @@ public class BestMoveFinder {
                 return 0;
             }
         }
+        if (tile == ABORIGINE) {
+            return 0;
+        }
+        if (tile == ANGRY_ABORIGINE) {
+            return 2;
+        }
         return 0;
     }
 
@@ -300,6 +326,12 @@ public class BestMoveFinder {
                 return 4;
             }
         }
+        if (tile == ABORIGINE) {
+            return 3;
+        }
+        if (tile == ANGRY_ABORIGINE) {
+            return 1;
+        }
         return 0;
     }
 
@@ -308,6 +340,9 @@ public class BestMoveFinder {
     }
 
     private int evaluate(PlayerState ps) {
+        if (ps == null) {
+            return Integer.MIN_VALUE;
+        }
         return ps.gold * 10 + ps.xp;
     }
 

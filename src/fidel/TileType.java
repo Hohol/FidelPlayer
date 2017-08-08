@@ -26,6 +26,8 @@ public enum TileType {
     BIG_FLOWER,
     SMALL_FLOWER,
     ALIEN,
+    ABORIGINE,
+    ANGRY_ABORIGINE,
     GNOME;
 
     public final Direction dir;
