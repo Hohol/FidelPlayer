@@ -33,6 +33,7 @@ public enum TileType {
     ROBOT,
     RAISED_WALL,
     LOWERED_WALL,
+    ROBO_MEDIKIT,
     GNOME;
 
     public final Direction dir;

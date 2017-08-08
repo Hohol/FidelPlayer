@@ -13,9 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import static fidel.TileType.*;
-import static fidel.Tryy.*;
-import static java.awt.Color.*;
-import static java.lang.Math.min;
+import static fidel.Tryy.tryy;
+import static java.awt.Color.WHITE;
 
 public class GameStateReader {
 
@@ -34,7 +33,7 @@ public class GameStateReader {
     GameState parseImage(BufferedImage img) {
         BufferedImage[][] tileImages = getTileImages(img);
 
-        /*saveTile(tileImages[1][], LOWERED_WALL);
+        /*saveTile(tileImages[6][0], SPIDER);
         if (true) {
             return null;
         }/**/

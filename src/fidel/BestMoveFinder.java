@@ -243,7 +243,7 @@ public class BestMoveFinder {
     }
 
     private int calcDmg(TileType tile, Direction dir, boolean smallFlowersNearby, PlayerState ps) {
-        if (tile == SPIDER || tile == CROWNED_SPIDER || tile == ALIEN) {
+        if (tile == SPIDER || tile == CROWNED_SPIDER || tile == ALIEN || tile == ROBO_MEDIKIT) {
             return 1;
         }
         if (tile == VAMPIRE) {
