@@ -26,19 +26,9 @@ public class GameStateReader {
     public GameState readGameState() {
         //BufferedImage img = getImageFromFile();
         BufferedImage img = getImageFromCapture();
-        /*if (true) {
-            writeImg(img, "img", true);
-            return null;
-        }*/
-        /*int startX = 26;
-        int startY = 58;
-        int h = 7;
-        int w = 7;/**/
-
-
         BufferedImage[][] tileImages = getTileImages(img);
 
-        /*saveTile(tileImages[3][1], SPIDER);
+        /*saveTile(tileImages[6][4], SWITCH);
         if (true) {
             return null;
         }/**/

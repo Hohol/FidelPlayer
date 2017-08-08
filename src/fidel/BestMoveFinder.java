@@ -34,7 +34,7 @@ public class BestMoveFinder {
     }
 
     private MovesAndEvaluation findBestMoves0(GameState gameState) {
-        dfs(gameState, gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.initialHp, 0, gameState.initialHp));
+        dfs(gameState, gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.initialHp, 0, gameState.initialHp, false));
         System.out.println(bestState);
         return new MovesAndEvaluation(bestMoves, evaluate(bestState));
     }
@@ -145,7 +145,7 @@ public class BestMoveFinder {
             gold++;
         }
         int addXp = calcXp(tile, ps.afterTriple, dir, ps.hp);
-        int dmg = calcDmg(tile, ps.hp, dir);
+        int dmg = calcDmg(tile, ps.hp, dir, ps.switchUsed);
         int xp = ps.xp + addXp;
 
         int streak = ps.streak;
@@ -166,7 +166,9 @@ public class BestMoveFinder {
 
         int hp = calcHp(ps, tile, dmg, poison);
 
-        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp);
+        boolean switchUsed = ps.switchUsed || tile == SWITCH;
+
+        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed);
     }
 
     private int calcHp(PlayerState ps, TileType tile, int dmg, int poison) {
@@ -178,7 +180,7 @@ public class BestMoveFinder {
         return hp;
     }
 
-    private int calcDmg(TileType tile, int hp, Direction dir) {
+    private int calcDmg(TileType tile, int hp, Direction dir, boolean switchUsed) {
         if (tile == SPIDER || tile == CROWNED_SPIDER) {
             return 1;
         }
@@ -191,6 +193,9 @@ public class BestMoveFinder {
             } else {
                 return 2;
             }
+        }
+        if (tile == SPIKES && !switchUsed) {
+            return 2;
         }
         return 0;
     }
@@ -260,8 +265,9 @@ public class BestMoveFinder {
         final int hp;
         final int poison;
         final int maxHp;
+        final boolean switchUsed;
 
-        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp) {
+        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed) {
             this.gold = gold;
             this.xp = xp;
             this.streak = streak;
@@ -269,6 +275,7 @@ public class BestMoveFinder {
             this.hp = hp;
             this.poison = poison;
             this.maxHp = maxHp;
+            this.switchUsed = switchUsed;
         }
 
         @Override

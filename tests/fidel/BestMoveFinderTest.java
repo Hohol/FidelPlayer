@@ -108,6 +108,28 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void spikes() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIKES, SPIKES, EXIT},
+                        {EMPTY, EMPTY, EMPTY, EMPTY},
+                },
+                Arrays.asList(RIGHT, DOWN, RIGHT, RIGHT, UP)
+        );
+    }
+
+    @Test
+    void spikes2() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SWITCH, SPIKES, SPIKES, EXIT},
+                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
     private void check(int initialHp, TileType[][] map, List<Command> expected) {
         GameState gameState = new GameState(map, initialHp);
         List<Command> actual = BestMoveFinder.findBestMoves(gameState);

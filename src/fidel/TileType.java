@@ -21,6 +21,8 @@ public enum TileType {
     MEDIKIT,
     WALL,
     CROWNED_SPIDER,
+    SPIKES,
+    SWITCH,
     GNOME;
 
     public final Direction dir;
