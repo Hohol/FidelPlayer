@@ -17,8 +17,9 @@ public class MoveMaker {
 
     private void makeMove(Command command) {
         robot.keyPress(command.keyCode);
-        tryy(() -> Thread.sleep(40));
+        int sleepTime = 400;
+        tryy(() -> Thread.sleep(sleepTime));
         robot.keyRelease(command.keyCode);
-        tryy(() -> Thread.sleep(40));
+        tryy(() -> Thread.sleep(sleepTime));
     }
 }

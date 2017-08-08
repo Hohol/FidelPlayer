@@ -43,6 +43,9 @@ public class BestMoveFinder {
         if (ps.hp < 0) {
             return false;
         }
+        if (!exitReachable(gameState, cur, exit)) {
+            return false;
+        }
         if (cur.equals(exit)) {
             double evaluation = evaluate(ps);
             if (evaluation > bestEvaluation) {
@@ -78,6 +81,34 @@ public class BestMoveFinder {
             pop(curMoves);
         }
 
+        return false;
+    }
+
+    private static boolean exitReachable(GameState gameState, Cell cur, Cell exit) {
+        boolean[][] visited = new boolean[gameState.height][gameState.width]; // todo get rid of it (make thread local?)
+        return dfs(gameState, cur, visited, exit);
+    }
+
+    private static boolean dfs(GameState gameState, Cell cur, boolean[][] visited, Cell exit) {
+        if (cur.equals(exit)) {
+            return true;
+        }
+        visited[cur.row][cur.col] = true;
+        for (Direction dir : DIRS) {
+            Cell to = cur.add(dir);
+            if (!gameState.inside(to)) {
+                continue;
+            }
+            if (!passable(gameState.get(to))) {
+                continue;
+            }
+            if (visited[to.row][to.col]) {
+                continue;
+            }
+            if (dfs(gameState, to, visited, exit)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -196,7 +227,7 @@ public class BestMoveFinder {
         return 0;
     }
 
-    private boolean passable(TileType tile) {
+    private static boolean passable(TileType tile) {
         return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL;
     }
 

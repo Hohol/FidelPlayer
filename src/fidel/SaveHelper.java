@@ -9,8 +9,8 @@ public class SaveHelper {
     public static final String SAVE_LOCATION = "E:\\Users\\Hohol\\AppData\\Roaming\\fidel\\Local Store\\save.txt";
 
     public static void main(String[] args) {
-        dump("tmp");
-        //undump("tmp");
+        //dump("tmp");
+        undump("tmp");
     }
 
     private static void undump(String name) {
