@@ -19,7 +19,8 @@ public enum TileType {
     TURTLE_LEFT(LEFT),
     TURTLE_UP(UP),
     MEDIKIT,
-    WALL;
+    WALL,
+    GNOME;
 
     public final Direction dir;
 
