@@ -40,7 +40,9 @@ public class BestMoveFinder {
         start = System.currentTimeMillis();
         alienLevel = checkAlienLevel(gameState);
         try {
-            dfs(gameState, gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false), 1);
+            dfs(gameState, gameState.findEntrance(),
+                    new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0),
+                    1);
         } catch (TimeoutException e) {
         }
         System.out.println(bestState);
@@ -65,7 +67,7 @@ public class BestMoveFinder {
         if (!exitReachable(gameState, cur, exit)) {
             return false;
         }
-        if (cur.equals(exit)) {
+        if (finished(cur, ps)) {
             double evaluation = evaluate(ps);
             if (evaluation > bestEvaluation) {
                 bestEvaluation = evaluation;
@@ -105,6 +107,13 @@ public class BestMoveFinder {
         }
 
         return false;
+    }
+
+    private boolean finished(Cell cur, PlayerState ps) {
+        if (alienLevel && ps.aliensKilled < 15) {
+            return false;
+        }
+        return cur.equals(exit);
     }
 
     private boolean tooLate() {
@@ -198,8 +207,9 @@ public class BestMoveFinder {
         }
 
         boolean switchUsed = ps.switchUsed || tile == SWITCH;
+        int aliensKilled = ps.aliensKilled + (tile == ALIEN ? 1 : 0);
 
-        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed);
+        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, aliensKilled);
     }
 
     private int calcHp(PlayerState ps, TileType tile, int dmg, int poison) {
@@ -327,8 +337,9 @@ public class BestMoveFinder {
         final int poison;
         final int maxHp;
         final boolean switchUsed;
+        final int aliensKilled;
 
-        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed) {
+        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int aliensKilled) {
             this.gold = gold;
             this.xp = xp;
             this.streak = streak;
@@ -337,6 +348,7 @@ public class BestMoveFinder {
             this.poison = poison;
             this.maxHp = maxHp;
             this.switchUsed = switchUsed;
+            this.aliensKilled = aliensKilled;
         }
 
         @Override
@@ -350,6 +362,7 @@ public class BestMoveFinder {
                     ", poison=" + poison +
                     ", maxHp=" + maxHp +
                     ", switchUsed=" + switchUsed +
+                    ", aliensKilled=" + aliensKilled +
                     '}';
         }
     }
