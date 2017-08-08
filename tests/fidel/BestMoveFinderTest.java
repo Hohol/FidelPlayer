@@ -97,6 +97,17 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void crownedSpider() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER},
+                        {CROWNED_SPIDER, EXIT},
+                },
+                Arrays.asList(DOWN, RIGHT)
+        );
+    }
+
     private void check(int initialHp, TileType[][] map, List<Command> expected) {
         GameState gameState = new GameState(map, initialHp);
         List<Command> actual = BestMoveFinder.findBestMoves(gameState);

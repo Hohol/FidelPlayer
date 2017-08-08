@@ -20,6 +20,7 @@ public enum TileType {
     TURTLE_UP(UP),
     MEDIKIT,
     WALL,
+    CROWNED_SPIDER,
     GNOME;
 
     public final Direction dir;

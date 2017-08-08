@@ -179,7 +179,7 @@ public class BestMoveFinder {
     }
 
     private int calcDmg(TileType tile, int hp, Direction dir) {
-        if (tile == SPIDER) {
+        if (tile == SPIDER || tile == CROWNED_SPIDER) {
             return 1;
         }
         if (tile == VAMPIRE) {
@@ -199,6 +199,9 @@ public class BestMoveFinder {
     private int calcXp(TileType tile, boolean afterTriple, Direction dir, int hp) {
         if (tile == SPIDER) {
             return 1;
+        }
+        if (tile == CROWNED_SPIDER) {
+            return 3;
         }
         if (tile == SNAKE) {
             return 5;
