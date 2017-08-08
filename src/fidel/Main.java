@@ -14,6 +14,8 @@ public class Main {
 
         List<Command> bestMoves = BestMoveFinder.findBestMoves(gameState);
 
+        System.out.println(bestMoves);
+
         moveMaker.makeMoves(bestMoves);
     }
 }

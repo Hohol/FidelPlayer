@@ -30,21 +30,22 @@ public class GameStateReader {
             writeImg(img, "img", true);
             return null;
         }*/
-        /*int x = 26;
-        int y = 58;
+        int startX = 26;
+        int startY = 58;
         int h = 7;
-        int w = 7;*/
+        int w = 7;/**/
 
         // for 3x7 map
-        int startX = 26;
+        /*int startX = 26;
         int startY = 418;
         int w = 7;
-        int h = 3;
+        int h = 3;*/
 
         BufferedImage[][] tileImages = getTileImages(img, startX, startY, h, w);
 
         //saveTile(tileImages[1][0], ENTRANCE);
-        /*if (true) {
+        /*saveTile(tileImages[3][3], WALL);
+        if (true) {
             return null;
         }/**/
 
