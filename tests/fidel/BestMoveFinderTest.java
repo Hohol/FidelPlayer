@@ -86,18 +86,6 @@ public class BestMoveFinderTest {
     }
 
     @Test
-    void bark() {
-        check(
-                new TileType[][]{
-                        {EMPTY, EXIT, EMPTY},
-                        {ENTRANCE, TURTLE_DOWN, EMPTY},
-                        {EMPTY, EMPTY, EMPTY},
-                },
-                Arrays.asList(BARK, DOWN, RIGHT, RIGHT, UP, LEFT, UP)
-        );
-    }
-
-    @Test
     void crownedSpider() {
         check(
                 new TileType[][]{

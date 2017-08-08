@@ -25,7 +25,8 @@ public class GameStateReader {
 
     public GameState readGameState() {
         BufferedImage img = getImageFromCapture();
-        //BufferedImage img = getImageFromFile();
+        //BufferedImage img = getImageFromF
+        // ile();
         writeImg(img, "img", true);
         return parseImage(img);
     }

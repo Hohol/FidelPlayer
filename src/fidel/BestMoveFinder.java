@@ -46,7 +46,7 @@ public class BestMoveFinder {
         } catch (TimeoutException e) {
         }
         System.out.println(bestState);
-        return new MovesAndEvaluation(bestMoves, evaluate(bestState));
+        return new MovesAndEvaluation(bestMoves, evaluate(bestState, bestMoves));
     }
 
     private boolean checkAlienLevel(GameState gameState) {
@@ -68,7 +68,7 @@ public class BestMoveFinder {
             return false;
         }
         if (finished(cur, ps)) {
-            double evaluation = evaluate(ps);
+            double evaluation = evaluate(ps, curMoves);
             if (evaluation > bestEvaluation) {
                 bestEvaluation = evaluation;
                 bestState = ps;
@@ -339,11 +339,11 @@ public class BestMoveFinder {
         return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME;
     }
 
-    private int evaluate(PlayerState ps) {
+    private static double evaluate(PlayerState ps, List<Command> moves) {
         if (ps == null) {
             return Integer.MIN_VALUE;
         }
-        return ps.gold * 10 + ps.xp;
+        return ps.gold * 10 + ps.xp - moves.size() / 1000.0;
     }
 
     private void pop(List<Command> r) {
@@ -352,9 +352,9 @@ public class BestMoveFinder {
 
     static class MovesAndEvaluation {
         final List<Command> moves;
-        final int evaluation;
+        final double evaluation;
 
-        MovesAndEvaluation(List<Command> moves, int evaluation) {
+        MovesAndEvaluation(List<Command> moves, double evaluation) {
             this.moves = moves;
             this.evaluation = evaluation;
         }
