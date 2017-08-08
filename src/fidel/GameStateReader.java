@@ -25,13 +25,15 @@ public class GameStateReader {
 
     public GameState readGameState() {
         BufferedImage img = getImageFromCapture();
+//        BufferedImage img = getImageFromFile();
+        writeImg(img, "img", true);
         return parseImage(img);
     }
 
     GameState parseImage(BufferedImage img) {
         BufferedImage[][] tileImages = getTileImages(img);
 
-        /*saveTile(tileImages[0][3], ALIEN);
+        /*saveTile(tileImages[2][0], EMPTY);
         if (true) {
             return null;
         }/**/
