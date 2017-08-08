@@ -25,6 +25,7 @@ public enum TileType {
     SWITCH,
     BIG_FLOWER,
     SMALL_FLOWER,
+    ALIEN,
     GNOME;
 
     public final Direction dir;

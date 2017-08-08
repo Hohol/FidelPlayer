@@ -182,7 +182,7 @@ public class BestMoveFinder {
     }
 
     private int calcDmg(TileType tile, int hp, Direction dir, boolean switchUsed, boolean smallFlowersNearby) {
-        if (tile == SPIDER || tile == CROWNED_SPIDER) {
+        if (tile == SPIDER || tile == CROWNED_SPIDER || tile == ALIEN) {
             return 1;
         }
         if (tile == VAMPIRE) {
@@ -223,7 +223,7 @@ public class BestMoveFinder {
 
 
     private int calcXp(TileType tile, boolean afterTriple, Direction dir, int hp, boolean smallFlowersNearby) {
-        if (tile == SPIDER) {
+        if (tile == SPIDER || tile == ALIEN) {
             return 1;
         }
         if (tile == CROWNED_SPIDER) {
