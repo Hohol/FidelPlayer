@@ -7,6 +7,8 @@ import java.util.List;
 import static fidel.Command.*;
 import static fidel.Direction.DIRS;
 import static fidel.TileType.*;
+import static java.lang.Math.*;
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class BestMoveFinder {
@@ -46,7 +48,7 @@ public class BestMoveFinder {
         alienLevel = gameState.find(ALIEN) != null;
         try {
             dfs(gameState, gameState.findEntrance(),
-                    new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0, 0),
+                    new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0, 0, 3),
                     1);
         } catch (TimeoutException e) {
         }
@@ -195,8 +197,8 @@ public class BestMoveFinder {
             gold++;
         }
         boolean smallFlowersNearby = tile == BIG_FLOWER && smallFlowersNearby(gameState, cell);
-        int addXp = calcXp(tile, ps.afterTriple, dir, ps.hp, smallFlowersNearby);
-        int dmg = calcDmg(tile, ps.hp, dir, ps.switchUsed, smallFlowersNearby);
+        int addXp = calcXp(tile, dir, smallFlowersNearby, ps);
+        int dmg = calcDmg(tile, dir, smallFlowersNearby, ps);
         int xp = ps.xp + addXp;
 
         int streak = ps.streak;
@@ -223,8 +225,12 @@ public class BestMoveFinder {
         boolean switchUsed = ps.switchUsed || tile == SWITCH;
         int aliensKilled = ps.aliensKilled + (tile == ALIEN ? 1 : 0);
         int buttonsPressed = ps.buttonsPressed + (tile == BUTTON ? 1 : 0);
+        int robotBars = max(0, ps.robotBars - (tile == BUTTON ? 1 : 0));
+        if (addXp > 0) {
+            robotBars = 3;
+        }
 
-        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, aliensKilled, buttonsPressed);
+        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, aliensKilled, buttonsPressed, robotBars);
     }
 
     private int calcHp(PlayerState ps, TileType tile, int dmg, int poison) {
@@ -236,12 +242,12 @@ public class BestMoveFinder {
         return hp;
     }
 
-    private int calcDmg(TileType tile, int hp, Direction dir, boolean switchUsed, boolean smallFlowersNearby) {
+    private int calcDmg(TileType tile, Direction dir, boolean smallFlowersNearby, PlayerState ps) {
         if (tile == SPIDER || tile == CROWNED_SPIDER || tile == ALIEN) {
             return 1;
         }
         if (tile == VAMPIRE) {
-            return hp;
+            return ps.hp;
         }
         if (tile.isTurtle()) {
             if (dir == tile.dir) {
@@ -250,7 +256,7 @@ public class BestMoveFinder {
                 return 2;
             }
         }
-        if (tile == SPIKES && !switchUsed) {
+        if (tile == SPIKES && !ps.switchUsed) {
             return 2;
         }
         if (tile == BIG_FLOWER) {
@@ -265,6 +271,13 @@ public class BestMoveFinder {
         }
         if (tile == ANGRY_ABORIGINE) {
             return 2;
+        }
+        if (tile == ROBOT) {
+            if (robotsDisabled(ps)) {
+                return 0;
+            } else {
+                return 2;
+            }
         }
         return 0;
     }
@@ -283,7 +296,7 @@ public class BestMoveFinder {
     }
 
 
-    private int calcXp(TileType tile, boolean afterTriple, Direction dir, int hp, boolean smallFlowersNearby) {
+    private int calcXp(TileType tile, Direction dir, boolean smallFlowersNearby, PlayerState ps) {
         if (tile == SPIDER || tile == ALIEN) {
             return 1;
         }
@@ -294,14 +307,14 @@ public class BestMoveFinder {
             return 5;
         }
         if (tile == RED_SPIDER) {
-            if (afterTriple) {
+            if (ps.afterTriple) {
                 return 4;
             } else {
                 return 1;
             }
         }
         if (tile == VAMPIRE) {
-            if (hp == 0) {
+            if (ps.hp == 0) {
                 return 5;
             } else {
                 return 1;
@@ -327,8 +340,20 @@ public class BestMoveFinder {
         if (tile == ANGRY_ABORIGINE) {
             return 1;
         }
+        if (tile == ROBOT) {
+            if (robotsDisabled(ps)) {
+                return 10;
+            } else {
+                return 1;
+            }
+        }
         return 0;
     }
+
+    private boolean robotsDisabled(PlayerState ps) {
+        return ps.robotBars == 0;
+    }
+
 
     private static boolean potentiallyPassable(TileType tile) {
         return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME;
@@ -382,8 +407,9 @@ public class BestMoveFinder {
         final boolean switchUsed;
         final int aliensKilled;
         final int buttonsPressed;
+        final int robotBars;
 
-        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int aliensKilled, int buttonsPressed) {
+        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int aliensKilled, int buttonsPressed, int robotBars) {
             this.gold = gold;
             this.xp = xp;
             this.streak = streak;
@@ -394,6 +420,7 @@ public class BestMoveFinder {
             this.switchUsed = switchUsed;
             this.aliensKilled = aliensKilled;
             this.buttonsPressed = buttonsPressed;
+            this.robotBars = robotBars;
         }
 
         @Override
@@ -409,6 +436,7 @@ public class BestMoveFinder {
                     ", switchUsed=" + switchUsed +
                     ", aliensKilled=" + aliensKilled +
                     ", buttonsPressed=" + buttonsPressed +
+                    ", robotBars=" + robotBars +
                     '}';
         }
     }

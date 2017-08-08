@@ -198,6 +198,28 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void robots() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY, ROBOT, EXIT},
+                        {BUTTON, BUTTON, BUTTON, EMPTY},
+                },
+                Arrays.asList(DOWN, RIGHT, RIGHT, UP, RIGHT)
+        );
+    }
+
+    @Test
+    void robots2() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, BUTTON, BUTTON, BUTTON, SPIDER, ROBOT, EXIT},
+                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, DOWN, RIGHT, RIGHT, UP, RIGHT)
+        );
+    }
+
     private void check(int initialHp, TileType[][] map, List<Command> expected) {
         GameState gameState = new GameState(map, initialHp);
         List<Command> actual = BestMoveFinder.findBestMoves(gameState);
