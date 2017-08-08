@@ -25,7 +25,7 @@ public class GameStateReader {
 
     public GameState readGameState() {
         BufferedImage img = getImageFromCapture();
-//        BufferedImage img = getImageFromFile();
+        //BufferedImage img = getImageFromFile();
         writeImg(img, "img", true);
         return parseImage(img);
     }
@@ -33,7 +33,7 @@ public class GameStateReader {
     GameState parseImage(BufferedImage img) {
         BufferedImage[][] tileImages = getTileImages(img);
 
-        /*saveTile(tileImages[2][0], EMPTY);
+        /*saveTile(tileImages[2][6], SPIDER);
         if (true) {
             return null;
         }/**/
