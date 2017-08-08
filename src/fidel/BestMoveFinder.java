@@ -34,7 +34,7 @@ public class BestMoveFinder {
     }
 
     private MovesAndEvaluation findBestMoves0(GameState gameState) {
-        dfs(gameState, gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.initialHp, 0, gameState.initialHp, false));
+        dfs(gameState, gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false));
         System.out.println(bestState);
         return new MovesAndEvaluation(bestMoves, evaluate(bestState));
     }

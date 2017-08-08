@@ -24,8 +24,11 @@ public class GameStateReader {
     private final Robot robot = tryy(() -> new Robot());
 
     public GameState readGameState() {
-        //BufferedImage img = getImageFromFile();
         BufferedImage img = getImageFromCapture();
+        return parseImage(img);
+    }
+
+    GameState parseImage(BufferedImage img) {
         BufferedImage[][] tileImages = getTileImages(img);
 
         /*saveTile(tileImages[0][3], ALIEN);
@@ -36,7 +39,8 @@ public class GameStateReader {
         Map<TileType, List<BufferedImage>> tileTypeImgs = loadTiles();
         int h = tileImages.length;
         int w = tileImages[0].length;
-        GameState gameState = new GameState(h, w, 2);
+        int maxHp = getMaxHp(img);
+        GameState gameState = new GameState(h, w, maxHp);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
                 gameState.setInPlace(row, col, findMostSimilar(tileTypeImgs, tileImages[row][col]));
@@ -49,6 +53,18 @@ public class GameStateReader {
         //System.out.println(gameState);
 
         return gameState;
+    }
+
+    private int getMaxHp(BufferedImage img) {
+        int cnt = 0;
+        for (int x = 27; x <= 400; x++) {
+            int red = getRed(img.getRGB(x, 754));
+            int prevRed = getRed(img.getRGB(x - 1, 754));
+            if (red >= 50 && prevRed < 50) {
+                cnt++;
+            }
+        }
+        return cnt;
     }
 
     private void saveTile(BufferedImage img, TileType tileType) {
@@ -130,7 +146,7 @@ public class GameStateReader {
         return tryy(() -> ImageIO.read(new File("img.png")));
     }
 
-    private void writeImg(BufferedImage img, String name, boolean overwrite) {
+    private static void writeImg(BufferedImage img, String name, boolean overwrite) {
         tryy(() -> {
             File file = new File(name + ".png");
             if (!overwrite && file.exists()) {
@@ -162,13 +178,13 @@ public class GameStateReader {
             for (int j = 0; j < imageA.getHeight(); j++) {
                 int colourA = imageA.getRGB(i, j);
 
-                int redA = (colourA & 0x00ff0000) >> 16;
+                int redA = getRed(colourA);
                 int greenA = (colourA & 0x0000ff00) >> 8;
                 int blueA = colourA & 0x000000ff;
 
                 int colourB = imageB.getRGB(i, j);
 
-                int redB = (colourB & 0x00ff0000) >> 16;
+                int redB = getRed(colourB);
                 int greenB = (colourB & 0x0000ff00) >> 8;
                 int blueB = colourB & 0x000000ff;
 
@@ -180,6 +196,10 @@ public class GameStateReader {
             }
         }
         return sum;
+    }
+
+    private static int getRed(int color) {
+        return (color & 0x00ff0000) >> 16;
     }
 
     private static Map<TileType, List<BufferedImage>> loadTiles() {
@@ -210,5 +230,18 @@ public class GameStateReader {
             }
         }
         throw new RuntimeException("tile tipe not found for name: " + name);
+    }
+
+    public static void main(String[] args) {
+        BufferedImage img = new GameStateReader().getImageFromCapture();
+        int cnt = 1;
+        while (true) {
+            String name = "tests/imgs/" + cnt;
+            if (!(new File(name + ".png").exists())) {
+                writeImg(img, name, false);
+                break;
+            }
+            cnt++;
+        }
     }
 }

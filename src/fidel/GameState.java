@@ -10,18 +10,18 @@ public class GameState {
     public final int height;
     public final int width;
     public final TileType[][] map;
-    public final int initialHp;
+    public final int maxHp;
 
-    public GameState(int height, int width, int initialHp) {
+    public GameState(int height, int width, int maxHp) {
         this.height = height;
         this.width = width;
-        this.initialHp = initialHp;
+        this.maxHp = maxHp;
         map = new TileType[height][width];
     }
 
-    public GameState(TileType[][] tileTypes, int initialHp) {
+    public GameState(TileType[][] tileTypes, int maxHp) {
         map = tileTypes;
-        this.initialHp = initialHp;
+        this.maxHp = maxHp;
         height = map.length;
         width = map[0].length;
     }
@@ -29,7 +29,7 @@ public class GameState {
     public GameState(GameState gameState) {
         height = gameState.height;
         width = gameState.width;
-        initialHp = gameState.initialHp;
+        maxHp = gameState.maxHp;
         map = new TileType[height][width];
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
