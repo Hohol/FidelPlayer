@@ -9,7 +9,6 @@ import static fidel.TileType.*;
 
 public class BestMoveFinder {
 
-    private final GameState gameState;
     List<Command> bestMoves = null;
     double bestEvaluation = Double.NEGATIVE_INFINITY;
     PlayerState bestState = null;
@@ -17,14 +16,13 @@ public class BestMoveFinder {
     final Cell exit;
 
     public BestMoveFinder(GameState gameState) {
-        this.gameState = gameState;
         exit = gameState.findExit();
     }
 
     public static List<Command> findBestMoves(GameState gameState) {
-        MovesAndEvaluation first = new BestMoveFinder(gameState).findBestMoves0();
-        gameState.swap();
-        MovesAndEvaluation second = new BestMoveFinder(gameState).findBestMoves0();
+        MovesAndEvaluation first = new BestMoveFinder(gameState).findBestMoves0(gameState); // todo refactor
+        gameState.swapInPlace();
+        MovesAndEvaluation second = new BestMoveFinder(gameState).findBestMoves0(gameState);
         if (first.evaluation >= second.evaluation) {
             return first.moves;
         } else {
@@ -35,13 +33,13 @@ public class BestMoveFinder {
         }
     }
 
-    private MovesAndEvaluation findBestMoves0() {
-        dfs(gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.initialHp, 0, gameState.initialHp));
+    private MovesAndEvaluation findBestMoves0(GameState gameState) {
+        dfs(gameState, gameState.findEntrance(), new PlayerState(0, 0, 0, false, gameState.initialHp, 0, gameState.initialHp));
         System.out.println(bestState);
         return new MovesAndEvaluation(bestMoves, evaluate(bestState));
     }
 
-    private boolean dfs(Cell cur, PlayerState ps) {
+    private boolean dfs(GameState gameState, Cell cur, PlayerState ps) {
         if (ps.hp < 0) {
             return false;
         }
@@ -65,13 +63,12 @@ public class BestMoveFinder {
             TileType oldTile = gameState.get(to);
             PlayerState newPs = calcNewPs(ps, oldTile, dir);
 
-            gameState.set(to, VISITED);
+            GameState newGameState = gameState.setAndCopy(to, VISITED);
             curMoves.add(dir.command);
 
-            dfs(to, newPs);
+            dfs(newGameState, to, newPs);
 
             pop(curMoves);
-            gameState.set(to, oldTile);
         }
         return false;
     }

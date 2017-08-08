@@ -52,7 +52,7 @@ public class GameStateReader {
         GameState gameState = new GameState(h, w, 2);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
-                gameState.set(row, col, findMostSimilar(tileTypeImgs, tileImages[row][col]));
+                gameState.setInPlace(row, col, findMostSimilar(tileTypeImgs, tileImages[row][col]));
             }
         }
 

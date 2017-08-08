@@ -25,6 +25,18 @@ public class GameState {
         width = map[0].length;
     }
 
+    public GameState(GameState gameState) {
+        height = gameState.height;
+        width = gameState.width;
+        initialHp = gameState.initialHp;
+        map = new TileType[height][width];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                setInPlace(i, j, gameState.get(i, j));
+            }
+        }
+    }
+
     @Override
     public String toString() {
         return Stream.of(map)
@@ -32,8 +44,18 @@ public class GameState {
                 .collect(Collectors.joining(",\n"));
     }
 
-    public void set(int row, int col, TileType tile) {
+    public void setInPlace(int row, int col, TileType tile) {
         map[row][col] = tile;
+    }
+
+    public GameState setAndCopy(int row, int col, TileType tile) {
+        GameState newState = new GameState(this);
+        newState.setInPlace(row, col, tile);
+        return newState;
+    }
+
+    public GameState setAndCopy(Cell cell, TileType tile) {
+        return setAndCopy(cell.row, cell.col, tile);
     }
 
     public Cell findEntrance() {
@@ -71,14 +93,14 @@ public class GameState {
         return row >= 0 && col >= 0 && row < height && col < width;
     }
 
-    public void set(Cell to, TileType tileType) {
-        set(to.row, to.col, tileType);
+    public void setInPlace(Cell to, TileType tileType) {
+        setInPlace(to.row, to.col, tileType);
     }
 
-    public void swap() {
+    public void swapInPlace() {
         Cell entrance = findEntrance();
         Cell exit = findExit();
-        set(entrance, EXIT);
-        set(exit, ENTRANCE);
+        setInPlace(entrance, EXIT);
+        setInPlace(exit, ENTRANCE);
     }
 }
