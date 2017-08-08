@@ -156,7 +156,7 @@ public class BestMoveFinderTest {
         BestMoveFinder.findBestMoves(gameState);
     }
 
-    @Test (enabled = false)
+    @Test(enabled = false)
     void alienLaser() {
         check(
                 new TileType[][]{
@@ -184,6 +184,17 @@ public class BestMoveFinderTest {
                         {ENTRANCE, ABORIGINE, VAMPIRE, EXIT}
                 },
                 Arrays.asList(BARK, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void buttons() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, RAISED_WALL, EXIT},
+                        {BUTTON, RAISED_WALL, EMPTY},
+                },
+                Arrays.asList(DOWN, RIGHT, RIGHT, UP)
         );
     }
 

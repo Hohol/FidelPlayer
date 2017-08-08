@@ -46,7 +46,7 @@ public class BestMoveFinder {
         alienLevel = gameState.find(ALIEN) != null;
         try {
             dfs(gameState, gameState.findEntrance(),
-                    new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0),
+                    new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0, 0),
                     1);
         } catch (TimeoutException e) {
         }
@@ -79,7 +79,7 @@ public class BestMoveFinder {
             if (!gameState.inside(to)) {
                 continue;
             }
-            if (!passable(gameState.get(to))) {
+            if (!passableNow(gameState.get(to), ps)) {
                 continue;
             }
             TileType oldTile = gameState.get(to);
@@ -148,7 +148,7 @@ public class BestMoveFinder {
             if (!gameState.inside(to)) {
                 continue;
             }
-            if (!passable(gameState.get(to))) {
+            if (!potentiallyPassable(gameState.get(to))) {
                 continue;
             }
             if (visited[to.row][to.col]) {
@@ -222,8 +222,9 @@ public class BestMoveFinder {
 
         boolean switchUsed = ps.switchUsed || tile == SWITCH;
         int aliensKilled = ps.aliensKilled + (tile == ALIEN ? 1 : 0);
+        int buttonsPressed = ps.buttonsPressed + (tile == BUTTON ? 1 : 0);
 
-        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, aliensKilled);
+        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, aliensKilled, buttonsPressed);
     }
 
     private int calcHp(PlayerState ps, TileType tile, int dmg, int poison) {
@@ -329,8 +330,21 @@ public class BestMoveFinder {
         return 0;
     }
 
-    private static boolean passable(TileType tile) {
+    private static boolean potentiallyPassable(TileType tile) {
         return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME;
+    }
+
+    private static boolean passableNow(TileType tile, PlayerState ps) {
+        if (!potentiallyPassable(tile)) {
+            return false;
+        }
+        if (tile == RAISED_WALL) {
+            return ps.buttonsPressed % 2 == 1;
+        }
+        if (tile == LOWERED_WALL) {
+            return ps.buttonsPressed % 2 == 0;
+        }
+        return true;
     }
 
     private static double evaluate(PlayerState ps, List<Command> moves) {
@@ -367,8 +381,9 @@ public class BestMoveFinder {
         final int maxHp;
         final boolean switchUsed;
         final int aliensKilled;
+        final int buttonsPressed;
 
-        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int aliensKilled) {
+        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int aliensKilled, int buttonsPressed) {
             this.gold = gold;
             this.xp = xp;
             this.streak = streak;
@@ -378,6 +393,7 @@ public class BestMoveFinder {
             this.maxHp = maxHp;
             this.switchUsed = switchUsed;
             this.aliensKilled = aliensKilled;
+            this.buttonsPressed = buttonsPressed;
         }
 
         @Override
@@ -392,6 +408,7 @@ public class BestMoveFinder {
                     ", maxHp=" + maxHp +
                     ", switchUsed=" + switchUsed +
                     ", aliensKilled=" + aliensKilled +
+                    ", buttonsPressed=" + buttonsPressed +
                     '}';
         }
     }

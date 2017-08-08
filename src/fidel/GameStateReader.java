@@ -102,9 +102,6 @@ public class GameStateReader {
 
     private boolean is3by7Level(BufferedImage img) {
         BufferedImage actualImg = img.getSubimage(140, 290, 70, 50);
-
-        writeImg(actualImg, "fignya", true);
-
         BufferedImage firstLevelImg = tryy(() -> ImageIO.read(new File("detect-1-lvl.png")));
         BufferedImage intermission1Img = tryy(() -> ImageIO.read(new File("detect-intermission1.png")));
         double diff = getDifference(actualImg, firstLevelImg, Double.POSITIVE_INFINITY);
