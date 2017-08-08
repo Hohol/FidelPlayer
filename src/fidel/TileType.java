@@ -33,4 +33,6 @@ public enum TileType {
     public boolean isTurtle() {
         return dir != null;
     }
+
+    public static TileType[] TURTLES = {TURTLE_RIGHT, TURTLE_DOWN, TURTLE_LEFT, TURTLE_UP};
 }

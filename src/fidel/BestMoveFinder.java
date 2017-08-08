@@ -70,7 +70,42 @@ public class BestMoveFinder {
 
             pop(curMoves);
         }
+
+        GameState afterBarking = afterBarking(gameState, cur);
+        if (afterBarking != null) {
+            curMoves.add(BARK);
+            dfs(afterBarking, cur, ps);
+            pop(curMoves);
+        }
+
         return false;
+    }
+
+    private GameState afterBarking(GameState gameState, Cell cur) { // returns null if nothing changed
+        GameState newGameState = new GameState(gameState);
+        boolean somethingChanged = false;
+
+        for (Direction dir : DIRS) {
+            Cell to = cur.add(dir);
+            if (!newGameState.inside(to)) {
+                continue;
+            }
+            TileType toTile = newGameState.get(to);
+            if (toTile.isTurtle()) {
+                for (TileType turtle : TileType.TURTLES) {
+                    if (turtle.dir.isOpposite(dir) && toTile != turtle) {
+                        newGameState.setInPlace(to, turtle);
+                        somethingChanged = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (somethingChanged) {
+            return newGameState;
+        } else {
+            return null;
+        }
     }
 
     private PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir) {
@@ -128,7 +163,6 @@ public class BestMoveFinder {
         }
         return 0;
     }
-
 
 
     private int calcXp(TileType tile, boolean afterTriple, Direction dir, int hp) {

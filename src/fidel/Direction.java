@@ -17,4 +17,8 @@ public enum Direction {
     }
 
     public static Direction[] DIRS = Direction.values();
+
+    public boolean isOpposite(Direction dir) {
+        return dRow == -dir.dRow && dCol == -dir.dCol;
+    }
 }
