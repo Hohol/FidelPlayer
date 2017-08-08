@@ -34,7 +34,7 @@ public class GameStateReader {
     GameState parseImage(BufferedImage img) {
         BufferedImage[][] tileImages = getTileImages(img);
 
-        /*saveTile(tileImages[1][6], ROBODOOR);
+        /*saveTile(tileImages[1][], LOWERED_WALL);
         if (true) {
             return null;
         }/**/
