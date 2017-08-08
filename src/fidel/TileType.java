@@ -17,7 +17,8 @@ public enum TileType {
     TURTLE_RIGHT(RIGHT),
     TURTLE_DOWN(DOWN),
     TURTLE_LEFT(LEFT),
-    TURTLE_UP(UP);
+    TURTLE_UP(UP),
+    MEDIKIT;
 
     public final Direction dir;
 
