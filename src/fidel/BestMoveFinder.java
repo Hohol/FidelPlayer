@@ -7,21 +7,27 @@ import java.util.List;
 import static fidel.Command.*;
 import static fidel.Direction.DIRS;
 import static fidel.TileType.*;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 
 public class BestMoveFinder {
+
+    final Cell exit;
+    final LevelType levelType;
+    final GameParameters gameParameters;
+    final int maxHp;
+    final Simulator simulator;
 
     List<Command> bestMoves = null;
     double bestEvaluation = Double.NEGATIVE_INFINITY;
     PlayerState bestState = null;
     final List<Command> curMoves = new ArrayList<>();
-    Cell exit;
     long start;
-    LevelType levelType;
-    GameParameters gameParameters;
 
-    public BestMoveFinder() {
+    public BestMoveFinder(GameState gameState, GameParameters gameParameters) {
+        this.gameParameters = gameParameters;
+        exit = gameState.board.findExit();
+        levelType = gameState.levelType;
+        maxHp = gameState.maxHp;
+        simulator = new Simulator(levelType, exit);
     }
 
     public static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters) {
@@ -29,9 +35,9 @@ public class BestMoveFinder {
             return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
                     UP, RIGHT, RIGHT);
         }
-        MovesAndEvaluation first = new BestMoveFinder().findBestMoves0(gameState, gameParameters);
+        MovesAndEvaluation first = new BestMoveFinder(gameState, gameParameters).findBestMoves0(gameState);
         gameState.swapGatesInPlace();
-        MovesAndEvaluation second = new BestMoveFinder().findBestMoves0(gameState, gameParameters);
+        MovesAndEvaluation second = new BestMoveFinder(gameState, gameParameters).findBestMoves0(gameState);
         if (first.evaluation >= second.evaluation) {
             return first.moves;
         } else {
@@ -42,23 +48,23 @@ public class BestMoveFinder {
         }
     }
 
-    private MovesAndEvaluation findBestMoves0(GameState gameState, GameParameters gameParameters) {
+    private MovesAndEvaluation findBestMoves0(GameState gameState) {
         start = System.currentTimeMillis();
-        this.gameParameters = gameParameters;
-        Board board = gameState.board;
-        exit = board.findExit();
-        levelType = gameState.levelType;
+        MoveGameState moveGameState = new MoveGameState(
+                gameState.board,
+                new PlayerState(0, 0, 0, false, maxHp, 0,
+                        maxHp, false, 0, 3, getInitialBossHp(levelType))
+        );
         try {
-            dfs(board, board.findEntrance(),
-                    new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0, 3, getBossHp(levelType)),
-                    1);
+            dfs(moveGameState, gameState.board.findEntrance(), 1);
         } catch (TimeoutException e) {
+            System.out.println("timeout");
         }
         System.out.println(bestState);
         return new MovesAndEvaluation(bestMoves, evaluate(bestState, bestMoves));
     }
 
-    private int getBossHp(LevelType levelType) {
+    private int getInitialBossHp(LevelType levelType) {
         if (levelType == LevelType.ALIENS) {
             return gameParameters.alienBossHp;
         }
@@ -68,12 +74,14 @@ public class BestMoveFinder {
         return 0;
     }
 
-    private boolean dfs(Board board, Cell cur, PlayerState ps, int round) {
+    private void dfs(MoveGameState gameState, Cell cur, int round) {
+        PlayerState ps = gameState.ps;
+        Board board = gameState.board;
         if (ps.hp < 0) {
-            return false;
+            return;
         }
         if (!exitReachable(board, cur, exit)) {
-            return false;
+            return;
         }
         if (finished(cur, ps)) {
             double evaluation = evaluate(ps, curMoves);
@@ -83,7 +91,7 @@ public class BestMoveFinder {
                 bestMoves = new ArrayList<>(curMoves);
                 System.out.println("cur best " + ps);
             }
-            return true;
+            return;
         }
         if (bestMoves != null && tooLate()) {
             throw new TimeoutException();
@@ -96,43 +104,21 @@ public class BestMoveFinder {
             if (!passableNow(board.get(to), ps)) {
                 continue;
             }
-            TileType oldTile = board.get(to);
-            PlayerState newPs = calcNewPs(ps, oldTile, dir, board, to, round);
-            Board newBoard = board.setAndCopy(to, VISITED);
-            if (newPs.xp > ps.xp) {
-                awakeAborigines(newBoard, to);
-            }
+
+            MoveGameState newGameState = simulator.simulateMove(board, ps, round, dir, to);
 
             curMoves.add(dir.command);
-
-            dfs(newBoard, to, newPs, round + 1);
-
+            dfs(newGameState, to, round + 1);
             pop(curMoves);
         }
 
-        Board afterBarking = afterBarking(board, cur);
+        MoveGameState afterBarking = simulator.simulateBark(board, cur, ps);
         if (afterBarking != null) {
             curMoves.add(BARK);
-            dfs(afterBarking, cur, ps, round + 1);
+            dfs(afterBarking, cur,round + 1);
             pop(curMoves);
         }
 
-        return false;
-    }
-
-    private boolean awakeAborigines(Board board, Cell cell) {
-        boolean found = false;
-        for (Direction dir : DIRS) {
-            Cell to = cell.add(dir);
-            if (!board.inside(to)) {
-                continue;
-            }
-            if (board.get(to) == ABORIGINE) {
-                found = true;
-                board.setInPlace(to, ANGRY_ABORIGINE);
-            }
-        }
-        return found;
     }
 
     private boolean finished(Cell cur, PlayerState ps) {
@@ -143,7 +129,7 @@ public class BestMoveFinder {
     }
 
     private boolean tooLate() {
-        //return false; // todo revert
+        //return false;
         return System.currentTimeMillis() - start > 15000;
     }
 
@@ -175,221 +161,6 @@ public class BestMoveFinder {
         return false;
     }
 
-    private Board afterBarking(Board board, Cell cur) { // returns null if nothing changed
-        Board newGameState = new Board(board);
-        boolean somethingChanged = false;
-
-        for (Direction dir : DIRS) {
-            Cell to = cur.add(dir);
-            if (!newGameState.inside(to)) {
-                continue;
-            }
-            TileType toTile = newGameState.get(to);
-            if (toTile.isTurtle()) {
-                for (TileType turtle : TileType.TURTLES) {
-                    if (turtle.dir.isOpposite(dir) && toTile != turtle) {
-                        newGameState.setInPlace(to, turtle);
-                        somethingChanged = true;
-                        break;
-                    }
-                }
-            }
-        }
-        somethingChanged |= awakeAborigines(newGameState, cur);
-        if (somethingChanged) {
-            return newGameState;
-        } else {
-            return null;
-        }
-    }
-
-    private PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir, Board board, Cell cell, int round) {
-        int gold = ps.gold;
-        if (tile == COIN) {
-            gold++;
-        }
-        boolean smallFlowersNearby = tile == BIG_FLOWER && smallFlowersNearby(board, cell);
-        int addXp = calcXp(tile, dir, smallFlowersNearby, ps);
-        int dmg = calcDmg(tile, dir, smallFlowersNearby, ps);
-        int xp = ps.xp + addXp;
-
-        int streak = ps.streak;
-        if (addXp > 0 || tile == SMALL_SPIDER) {
-            streak++;
-        } else {
-            streak = 0;
-        }
-
-        boolean afterTriple = streak == 3 || ps.afterTriple && streak == 0;
-
-        if (streak == 3) {
-            xp += 3;
-            streak = 0;
-        }
-
-        int poison = min(ps.maxHp, ps.poison + (tile == SNAKE ? 1 : 0));
-
-        int hp = calcHp(ps, tile, dmg, poison);
-        if (underAlienLaser(cell, round, ps)) {
-            hp = min(hp, 0);
-        }
-
-        boolean switchUsed = ps.switchUsed || tile == SWITCH;
-        int bossHp = calcBossHp(ps, tile);
-        int buttonsPressed = ps.buttonsPressed + (tile == BUTTON ? 1 : 0);
-        int robotBars = max(0, ps.robotBars - (tile == BUTTON ? 1 : 0));
-        if (addXp > 0) {
-            robotBars = 3;
-        }
-
-        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, buttonsPressed, robotBars, bossHp);
-    }
-
-    private boolean underAlienLaser(Cell cell, int round, PlayerState ps) {
-        return levelType == LevelType.ALIENS
-                && ps.bossHp > 0
-                && round % 10 == 0
-                && (cell.row == exit.row || cell.col == exit.col);
-    }
-
-    private int calcBossHp(PlayerState ps, TileType tile) {
-        if (ps.bossHp == 0) {
-            return 0;
-        }
-        if (levelType == LevelType.ALIENS) {
-            return ps.bossHp - (tile == ALIEN ? 1 : 0);
-        }
-        return 0;
-    }
-
-    private int calcHp(PlayerState ps, TileType tile, int dmg, int poison) {
-        int hp = ps.hp - dmg;
-        hp = min(hp, ps.maxHp - poison);
-        if (tile == MEDIKIT) {
-            hp = ps.maxHp - poison;
-        }
-        return hp;
-    }
-
-    private int calcDmg(TileType tile, Direction dir, boolean smallFlowersNearby, PlayerState ps) {
-        if (tile == SPIDER || tile == CROWNED_SPIDER || tile == ALIEN || tile == ROBO_MEDIKIT) {
-            return 1;
-        }
-        if (tile == RED_SPIDER) {
-            if (ps.afterTriple) {
-                return 0;
-            } else {
-                return 2;
-            }
-        }
-        if (tile == VAMPIRE) {
-            return ps.hp;
-        }
-        if (tile.isTurtle()) {
-            if (dir == tile.dir) {
-                return 0;
-            } else {
-                return 2;
-            }
-        }
-        if (tile == SPIKES && !ps.switchUsed) {
-            return 2;
-        }
-        if (tile == BIG_FLOWER) {
-            if (smallFlowersNearby) {
-                return 2;
-            } else {
-                return 0;
-            }
-        }
-        if (tile == ABORIGINE) {
-            return 0;
-        }
-        if (tile == ANGRY_ABORIGINE) {
-            return 2;
-        }
-        if (tile == ROBOT) {
-            if (robotsDisabled(ps)) {
-                return 0;
-            } else {
-                return 2;
-            }
-        }
-        return 0;
-    }
-
-    private boolean smallFlowersNearby(Board board, Cell cell) {
-        for (Direction dir : DIRS) {
-            Cell to = cell.add(dir);
-            if (!board.inside(to)) {
-                continue;
-            }
-            if (board.get(to) == SMALL_FLOWER) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    private int calcXp(TileType tile, Direction dir, boolean smallFlowersNearby, PlayerState ps) {
-        if (tile == SPIDER || tile == ALIEN) {
-            return 1;
-        }
-        if (tile == CROWNED_SPIDER) {
-            return 3;
-        }
-        if (tile == SNAKE) {
-            return 5;
-        }
-        if (tile == RED_SPIDER) {
-            if (ps.afterTriple) {
-                return 4;
-            } else {
-                return 1;
-            }
-        }
-        if (tile == VAMPIRE) {
-            if (ps.hp == 0) {
-                return 5;
-            } else {
-                return 1;
-            }
-        }
-        if (tile.isTurtle()) {
-            if (dir == tile.dir) {
-                return 4;
-            } else {
-                return 1;
-            }
-        }
-        if (tile == BIG_FLOWER) {
-            if (smallFlowersNearby) {
-                return 1;
-            } else {
-                return 4;
-            }
-        }
-        if (tile == ABORIGINE) {
-            return 3;
-        }
-        if (tile == ANGRY_ABORIGINE) {
-            return 1;
-        }
-        if (tile == ROBOT) {
-            if (robotsDisabled(ps)) {
-                return 10;
-            } else {
-                return 1;
-            }
-        }
-        return 0;
-    }
-
-    private boolean robotsDisabled(PlayerState ps) {
-        return ps.robotBars == 0;
-    }
-
 
     private static boolean potentiallyPassable(TileType tile) {
         return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME;
@@ -419,61 +190,4 @@ public class BestMoveFinder {
         r.remove(r.size() - 1);
     }
 
-    static class MovesAndEvaluation {
-        final List<Command> moves;
-        final double evaluation;
-
-        MovesAndEvaluation(List<Command> moves, double evaluation) {
-            this.moves = moves;
-            this.evaluation = evaluation;
-        }
-    }
-
-    static class TimeoutException extends RuntimeException {
-    }
-
-    static class PlayerState {
-        final int gold;
-        final int xp;
-        final int streak;
-        final boolean afterTriple;
-        final int hp;
-        final int poison;
-        final int maxHp;
-        final boolean switchUsed;
-        final int buttonsPressed;
-        final int robotBars;
-        final int bossHp;
-
-        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int buttonsPressed, int robotBars, int bossHp) {
-            this.gold = gold;
-            this.xp = xp;
-            this.streak = streak;
-            this.afterTriple = afterTriple;
-            this.hp = hp;
-            this.poison = poison;
-            this.maxHp = maxHp;
-            this.switchUsed = switchUsed;
-            this.buttonsPressed = buttonsPressed;
-            this.robotBars = robotBars;
-            this.bossHp = bossHp;
-        }
-
-        @Override
-        public String toString() {
-            return "PlayerState{" +
-                    "gold=" + gold +
-                    ", xp=" + xp +
-                    ", streak=" + streak +
-                    ", afterTriple=" + afterTriple +
-                    ", hp=" + hp +
-                    ", poison=" + poison +
-                    ", maxHp=" + maxHp +
-                    ", switchUsed=" + switchUsed +
-                    ", buttonsPressed=" + buttonsPressed +
-                    ", robotBars=" + robotBars +
-                    ", bossHp=" + bossHp +
-                    '}';
-        }
-    }
 }
