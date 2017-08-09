@@ -246,6 +246,13 @@ public class BestMoveFinder {
         if (tile == SPIDER || tile == CROWNED_SPIDER || tile == ALIEN || tile == ROBO_MEDIKIT) {
             return 1;
         }
+        if (tile == RED_SPIDER) {
+            if (ps.afterTriple) {
+                return 0;
+            } else {
+                return 2;
+            }
+        }
         if (tile == VAMPIRE) {
             return ps.hp;
         }
