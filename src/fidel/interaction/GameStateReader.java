@@ -16,6 +16,7 @@ import fidel.common.Board;
 import fidel.common.GameState;
 import fidel.common.LevelType;
 import fidel.common.TileType;
+
 import static fidel.common.TileType.*;
 import static fidel.common.Tryy.tryy;
 import static java.awt.Color.WHITE;
@@ -52,12 +53,13 @@ public class GameStateReader {
             }
         }
 
-        //showMarkedTiles(img, tileWidth, tileHeight, x, y, h, w);
-        //writeImg(img, "img");
-
-        //System.out.println(gameState);
-
-        return new GameState(board, maxHp, LevelType.NORMAL); // todo detect level type
+        LevelType levelType = LevelType.NORMAL;
+        if (board.find(ALIEN) != null) {
+            levelType = LevelType.ALIENS;
+        } else if (board.find(ROBODOOR) != null) {
+            levelType = LevelType.INTERMISSION1;
+        }
+        return new GameState(board, maxHp, levelType);
     }
 
     private int getMaxHp(BufferedImage img) {

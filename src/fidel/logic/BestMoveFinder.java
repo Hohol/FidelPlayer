@@ -39,7 +39,7 @@ public class BestMoveFinder {
     }
 
     public static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters) {
-        if (gameState.board.find(ROBODOOR) != null) {
+        if (gameState.levelType == LevelType.INTERMISSION1) {
             return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
                     UP, RIGHT, RIGHT);
         }
