@@ -18,7 +18,6 @@ public class BestMoveFinder {
     final List<Command> curMoves = new ArrayList<>();
     Cell exit;
     long start;
-    boolean alienLevel;
     LevelType levelType;
     GameParameters gameParameters;
 
@@ -49,7 +48,6 @@ public class BestMoveFinder {
         Board board = gameState.board;
         exit = board.findExit();
         levelType = gameState.levelType;
-        alienLevel = board.find(ALIEN) != null;
         try {
             dfs(board, board.findEntrance(),
                     new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0, 3, getBossHp(levelType)),
@@ -232,7 +230,7 @@ public class BestMoveFinder {
         int poison = min(ps.maxHp, ps.poison + (tile == SNAKE ? 1 : 0));
 
         int hp = calcHp(ps, tile, dmg, poison);
-        if (alienLevel && round % 10 == 0 && (cell.row == exit.row || cell.col == exit.col)) {
+        if (underAlienLaser(cell, round, ps)) {
             hp = min(hp, 0);
         }
 
@@ -245,6 +243,13 @@ public class BestMoveFinder {
         }
 
         return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, buttonsPressed, robotBars, bossHp);
+    }
+
+    private boolean underAlienLaser(Cell cell, int round, PlayerState ps) {
+        return levelType == LevelType.ALIENS
+                && ps.bossHp > 0
+                && round % 10 == 0
+                && (cell.row == exit.row || cell.col == exit.col);
     }
 
     private int calcBossHp(PlayerState ps, TileType tile) {

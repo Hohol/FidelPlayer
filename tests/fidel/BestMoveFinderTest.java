@@ -183,6 +183,30 @@ public class BestMoveFinderTest {
     }
 
     @Test
+    void alienLaser2() {
+        gameParameters.alienBossHp = 1;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, ALIEN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, ALIEN, EXIT},
+                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void alienLaser3() {
+        gameParameters.alienBossHp = 2;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, ALIEN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, ALIEN, EXIT},
+                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, DOWN, RIGHT, RIGHT, UP, RIGHT)
+        );
+    }
+
+    @Test
     void aborigine() {
         check(
                 new TileType[][]{
@@ -237,7 +261,12 @@ public class BestMoveFinderTest {
     }
 
     private void check(TileType[][] map, List<Command> expected) {
-        GameState gameState = new GameState(new Board(map), maxHp, levelType);
+        Board board = new Board(map);
+        if (board.find(ALIEN) != null) {
+            levelType = LevelType.ALIENS;
+        }
+        GameState gameState = new GameState(board, maxHp, levelType);
+
         List<Command> actual = BestMoveFinder.findBestMoves(gameState, gameParameters);
         assertEquals(actual, expected, actual.toString());
     }
