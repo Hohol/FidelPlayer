@@ -12,6 +12,7 @@ import fidel.common.GameParameters;
 import fidel.common.GameState;
 import fidel.common.LevelType;
 import fidel.common.TileType;
+
 import static fidel.common.Command.*;
 import static fidel.common.Direction.DIRS;
 import static fidel.common.TileType.*;
@@ -35,7 +36,7 @@ public class BestMoveFinder {
         exit = gameState.board.findExit();
         levelType = gameState.levelType;
         maxHp = gameState.maxHp;
-        simulator = new Simulator(levelType, exit);
+        simulator = new Simulator(levelType, exit, gameParameters);
     }
 
     public static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters) {
@@ -47,6 +48,9 @@ public class BestMoveFinder {
         gameState.swapGatesInPlace();
         MovesAndEvaluation second = new BestMoveFinder(gameState, gameParameters).findBestMoves0(gameState);
         if (first.evaluation >= second.evaluation) {
+            if (first.moves == null) {
+                throw new RuntimeException("no path found");
+            }
             return first.moves;
         } else {
             List<Command> r = new ArrayList<>();
@@ -61,7 +65,7 @@ public class BestMoveFinder {
         MoveGameState moveGameState = new MoveGameState(
                 gameState.board,
                 new PlayerState(0, 0, 0, false, maxHp, 0,
-                        maxHp, false, 0, 3, getInitialBossHp(levelType))
+                        maxHp, false, 0, 3, simulator.getInitialBossHp(levelType))
         );
         try {
             dfs(moveGameState, gameState.board.findEntrance(), 1);
@@ -70,16 +74,6 @@ public class BestMoveFinder {
         }
         System.out.println(bestState);
         return new MovesAndEvaluation(bestMoves, evaluate(bestState, bestMoves));
-    }
-
-    private int getInitialBossHp(LevelType levelType) {
-        if (levelType == LevelType.ALIENS) {
-            return gameParameters.alienBossHp;
-        }
-        if (levelType == LevelType.ROBODOG) {
-            return gameParameters.robodogMaxHp;
-        }
-        return 0;
     }
 
     private void dfs(MoveGameState gameState, Cell cur, int round) {
@@ -109,7 +103,7 @@ public class BestMoveFinder {
             if (!board.inside(to)) {
                 continue;
             }
-            if (!passableNow(board.get(to), ps)) {
+            if (!passableNow(ps, board, to)) {
                 continue;
             }
 
@@ -123,7 +117,7 @@ public class BestMoveFinder {
         MoveGameState afterBarking = simulator.simulateBark(board, cur, ps);
         if (afterBarking != null) {
             curMoves.add(BARK);
-            dfs(afterBarking, cur,round + 1);
+            dfs(afterBarking, cur, round + 1);
             pop(curMoves);
         }
 
@@ -174,7 +168,8 @@ public class BestMoveFinder {
         return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME;
     }
 
-    private static boolean passableNow(TileType tile, PlayerState ps) {
+    private boolean passableNow(PlayerState ps, Board board, Cell to) {
+        TileType tile = board.get(to);
         if (!potentiallyPassable(tile)) {
             return false;
         }
@@ -183,6 +178,9 @@ public class BestMoveFinder {
         }
         if (tile == LOWERED_WALL) {
             return ps.buttonsPressed % 2 == 0;
+        }
+        if (levelType == LevelType.ROBODOG && ps.bossHp > 0 && board.getOpposite(to) == VISITED) {
+            return false;
         }
         return true;
     }

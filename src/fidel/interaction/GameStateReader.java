@@ -58,6 +58,9 @@ public class GameStateReader {
             levelType = LevelType.ALIENS;
         } else if (board.find(ROBODOOR) != null) {
             levelType = LevelType.INTERMISSION1;
+        } else if (board.find(ROBODOG) != null) {
+            levelType = LevelType.ROBODOG;
+            board.setInPlace(board.find(ROBODOG), EXIT);
         }
         return new GameState(board, maxHp, levelType);
     }

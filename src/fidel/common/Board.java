@@ -113,4 +113,12 @@ public class Board {
     public static String padRight(String s, int n) {
         return String.format("%1$-" + n + "s", s);
     }
+
+    public Cell getOppositeCell(Cell cell) {
+        return new Cell(height - 1 - cell.row, width - 1 - cell.col);
+    }
+
+    public TileType getOpposite(Cell cell) {
+        return get(getOppositeCell(cell));
+    }
 }

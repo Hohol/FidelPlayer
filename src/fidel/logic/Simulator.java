@@ -1,10 +1,7 @@
 package fidel.logic;
 
-import fidel.common.Board;
-import fidel.common.Cell;
-import fidel.common.Direction;
-import fidel.common.LevelType;
-import fidel.common.TileType;
+import fidel.common.*;
+
 import static fidel.common.Direction.DIRS;
 import static fidel.common.TileType.*;
 import static java.lang.Math.*;
@@ -12,15 +9,20 @@ import static java.lang.Math.*;
 class Simulator {
     private final LevelType levelType;
     private final Cell exit;
+    private final GameParameters gameParameters;
 
-    public Simulator(LevelType levelType, Cell exit) {
+    public Simulator(LevelType levelType, Cell exit, GameParameters gameParameters) {
         this.levelType = levelType;
         this.exit = exit;
+        this.gameParameters = gameParameters;
     }
 
     MoveGameState simulateMove(Board board, PlayerState ps, int round, Direction dir, Cell to) {
         PlayerState newPs = calcNewPs(ps, board.get(to), dir, board, to, round);
         Board newBoard = board.setAndCopy(to, VISITED);
+        if (levelType == LevelType.ROBODOG && ps.bossHp > 0) {
+            newBoard.setInPlace(newBoard.getOppositeCell(to), EMPTY);
+        }
         if (newPs.xp > ps.xp) {
             awakeAborigines(newBoard, to);
         }
@@ -88,7 +90,7 @@ class Simulator {
         }
 
         boolean switchUsed = ps.switchUsed || tile == SWITCH;
-        int bossHp = calcBossHp(ps, tile);
+        int bossHp = calcBossHp(ps, tile, cell, board, dir);
         int buttonsPressed = ps.buttonsPressed + (tile == BUTTON ? 1 : 0);
         int robotBars = max(0, ps.robotBars - (tile == BUTTON ? 1 : 0));
         if (addXp > 0) {
@@ -98,12 +100,40 @@ class Simulator {
         return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, buttonsPressed, robotBars, bossHp);
     }
 
-    private int calcBossHp(PlayerState ps, TileType tile) {
+    private int calcBossHp(PlayerState ps, TileType tile, Cell cell, Board board, Direction dir) {
         if (ps.bossHp == 0) {
             return 0;
         }
         if (levelType == LevelType.ALIENS) {
             return ps.bossHp - (tile == ALIEN ? 1 : 0);
+        }
+        if (levelType == LevelType.ROBODOG) {
+            TileType robodogTile = board.getOpposite(cell);
+            if (robodogTile == ROBO_MEDIKIT) {
+                return gameParameters.robodogMaxHp;
+            }
+            return max(0, ps.bossHp - calcRobodogDmg(robodogTile, ps, dir));
+        }
+        return ps.bossHp;
+    }
+
+    private int calcRobodogDmg(TileType tile, PlayerState ps, Direction dir) {
+        if (tile == SPIDER) {
+            return 1;
+        }
+        if (tile == RED_SPIDER) {
+            if (ps.afterTriple) {
+                return 0;
+            } else {
+                return 2;
+            }
+        }
+        if (tile.isTurtle()) {
+            if (dir.opposite() == tile.dir) {
+                return 0;
+            } else {
+                return 2;
+            }
         }
         return 0;
     }
@@ -255,5 +285,15 @@ class Simulator {
             }
         }
         return found;
+    }
+
+    int getInitialBossHp(LevelType levelType) {
+        if (levelType == LevelType.ALIENS) {
+            return gameParameters.alienBossHp;
+        }
+        if (levelType == LevelType.ROBODOG) {
+            return gameParameters.robodogMaxHp;
+        }
+        return 0;
     }
 }

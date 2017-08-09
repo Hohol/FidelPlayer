@@ -12,6 +12,7 @@ import fidel.common.GameParameters;
 import fidel.common.GameState;
 import fidel.common.LevelType;
 import fidel.common.TileType;
+
 import static fidel.common.Command.*;
 import static fidel.common.TileType.*;
 import static org.testng.Assert.*;
@@ -263,6 +264,48 @@ public class BestMoveFinderTest {
                         {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
                 },
                 Arrays.asList(RIGHT, RIGHT, RIGHT, DOWN, RIGHT, RIGHT, UP, RIGHT)
+        );
+    }
+
+    @Test
+    void robodog() {
+        levelType = LevelType.ROBODOG;
+        gameParameters.robodogMaxHp = 1;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, EMPTY},
+                        {EMPTY, WALL, EMPTY},
+                        {EMPTY, EMPTY, EXIT},
+                },
+                Arrays.asList(DOWN, DOWN, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void robodog2() {
+        levelType = LevelType.ROBODOG;
+        gameParameters.robodogMaxHp = 1;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY, EMPTY},
+                        {EMPTY, EMPTY, EMPTY},
+                        {EMPTY, SPIDER, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, DOWN, DOWN)
+        );
+    }
+
+    @Test
+    void robodog3() {
+        levelType = LevelType.ROBODOG;
+        gameParameters.robodogMaxHp = 1;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY, EMPTY},
+                        {EMPTY, WALL, EMPTY},
+                        {EMPTY, TURTLE_LEFT, EXIT},
+                },
+                Arrays.asList(ENTER, UP, UP, LEFT, LEFT)
         );
     }
 

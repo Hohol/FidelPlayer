@@ -21,4 +21,8 @@ public enum Direction {
     public boolean isOpposite(Direction dir) {
         return dRow == -dir.dRow && dCol == -dir.dCol;
     }
+
+    public Direction opposite() {
+        return DIRS[(ordinal() + 2) % 4];
+    }
 }
