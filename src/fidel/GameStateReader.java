@@ -42,10 +42,10 @@ public class GameStateReader {
         int h = tileImages.length;
         int w = tileImages[0].length;
         int maxHp = getMaxHp(img);
-        GameState gameState = new GameState(h, w, maxHp);
+        Board board = new Board(h, w);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
-                gameState.setInPlace(row, col, findMostSimilar(tileTypeImgs, tileImages[row][col]));
+                board.setInPlace(row, col, findMostSimilar(tileTypeImgs, tileImages[row][col]));
             }
         }
 
@@ -54,7 +54,7 @@ public class GameStateReader {
 
         //System.out.println(gameState);
 
-        return gameState;
+        return new GameState(board, maxHp);
     }
 
     private int getMaxHp(BufferedImage img) {

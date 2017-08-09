@@ -17,22 +17,21 @@ public class BestMoveFinder {
     double bestEvaluation = Double.NEGATIVE_INFINITY;
     PlayerState bestState = null;
     final List<Command> curMoves = new ArrayList<>();
-    final Cell exit;
+    Cell exit;
     long start;
     boolean alienLevel;
 
-    public BestMoveFinder(GameState gameState) {
-        exit = gameState.findExit();
+    public BestMoveFinder() {
     }
 
     public static List<Command> findBestMoves(GameState gameState) {
-        if (gameState.find(ROBODOOR) != null) {
+        if (gameState.board.find(ROBODOOR) != null) {
             return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
                     UP, RIGHT, RIGHT);
         }
-        MovesAndEvaluation first = new BestMoveFinder(gameState).findBestMoves0(gameState); // todo refactor
+        MovesAndEvaluation first = new BestMoveFinder().findBestMoves0(gameState);
         gameState.swapInPlace();
-        MovesAndEvaluation second = new BestMoveFinder(gameState).findBestMoves0(gameState);
+        MovesAndEvaluation second = new BestMoveFinder().findBestMoves0(gameState);
         if (first.evaluation >= second.evaluation) {
             return first.moves;
         } else {
@@ -45,9 +44,11 @@ public class BestMoveFinder {
 
     private MovesAndEvaluation findBestMoves0(GameState gameState) {
         start = System.currentTimeMillis();
-        alienLevel = gameState.find(ALIEN) != null;
+        Board board = gameState.board;
+        exit = board.findExit();
+        alienLevel = board.find(ALIEN) != null;
         try {
-            dfs(gameState, gameState.findEntrance(),
+            dfs(board, board.findEntrance(),
                     new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0, 0, 3),
                     1);
         } catch (TimeoutException e) {
@@ -56,11 +57,11 @@ public class BestMoveFinder {
         return new MovesAndEvaluation(bestMoves, evaluate(bestState, bestMoves));
     }
 
-    private boolean dfs(GameState gameState, Cell cur, PlayerState ps, int round) {
+    private boolean dfs(Board board, Cell cur, PlayerState ps, int round) {
         if (ps.hp < 0) {
             return false;
         }
-        if (!exitReachable(gameState, cur, exit)) {
+        if (!exitReachable(board, cur, exit)) {
             return false;
         }
         if (finished(cur, ps)) {
@@ -78,27 +79,27 @@ public class BestMoveFinder {
         }
         for (Direction dir : DIRS) {
             Cell to = cur.add(dir);
-            if (!gameState.inside(to)) {
+            if (!board.inside(to)) {
                 continue;
             }
-            if (!passableNow(gameState.get(to), ps)) {
+            if (!passableNow(board.get(to), ps)) {
                 continue;
             }
-            TileType oldTile = gameState.get(to);
-            PlayerState newPs = calcNewPs(ps, oldTile, dir, gameState, to, round);
-            GameState newGameState = gameState.setAndCopy(to, VISITED);
+            TileType oldTile = board.get(to);
+            PlayerState newPs = calcNewPs(ps, oldTile, dir, board, to, round);
+            Board newBoard = board.setAndCopy(to, VISITED);
             if (newPs.xp > ps.xp) {
-                awakeAborigines(newGameState, to);
+                awakeAborigines(newBoard, to);
             }
 
             curMoves.add(dir.command);
 
-            dfs(newGameState, to, newPs, round + 1);
+            dfs(newBoard, to, newPs, round + 1);
 
             pop(curMoves);
         }
 
-        GameState afterBarking = afterBarking(gameState, cur);
+        Board afterBarking = afterBarking(board, cur);
         if (afterBarking != null) {
             curMoves.add(BARK);
             dfs(afterBarking, cur, ps, round + 1);
@@ -108,16 +109,16 @@ public class BestMoveFinder {
         return false;
     }
 
-    private boolean awakeAborigines(GameState gameState, Cell cell) {
+    private boolean awakeAborigines(Board board, Cell cell) {
         boolean found = false;
         for (Direction dir : DIRS) {
             Cell to = cell.add(dir);
-            if (!gameState.inside(to)) {
+            if (!board.inside(to)) {
                 continue;
             }
-            if (gameState.get(to) == ABORIGINE) {
+            if (board.get(to) == ABORIGINE) {
                 found = true;
-                gameState.setInPlace(to, ANGRY_ABORIGINE);
+                board.setInPlace(to, ANGRY_ABORIGINE);
             }
         }
         return found;
@@ -135,36 +136,36 @@ public class BestMoveFinder {
         return System.currentTimeMillis() - start > 15000;
     }
 
-    private static boolean exitReachable(GameState gameState, Cell cur, Cell exit) {
-        boolean[][] visited = new boolean[gameState.height][gameState.width]; // todo get rid of it (make thread local?)
-        return dfs(gameState, cur, visited, exit);
+    private static boolean exitReachable(Board board, Cell cur, Cell exit) {
+        boolean[][] visited = new boolean[board.height][board.width]; // todo get rid of it (make thread local?)
+        return dfs(board, cur, visited, exit);
     }
 
-    private static boolean dfs(GameState gameState, Cell cur, boolean[][] visited, Cell exit) {
+    private static boolean dfs(Board board, Cell cur, boolean[][] visited, Cell exit) {
         if (cur.equals(exit)) {
             return true;
         }
         visited[cur.row][cur.col] = true;
         for (Direction dir : DIRS) {
             Cell to = cur.add(dir);
-            if (!gameState.inside(to)) {
+            if (!board.inside(to)) {
                 continue;
             }
-            if (!potentiallyPassable(gameState.get(to))) {
+            if (!potentiallyPassable(board.get(to))) {
                 continue;
             }
             if (visited[to.row][to.col]) {
                 continue;
             }
-            if (dfs(gameState, to, visited, exit)) {
+            if (dfs(board, to, visited, exit)) {
                 return true;
             }
         }
         return false;
     }
 
-    private GameState afterBarking(GameState gameState, Cell cur) { // returns null if nothing changed
-        GameState newGameState = new GameState(gameState);
+    private Board afterBarking(Board board, Cell cur) { // returns null if nothing changed
+        Board newGameState = new Board(board);
         boolean somethingChanged = false;
 
         for (Direction dir : DIRS) {
@@ -191,12 +192,12 @@ public class BestMoveFinder {
         }
     }
 
-    private PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir, GameState gameState, Cell cell, int round) {
+    private PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir, Board board, Cell cell, int round) {
         int gold = ps.gold;
         if (tile == COIN) {
             gold++;
         }
-        boolean smallFlowersNearby = tile == BIG_FLOWER && smallFlowersNearby(gameState, cell);
+        boolean smallFlowersNearby = tile == BIG_FLOWER && smallFlowersNearby(board, cell);
         int addXp = calcXp(tile, dir, smallFlowersNearby, ps);
         int dmg = calcDmg(tile, dir, smallFlowersNearby, ps);
         int xp = ps.xp + addXp;
@@ -289,13 +290,13 @@ public class BestMoveFinder {
         return 0;
     }
 
-    private boolean smallFlowersNearby(GameState gameState, Cell cell) {
+    private boolean smallFlowersNearby(Board board, Cell cell) {
         for (Direction dir : DIRS) {
             Cell to = cell.add(dir);
-            if (!gameState.inside(to)) {
+            if (!board.inside(to)) {
                 continue;
             }
-            if (gameState.get(to) == SMALL_FLOWER) {
+            if (board.get(to) == SMALL_FLOWER) {
                 return true;
             }
         }

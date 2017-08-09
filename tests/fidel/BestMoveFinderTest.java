@@ -143,15 +143,16 @@ public class BestMoveFinderTest {
     @Test(enabled = false)
     void performance() {
         GameState gameState = new GameState(
-                new TileType[][]{
-                        {EMPTY, MEDIKIT, EMPTY, ALIEN, EMPTY, ALIEN, ALIEN},
-                        {EMPTY, EMPTY, ALIEN, EMPTY, MEDIKIT, EMPTY, ALIEN},
-                        {EMPTY, ALIEN, ALIEN, EMPTY, ALIEN, ALIEN, EMPTY},
-                        {ENTRANCE, EMPTY, EMPTY, EXIT, EMPTY, ALIEN, ALIEN},
-                        {MEDIKIT, EMPTY, EMPTY, ALIEN, EMPTY, MEDIKIT, EMPTY},
-                        {ALIEN, EMPTY, EMPTY, ALIEN, EMPTY, EMPTY, EMPTY},
-                        {EMPTY, EMPTY, ALIEN, ALIEN, MEDIKIT, ALIEN, EMPTY}
-                }, 3
+                new Board(
+                        new TileType[][]{
+                                {EMPTY, MEDIKIT, EMPTY, ALIEN, EMPTY, ALIEN, ALIEN},
+                                {EMPTY, EMPTY, ALIEN, EMPTY, MEDIKIT, EMPTY, ALIEN},
+                                {EMPTY, ALIEN, ALIEN, EMPTY, ALIEN, ALIEN, EMPTY},
+                                {ENTRANCE, EMPTY, EMPTY, EXIT, EMPTY, ALIEN, ALIEN},
+                                {MEDIKIT, EMPTY, EMPTY, ALIEN, EMPTY, MEDIKIT, EMPTY},
+                                {ALIEN, EMPTY, EMPTY, ALIEN, EMPTY, EMPTY, EMPTY},
+                                {EMPTY, EMPTY, ALIEN, ALIEN, MEDIKIT, ALIEN, EMPTY}
+                        }), 3
         );
         BestMoveFinder.findBestMoves(gameState);
     }
@@ -221,7 +222,7 @@ public class BestMoveFinderTest {
     }
 
     private void check(int initialHp, TileType[][] map, List<Command> expected) {
-        GameState gameState = new GameState(map, initialHp);
+        GameState gameState = new GameState(new Board(map), initialHp);
         List<Command> actual = BestMoveFinder.findBestMoves(gameState);
         assertEquals(actual, expected, actual.toString());
     }
