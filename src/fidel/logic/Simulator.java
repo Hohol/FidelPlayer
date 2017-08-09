@@ -1,10 +1,15 @@
-package fidel;
+package fidel.logic;
 
-import static fidel.Direction.DIRS;
-import static fidel.TileType.*;
+import fidel.common.Board;
+import fidel.common.Cell;
+import fidel.common.Direction;
+import fidel.common.LevelType;
+import fidel.common.TileType;
+import static fidel.common.Direction.DIRS;
+import static fidel.common.TileType.*;
 import static java.lang.Math.*;
 
-public class Simulator {
+class Simulator {
     private final LevelType levelType;
     private final Cell exit;
 

@@ -1,6 +1,6 @@
-package fidel;
+package fidel.common;
 
-import static fidel.Direction.*;
+import static fidel.common.Direction.*;
 
 public enum TileType {
     EMPTY,

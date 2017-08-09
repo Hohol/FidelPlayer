@@ -1,12 +1,20 @@
-package fidel;
+package fidel.logic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static fidel.Command.*;
-import static fidel.Direction.DIRS;
-import static fidel.TileType.*;
+import fidel.common.Board;
+import fidel.common.Cell;
+import fidel.common.Command;
+import fidel.common.Direction;
+import fidel.common.GameParameters;
+import fidel.common.GameState;
+import fidel.common.LevelType;
+import fidel.common.TileType;
+import static fidel.common.Command.*;
+import static fidel.common.Direction.DIRS;
+import static fidel.common.TileType.*;
 
 public class BestMoveFinder {
 

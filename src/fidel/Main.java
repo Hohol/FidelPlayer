@@ -3,8 +3,14 @@ package fidel;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fidel.Command.*;
-import static fidel.Tryy.*;
+import fidel.common.Command;
+import fidel.common.GameParameters;
+import fidel.common.GameState;
+import fidel.interaction.GameStateReader;
+import fidel.interaction.MoveMaker;
+import fidel.logic.BestMoveFinder;
+import static fidel.common.Command.*;
+import static fidel.common.Tryy.*;
 
 public class Main {
 

@@ -1,15 +1,16 @@
-package fidel;
+package fidel.interaction;
 
 import java.awt.*;
 import java.util.List;
 
-import static fidel.Tryy.*;
+import fidel.common.Command;
+import static fidel.common.Tryy.*;
 
 public class MoveMaker {
 
     private final Robot robot = tryy(() -> new Robot());
 
-    void makeMoves(List<Command> commands) {
+    public void makeMoves(List<Command> commands) {
         for (Command command : commands) {
             makeMove(command);
         }

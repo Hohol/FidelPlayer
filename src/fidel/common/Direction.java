@@ -1,4 +1,4 @@
-package fidel;
+package fidel.common;
 
 public enum Direction {
     RIGHT(0, 1, Command.RIGHT),

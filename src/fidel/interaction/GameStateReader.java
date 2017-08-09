@@ -1,4 +1,4 @@
-package fidel;
+package fidel.interaction;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -12,8 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static fidel.TileType.*;
-import static fidel.Tryy.tryy;
+import fidel.common.Board;
+import fidel.common.GameState;
+import fidel.common.LevelType;
+import fidel.common.TileType;
+import static fidel.common.TileType.*;
+import static fidel.common.Tryy.tryy;
 import static java.awt.Color.WHITE;
 
 public class GameStateReader {

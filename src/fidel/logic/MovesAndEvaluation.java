@@ -1,6 +1,8 @@
-package fidel;
+package fidel.logic;
 
 import java.util.List;
+
+import fidel.common.Command;
 
 class MovesAndEvaluation {
     final List<Command> moves;

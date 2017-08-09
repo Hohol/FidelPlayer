@@ -1,4 +1,4 @@
-package fidel;
+package fidel.interaction;
 
 import org.testng.annotations.Test;
 
@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import fidel.interaction.GameStateReader;
 import static org.testng.Assert.assertEquals;
 
 @Test

@@ -1,4 +1,4 @@
-package fidel;
+package fidel.logic;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -6,8 +6,14 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static fidel.Command.*;
-import static fidel.TileType.*;
+import fidel.common.Board;
+import fidel.common.Command;
+import fidel.common.GameParameters;
+import fidel.common.GameState;
+import fidel.common.LevelType;
+import fidel.common.TileType;
+import static fidel.common.Command.*;
+import static fidel.common.TileType.*;
 import static org.testng.Assert.*;
 
 @Test

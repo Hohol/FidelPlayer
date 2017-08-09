@@ -1,4 +1,4 @@
-package fidel;
+package fidel.common;
 
 import java.util.concurrent.Callable;
 
@@ -11,7 +11,6 @@ public class Tryy {
         }
     }
 
-
     public static <T> T tryy(Callable<T> callable) {
         try {
             return callable.call();
@@ -21,7 +20,7 @@ public class Tryy {
     }
 
     @FunctionalInterface
-    interface MyRunnable {
+    public interface MyRunnable {
         void run() throws Exception;
     }
 }

@@ -1,4 +1,4 @@
-package fidel;
+package fidel.common;
 
 public class GameState {
     public final Board board;

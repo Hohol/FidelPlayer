@@ -1,4 +1,4 @@
-package fidel;
+package fidel.common;
 
 import java.util.Objects;
 

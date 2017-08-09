@@ -1,4 +1,4 @@
-package fidel;
+package fidel.common;
 
 import static java.awt.event.KeyEvent.*;
 

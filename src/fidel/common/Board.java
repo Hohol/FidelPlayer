@@ -1,11 +1,11 @@
-package fidel;
+package fidel.common;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static fidel.TileType.ENTRANCE;
-import static fidel.TileType.EXIT;
+import static fidel.common.TileType.ENTRANCE;
+import static fidel.common.TileType.EXIT;
 
 public class Board {
     public final int height;

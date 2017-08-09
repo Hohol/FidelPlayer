@@ -1,4 +1,4 @@
-package fidel;
+package fidel.logic;
 
 class PlayerState {
     final int gold;
