@@ -4,7 +4,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 
-import fidel.common.Tryy;
+import fidel.common.ExceptionHelper;
 
 public class SaveHelper {
 
@@ -19,13 +19,13 @@ public class SaveHelper {
     }
 
     private static void undump(String name) {
-        Tryy.tryy(() -> {
+        ExceptionHelper.tryy(() -> {
             FileUtils.copyFile(new File(dumpName(name)), new File(SAVE_LOCATION));
         });
     }
 
     public static void dump(String name) {
-        Tryy.tryy(() -> {
+        ExceptionHelper.tryy(() -> {
             FileUtils.copyFile(new File(SAVE_LOCATION), new File(dumpName(name)));
         });
     }

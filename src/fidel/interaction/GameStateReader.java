@@ -12,13 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import fidel.common.Board;
-import fidel.common.GameState;
-import fidel.common.LevelType;
-import fidel.common.TileType;
+import fidel.common.*;
 
+import static fidel.common.ExceptionHelper.*;
 import static fidel.common.TileType.*;
-import static fidel.common.Tryy.tryy;
+import static fidel.common.ExceptionHelper.tryy;
 import static java.awt.Color.WHITE;
 
 public class GameStateReader {
@@ -35,6 +33,11 @@ public class GameStateReader {
     }
 
     GameState parseImage(BufferedImage img) {
+        LevelType intermissionLevelType = checkIntermission(img);
+        if (intermissionLevelType != null) {
+            return GameState.intermission(intermissionLevelType);
+        }
+
         BufferedImage[][] tileImages = getTileImages(img);
 
         /*saveTile(tileImages[6][0], SPIDER);
@@ -56,8 +59,6 @@ public class GameStateReader {
         LevelType levelType = LevelType.NORMAL;
         if (board.find(ALIEN) != null) {
             levelType = LevelType.ALIENS;
-        } else if (board.find(ROBODOOR) != null) {
-            levelType = LevelType.INTERMISSION1;
         } else if (board.find(ROBODOG) != null) {
             levelType = LevelType.ROBODOG;
             board.setInPlace(board.find(ROBODOG), EXIT);
@@ -90,7 +91,7 @@ public class GameStateReader {
     }
 
     private BufferedImage[][] getTileImages(BufferedImage img) {
-        if (is3by7Level(img)) {
+        if (isFirstLevel(img)) {
             return getTileImages(img, 26, 418, 3, 7);
         } else {
             return getTileImages(img, 26, 58, 7, 7);
@@ -107,13 +108,24 @@ public class GameStateReader {
         return r;
     }
 
-    private boolean is3by7Level(BufferedImage img) {
+    private boolean isFirstLevel(BufferedImage img) {
         BufferedImage actualImg = img.getSubimage(140, 290, 70, 50);
         BufferedImage firstLevelImg = tryy(() -> ImageIO.read(new File("detect-1-lvl.png")));
-        BufferedImage intermission1Img = tryy(() -> ImageIO.read(new File("detect-intermission1.png")));
         double diff = getDifference(actualImg, firstLevelImg, Double.POSITIVE_INFINITY);
-        double diff2 = getDifference(actualImg, intermission1Img, Double.POSITIVE_INFINITY);
-        return diff < 1000 || diff2 < 100000;
+        return diff < 1000;
+    }
+
+    LevelType checkIntermission(BufferedImage img) {
+        BufferedImage actualImg = img.getSubimage(140, 290, 70, 50);
+        BufferedImage intermission1Img = tryy(() -> ImageIO.read(new File("detect-intermission1.png")));
+        if (getDifference(actualImg, intermission1Img, Double.POSITIVE_INFINITY) < 100000) {
+            return LevelType.INTERMISSION1;
+        }
+        BufferedImage intermission2Img = tryy(() -> ImageIO.read(new File("detect-intermission2.png")));
+        if (getDifference(actualImg, intermission2Img, Double.POSITIVE_INFINITY) == 0) {
+            return LevelType.INTERMISSION2;
+        }
+        return null;
     }
 
     private void showMarkedTiles(BufferedImage img, int tileWidth, int tileHeight, int x, int y, int h, int w) {

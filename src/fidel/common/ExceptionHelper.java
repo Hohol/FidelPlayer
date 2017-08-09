@@ -2,7 +2,7 @@ package fidel.common;
 
 import java.util.concurrent.Callable;
 
-public class Tryy {
+public class ExceptionHelper {
     public static void tryy(MyRunnable runnable) {
         try {
             runnable.run();
@@ -22,5 +22,13 @@ public class Tryy {
     @FunctionalInterface
     public interface MyRunnable {
         void run() throws Exception;
+    }
+
+    public static void fail() {
+        fail("");
+    }
+
+    private static void fail(String msg) {
+        throw new RuntimeException(msg);
     }
 }

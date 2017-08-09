@@ -4,7 +4,7 @@ import java.awt.*;
 import java.util.List;
 
 import fidel.common.Command;
-import static fidel.common.Tryy.*;
+import static fidel.common.ExceptionHelper.*;
 
 public class MoveMaker {
 

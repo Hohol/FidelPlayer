@@ -107,7 +107,7 @@ public class Board {
                         + "}"
                 )
                 .collect(Collectors.joining(",\n"));
-        return "\n" + s + "\n";
+        return "\n\n" + s + "\n\n";
     }
 
     public static String padRight(String s, int n) {

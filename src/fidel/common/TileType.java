@@ -28,7 +28,6 @@ public enum TileType {
     ALIEN,
     ABORIGINE,
     ANGRY_ABORIGINE,
-    ROBODOOR,
     BUTTON,
     ROBOT,
     RAISED_WALL,

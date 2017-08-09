@@ -44,6 +44,9 @@ public class BestMoveFinder {
             return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
                     UP, RIGHT, RIGHT);
         }
+        if (gameState.levelType == LevelType.INTERMISSION2) {
+            return Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT);
+        }
         MovesAndEvaluation first = new BestMoveFinder(gameState, gameParameters).findBestMoves0(gameState);
         gameState.swapGatesInPlace();
         MovesAndEvaluation second = new BestMoveFinder(gameState, gameParameters).findBestMoves0(gameState);

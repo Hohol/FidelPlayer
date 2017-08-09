@@ -23,4 +23,8 @@ public class GameState {
                 ", levelType=" + levelType +
                 '}';
     }
+
+    public static GameState intermission(LevelType intermissionLevelType) {
+        return new GameState(null, 0, intermissionLevelType);
+    }
 }
