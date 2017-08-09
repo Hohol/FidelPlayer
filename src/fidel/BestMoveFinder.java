@@ -7,7 +7,6 @@ import java.util.List;
 import static fidel.Command.*;
 import static fidel.Direction.DIRS;
 import static fidel.TileType.*;
-import static java.lang.Math.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -20,18 +19,20 @@ public class BestMoveFinder {
     Cell exit;
     long start;
     boolean alienLevel;
+    LevelType levelType;
+    GameParameters gameParameters;
 
     public BestMoveFinder() {
     }
 
-    public static List<Command> findBestMoves(GameState gameState) {
+    public static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters) {
         if (gameState.board.find(ROBODOOR) != null) {
             return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
                     UP, RIGHT, RIGHT);
         }
-        MovesAndEvaluation first = new BestMoveFinder().findBestMoves0(gameState);
-        gameState.swapInPlace();
-        MovesAndEvaluation second = new BestMoveFinder().findBestMoves0(gameState);
+        MovesAndEvaluation first = new BestMoveFinder().findBestMoves0(gameState, gameParameters);
+        gameState.swapGatesInPlace();
+        MovesAndEvaluation second = new BestMoveFinder().findBestMoves0(gameState, gameParameters);
         if (first.evaluation >= second.evaluation) {
             return first.moves;
         } else {
@@ -42,19 +43,31 @@ public class BestMoveFinder {
         }
     }
 
-    private MovesAndEvaluation findBestMoves0(GameState gameState) {
+    private MovesAndEvaluation findBestMoves0(GameState gameState, GameParameters gameParameters) {
         start = System.currentTimeMillis();
+        this.gameParameters = gameParameters;
         Board board = gameState.board;
         exit = board.findExit();
+        levelType = gameState.levelType;
         alienLevel = board.find(ALIEN) != null;
         try {
             dfs(board, board.findEntrance(),
-                    new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0, 0, 3),
+                    new PlayerState(0, 0, 0, false, gameState.maxHp, 0, gameState.maxHp, false, 0, 3, getBossHp(levelType)),
                     1);
         } catch (TimeoutException e) {
         }
         System.out.println(bestState);
         return new MovesAndEvaluation(bestMoves, evaluate(bestState, bestMoves));
+    }
+
+    private int getBossHp(LevelType levelType) {
+        if (levelType == LevelType.ALIENS) {
+            return gameParameters.alienBossHp;
+        }
+        if (levelType == LevelType.ROBODOG) {
+            return gameParameters.robodogMaxHp;
+        }
+        return 0;
     }
 
     private boolean dfs(Board board, Cell cur, PlayerState ps, int round) {
@@ -125,7 +138,7 @@ public class BestMoveFinder {
     }
 
     private boolean finished(Cell cur, PlayerState ps) {
-        if (alienLevel && ps.aliensKilled < 15) {
+        if (ps.bossHp > 0) {
             return false;
         }
         return cur.equals(exit);
@@ -224,14 +237,24 @@ public class BestMoveFinder {
         }
 
         boolean switchUsed = ps.switchUsed || tile == SWITCH;
-        int aliensKilled = ps.aliensKilled + (tile == ALIEN ? 1 : 0);
+        int bossHp = calcBossHp(ps, tile);
         int buttonsPressed = ps.buttonsPressed + (tile == BUTTON ? 1 : 0);
         int robotBars = max(0, ps.robotBars - (tile == BUTTON ? 1 : 0));
         if (addXp > 0) {
             robotBars = 3;
         }
 
-        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, aliensKilled, buttonsPressed, robotBars);
+        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, buttonsPressed, robotBars, bossHp);
+    }
+
+    private int calcBossHp(PlayerState ps, TileType tile) {
+        if (ps.bossHp == 0) {
+            return 0;
+        }
+        if (levelType == LevelType.ALIENS) {
+            return ps.bossHp - (tile == ALIEN ? 1 : 0);
+        }
+        return 0;
     }
 
     private int calcHp(PlayerState ps, TileType tile, int dmg, int poison) {
@@ -413,11 +436,11 @@ public class BestMoveFinder {
         final int poison;
         final int maxHp;
         final boolean switchUsed;
-        final int aliensKilled;
         final int buttonsPressed;
         final int robotBars;
+        final int bossHp;
 
-        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int aliensKilled, int buttonsPressed, int robotBars) {
+        PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int buttonsPressed, int robotBars, int bossHp) {
             this.gold = gold;
             this.xp = xp;
             this.streak = streak;
@@ -426,9 +449,9 @@ public class BestMoveFinder {
             this.poison = poison;
             this.maxHp = maxHp;
             this.switchUsed = switchUsed;
-            this.aliensKilled = aliensKilled;
             this.buttonsPressed = buttonsPressed;
             this.robotBars = robotBars;
+            this.bossHp = bossHp;
         }
 
         @Override
@@ -442,9 +465,9 @@ public class BestMoveFinder {
                     ", poison=" + poison +
                     ", maxHp=" + maxHp +
                     ", switchUsed=" + switchUsed +
-                    ", aliensKilled=" + aliensKilled +
                     ", buttonsPressed=" + buttonsPressed +
                     ", robotBars=" + robotBars +
+                    ", bossHp=" + bossHp +
                     '}';
         }
     }

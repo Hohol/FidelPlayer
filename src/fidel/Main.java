@@ -14,13 +14,14 @@ public class Main {
         MoveMaker moveMaker = new MoveMaker();
 
         GameStateReader gameStateReader = new GameStateReader();
+        GameParameters gameParameters = new GameParameters();
 
         while (true) {
             GameState gameState = gameStateReader.readGameState();
 
             System.out.println(gameState);
 
-            List<Command> bestMoves = BestMoveFinder.findBestMoves(gameState);
+            List<Command> bestMoves = BestMoveFinder.findBestMoves(gameState, gameParameters);
 
             if (auto) {
                 bestMoves = new ArrayList<>(bestMoves);

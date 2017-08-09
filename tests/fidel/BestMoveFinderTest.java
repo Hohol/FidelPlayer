@@ -1,5 +1,6 @@
 package fidel;
 
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -11,6 +12,18 @@ import static org.testng.Assert.*;
 
 @Test
 public class BestMoveFinderTest {
+
+    LevelType levelType;
+    int maxHp;
+    GameParameters gameParameters;
+
+    @BeforeMethod
+    void init() {
+        levelType = LevelType.NORMAL;
+        maxHp = 2;
+        gameParameters = new GameParameters();
+    }
+
     @Test
     void testEmpty() {
         check(
@@ -43,8 +56,8 @@ public class BestMoveFinderTest {
 
     @Test
     void tripleKill() {
+        maxHp = 3;
         check(
-                3,
                 new TileType[][]{
                         {ENTRANCE, SPIDER, SPIDER, EMPTY, SPIDER},
                         {EMPTY, EMPTY, SPIDER, EXIT, EMPTY},
@@ -152,16 +165,17 @@ public class BestMoveFinderTest {
                                 {MEDIKIT, EMPTY, EMPTY, ALIEN, EMPTY, MEDIKIT, EMPTY},
                                 {ALIEN, EMPTY, EMPTY, ALIEN, EMPTY, EMPTY, EMPTY},
                                 {EMPTY, EMPTY, ALIEN, ALIEN, MEDIKIT, ALIEN, EMPTY}
-                        }), 3
-        );
-        BestMoveFinder.findBestMoves(gameState);
+                        }), 3,
+                LevelType.ALIENS);
+        BestMoveFinder.findBestMoves(gameState, gameParameters);
     }
 
-    @Test(enabled = false)
+    @Test
     void alienLaser() {
+        gameParameters.alienBossHp = 2;
         check(
                 new TileType[][]{
-                        {ENTRANCE, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, ALIEN, EXIT},
+                        {ENTRANCE, ALIEN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, ALIEN, EXIT},
                         {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
                 },
                 Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, DOWN, RIGHT, RIGHT, UP, RIGHT)
@@ -216,18 +230,15 @@ public class BestMoveFinderTest {
                 new TileType[][]{
                         {ENTRANCE, BUTTON, BUTTON, BUTTON, SPIDER, ROBOT, EXIT},
                         {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
                 },
                 Arrays.asList(RIGHT, RIGHT, RIGHT, DOWN, RIGHT, RIGHT, UP, RIGHT)
         );
     }
 
-    private void check(int initialHp, TileType[][] map, List<Command> expected) {
-        GameState gameState = new GameState(new Board(map), initialHp);
-        List<Command> actual = BestMoveFinder.findBestMoves(gameState);
-        assertEquals(actual, expected, actual.toString());
-    }
-
     private void check(TileType[][] map, List<Command> expected) {
-        check(2, map, expected);
+        GameState gameState = new GameState(new Board(map), maxHp, levelType);
+        List<Command> actual = BestMoveFinder.findBestMoves(gameState, gameParameters);
+        assertEquals(actual, expected, actual.toString());
     }
 }

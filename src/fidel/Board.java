@@ -88,7 +88,7 @@ public class Board {
         setInPlace(to.row, to.col, tileType);
     }
 
-    public void swapInPlace() {
+    public void swapGatesInPlace() {
         Cell entrance = findEntrance();
         Cell exit = findExit();
         setInPlace(entrance, EXIT);

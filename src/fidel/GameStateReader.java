@@ -54,7 +54,7 @@ public class GameStateReader {
 
         //System.out.println(gameState);
 
-        return new GameState(board, maxHp);
+        return new GameState(board, maxHp, LevelType.NORMAL); // todo detect level type
     }
 
     private int getMaxHp(BufferedImage img) {
