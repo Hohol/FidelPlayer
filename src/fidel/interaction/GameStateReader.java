@@ -30,7 +30,6 @@ public class GameStateReader {
     public GameState readGameState() {
         BufferedImage img = getImageFromCapture();
 //        BufferedImage img = getImageFromFile();
-        writeImg(img, "img", true);
         return parseImage(img);
     }
 
@@ -147,7 +146,20 @@ public class GameStateReader {
         robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
         tryy(() -> Thread.sleep(100));
-        return robot.createScreenCapture(new Rectangle(x, y, w, h));
+
+        BufferedImage img = robot.createScreenCapture(new Rectangle(x, y, w, h));
+        save(img);
+        return img;
+    }
+
+    private void save(BufferedImage img) {
+        File cur = new File("img.png");
+        if (cur.exists()) {
+            File prev = new File("prev-img.png");
+            prev.delete();
+            cur.renameTo(prev);
+        }
+        writeImg(img, "img", true);
     }
 
     private BufferedImage getImageFromFile() {

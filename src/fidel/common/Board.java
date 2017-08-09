@@ -101,12 +101,13 @@ public class Board {
         int[] colWidth = IntStream.range(0, width).map(col ->
                 IntStream.range(0, height).map(row -> map[row][col].name().length()).max().getAsInt()
         ).toArray();
-        return Stream.of(map)
+        String s = Stream.of(map)
                 .map(row -> "{"
                         + IntStream.range(0, width).mapToObj(col -> padRight(row[col].name(), colWidth[col])).collect(Collectors.joining(", "))
                         + "}"
                 )
                 .collect(Collectors.joining(",\n"));
+        return "\n" + s + "\n";
     }
 
     public static String padRight(String s, int n) {
