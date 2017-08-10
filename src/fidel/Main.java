@@ -10,7 +10,7 @@ import fidel.interaction.GameStateReader;
 import fidel.interaction.MoveMaker;
 import fidel.logic.BestMoveFinder;
 import static fidel.common.Command.*;
-import static fidel.common.ExceptionHelper.*;
+import static fidel.interaction.ExceptionHelper.*;
 
 public class Main {
 

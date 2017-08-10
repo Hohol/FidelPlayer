@@ -22,7 +22,6 @@ public class BestMoveFinder {
     final Cell exit;
     final LevelType levelType;
     final GameParameters gameParameters;
-    final int maxHp;
     final Simulator simulator;
 
     List<Command> bestMoves = null;
@@ -35,7 +34,6 @@ public class BestMoveFinder {
         this.gameParameters = gameParameters;
         exit = gameState.board.findExit();
         levelType = gameState.levelType;
-        maxHp = gameState.maxHp;
         simulator = new Simulator(levelType, exit, gameParameters);
     }
 
@@ -67,8 +65,8 @@ public class BestMoveFinder {
         start = System.currentTimeMillis();
         MoveGameState moveGameState = new MoveGameState(
                 gameState.board,
-                new PlayerState(0, 0, 0, false, maxHp, 0,
-                        maxHp, false, 0, 3, simulator.getInitialBossHp(levelType))
+                new PlayerState(0, 0, 0, false, gameState.maxHp, 0,
+                        gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType))
         );
         try {
             dfs(moveGameState, gameState.board.findEntrance(), 1);
@@ -190,7 +188,7 @@ public class BestMoveFinder {
 
     private static double evaluate(PlayerState ps, List<Command> moves) {
         if (ps == null) {
-            return Integer.MIN_VALUE;
+            return Double.NEGATIVE_INFINITY;
         }
         return ps.gold * 10 + ps.xp - moves.size() / 1000.0;
     }

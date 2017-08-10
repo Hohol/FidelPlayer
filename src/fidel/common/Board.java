@@ -68,6 +68,10 @@ public class Board {
         return null;
     }
 
+    public boolean contains(TileType tileType) {
+        return find(tileType) != null;
+    }
+
     public TileType get(Cell cell) {
         return get(cell.row, cell.col);
     }

@@ -17,8 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static fidel.common.ExceptionHelper.tryy;
 import static fidel.common.TileType.*;
+import static fidel.interaction.ExceptionHelper.*;
 import static java.awt.Color.WHITE;
 
 public class GameStateReader {
@@ -58,9 +58,9 @@ public class GameStateReader {
         }
 
         LevelType levelType = LevelType.NORMAL;
-        if (board.find(ALIEN) != null) {
+        if (board.contains(ALIEN)) {
             levelType = LevelType.ALIENS;
-        } else if (board.find(ROBODOG) != null) {
+        } else if (board.contains(ROBODOG)) {
             levelType = LevelType.ROBODOG;
             board.setInPlace(board.find(ROBODOG), EXIT);
         }

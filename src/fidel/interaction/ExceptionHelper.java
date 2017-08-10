@@ -1,4 +1,4 @@
-package fidel.common;
+package fidel.interaction;
 
 import java.util.concurrent.Callable;
 

@@ -4,8 +4,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 
-import fidel.common.ExceptionHelper;
-
 public class SaveHelper {
 
     public static final String SAVE_LOCATION = "E:\\Users\\Hohol\\AppData\\Roaming\\fidel\\Local Store\\save.txt";

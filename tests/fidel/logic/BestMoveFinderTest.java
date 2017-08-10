@@ -311,7 +311,7 @@ public class BestMoveFinderTest {
 
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
-        if (board.find(ALIEN) != null) {
+        if (board.contains(ALIEN)) {
             levelType = LevelType.ALIENS;
         }
         GameState gameState = new GameState(board, maxHp, levelType);
