@@ -33,12 +33,15 @@ public class BestMoveFinder {
     PlayerState bestState = null;
     final List<Command> curMoves = new ArrayList<>();
     long start;
+    final int[][] visited;
+    int curVisited;
 
     public BestMoveFinder(GameState gameState, GameParameters gameParameters) {
         this.gameParameters = gameParameters;
         exit = gameState.board.findExit();
         levelType = gameState.levelType;
         simulator = new Simulator(levelType, exit, gameParameters);
+        visited = new int[gameState.board.height][gameState.board.width];
     }
 
     public static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters) {
@@ -147,16 +150,16 @@ public class BestMoveFinder {
         return System.currentTimeMillis() - start > 10000;
     }
 
-    private static boolean exitReachable(Board board, Cell cur, Cell exit) {
-        boolean[][] visited = new boolean[board.height][board.width]; // todo get rid of it (make thread local?)
-        return dfs(board, cur, visited, exit);
+    private boolean exitReachable(Board board, Cell cur, Cell exit) {
+        curVisited++;
+        return dfs(board, cur, exit);
     }
 
-    private static boolean dfs(Board board, Cell cur, boolean[][] visited, Cell exit) {
+    private boolean dfs(Board board, Cell cur, Cell exit) {
         if (cur.equals(exit)) {
             return true;
         }
-        visited[cur.row][cur.col] = true;
+        visited[cur.row][cur.col] = curVisited;
         for (Direction dir : DIRS) {
             Cell to = cur.add(dir);
             if (!board.inside(to)) {
@@ -165,10 +168,10 @@ public class BestMoveFinder {
             if (!potentiallyPassable(board.get(to))) {
                 continue;
             }
-            if (visited[to.row][to.col]) {
+            if (visited[to.row][to.col] == curVisited) {
                 continue;
             }
-            if (dfs(board, to, visited, exit)) {
+            if (dfs(board, to, exit)) {
                 return true;
             }
         }

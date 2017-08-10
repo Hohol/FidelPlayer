@@ -29,7 +29,7 @@ public class BoardTest {
                 }
         );
         for (int j = 0; j < board.width; j++) {
-            System.out.println(board.get(0, j));
+            board.get(0, j);
         }
     }
 }
