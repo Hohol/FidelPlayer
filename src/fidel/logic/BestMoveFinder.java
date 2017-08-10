@@ -135,7 +135,7 @@ public class BestMoveFinder {
 
     private boolean tooLate() {
         //return false;
-        return System.currentTimeMillis() - start > 15000;
+        return System.currentTimeMillis() - start > 10000;
     }
 
     private static boolean exitReachable(Board board, Cell cur, Cell exit) {

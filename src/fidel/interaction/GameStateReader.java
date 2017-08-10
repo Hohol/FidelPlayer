@@ -1,5 +1,10 @@
 package fidel.interaction;
 
+import fidel.common.Board;
+import fidel.common.GameState;
+import fidel.common.LevelType;
+import fidel.common.TileType;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.InputEvent;
@@ -12,11 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import fidel.common.*;
-
-import static fidel.common.ExceptionHelper.*;
-import static fidel.common.TileType.*;
 import static fidel.common.ExceptionHelper.tryy;
+import static fidel.common.TileType.*;
 import static java.awt.Color.WHITE;
 
 public class GameStateReader {
@@ -28,7 +30,6 @@ public class GameStateReader {
 
     public GameState readGameState() {
         BufferedImage img = getImageFromCapture();
-//        BufferedImage img = getImageFromFile();
         return parseImage(img);
     }
 
@@ -270,7 +271,13 @@ public class GameStateReader {
     }
 
     public static void main(String[] args) {
-        BufferedImage img = new GameStateReader().getImageFromCapture();
+        GameStateReader gameStateReader = new GameStateReader();
+        BufferedImage img = gameStateReader.getImageFromFile();
+        BufferedImage[][] tileImages = gameStateReader.getTileImages(img);
+
+        gameStateReader.saveTile(tileImages[3][6], ENTRANCE);
+
+        /*BufferedImage img = new GameStateReader().getImageFromCapture();
         int cnt = 1;
         while (true) {
             String name = "tests/imgs/" + cnt;
@@ -279,6 +286,6 @@ public class GameStateReader {
                 break;
             }
             cnt++;
-        }
+        }*/
     }
 }
