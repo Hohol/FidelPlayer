@@ -27,7 +27,7 @@ class Simulator {
         if (newPs.xp > ps.xp) {
             awakeAborigines(newBoard, to);
         }
-        return new MoveGameState(newBoard, newPs);
+        return new MoveGameState(newBoard, newPs, to);
     }
 
     MoveGameState simulateBark(Board board, Cell cur, PlayerState ps) { // returns null if nothing changed
@@ -54,7 +54,7 @@ class Simulator {
         somethingChanged |= awakeAborigines(newBoard, cur);
         somethingChanged |= awakeMimics(newBoard, cur);
         if (somethingChanged) {
-            return new MoveGameState(newBoard, ps);
+            return new MoveGameState(newBoard, ps, cur);
         } else {
             return null;
         }

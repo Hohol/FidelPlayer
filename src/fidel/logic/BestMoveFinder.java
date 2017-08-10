@@ -116,10 +116,10 @@ public class BestMoveFinder {
         MoveGameState moveGameState = new MoveGameState(
                 gameState.board,
                 new PlayerState(0, 0, 0, false, gameState.maxHp, 0,
-                        gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType))
-        );
+                        gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType)),
+                gameState.board.findEntrance());
         try {
-            dfs(moveGameState, gameState.board.findEntrance(), 1);
+            dfs(moveGameState, 1);
         } catch (TimeoutException e) {
             System.out.println("timeout");
         }
@@ -127,9 +127,10 @@ public class BestMoveFinder {
         return new MovesAndEvaluation(bestMoves, evaluator.evaluate(bestState, bestMoves));
     }
 
-    private void dfs(MoveGameState gameState, Cell cur, int round) {
+    private void dfs(MoveGameState gameState, int round) {
         PlayerState ps = gameState.ps;
         Board board = gameState.board;
+        Cell cur = gameState.cur;
         if (ps.hp < 0) {
             return;
         }
@@ -149,6 +150,9 @@ public class BestMoveFinder {
         if (bestMoves != null && tooLate()) {
             throw new TimeoutException();
         }
+
+        List<MoveAndState> moveAndStates = new ArrayList<>();
+
         for (Direction dir : DIRS) {
             Cell to = cur.add(dir);
             if (!board.inside(to)) {
@@ -159,19 +163,28 @@ public class BestMoveFinder {
             }
 
             MoveGameState newGameState = simulator.simulateMove(board, ps, round, dir, to);
-
-            curMoves.add(dir.command);
-            dfs(newGameState, to, round + 1);
-            pop(curMoves);
+            moveAndStates.add(new MoveAndState(dir.command, newGameState));
         }
 
-        MoveGameState afterBarking = simulator.simulateBark(board, cur, ps);
-        if (afterBarking != null) {
-            curMoves.add(BARK);
-            dfs(afterBarking, cur, round + 1);
-            pop(curMoves);
-        }
+        moveAndStates.add(new MoveAndState(BARK, simulator.simulateBark(board, cur, ps)));
 
+        for (MoveAndState moveAndState : moveAndStates) {
+            if (moveAndState.gameState != null) {
+                curMoves.add(moveAndState.move);
+                dfs(moveAndState.gameState, round + 1);
+                pop(curMoves);
+            }
+        }
+    }
+
+    static class MoveAndState {
+        final Command move;
+        final MoveGameState gameState;
+
+        MoveAndState(Command move, MoveGameState gameState) {
+            this.move = move;
+            this.gameState = gameState;
+        }
     }
 
     private boolean tooLate() {
