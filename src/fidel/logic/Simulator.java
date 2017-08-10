@@ -3,6 +3,7 @@ package fidel.logic;
 import fidel.common.*;
 
 import static fidel.common.Direction.DIRS;
+import static fidel.common.Direction.DOWN;
 import static fidel.common.TileType.*;
 import static java.lang.Math.*;
 
@@ -51,6 +52,7 @@ class Simulator {
             }
         }
         somethingChanged |= awakeAborigines(newBoard, cur);
+        somethingChanged |= awakeMimics(newBoard, cur);
         if (somethingChanged) {
             return new MoveGameState(newBoard, ps);
         } else {
@@ -63,6 +65,10 @@ class Simulator {
         if (tile == COIN) {
             gold++;
         }
+        if (tile == TREASURE_CHEST) {
+            gold += 5;
+        }
+        gold = min(9, gold);
         boolean smallFlowersNearby = tile == BIG_FLOWER && smallFlowersNearby(board, cell);
         int addXp = calcXp(tile, dir, smallFlowersNearby, ps);
         int dmg = calcDmg(tile, dir, smallFlowersNearby, ps);
@@ -189,6 +195,9 @@ class Simulator {
                 return 2;
             }
         }
+        if (tile == MIMIC_CHEST || tile == BARKED_MIMIC_CHEST && dir != DOWN) {
+            return 2;
+        }
         return 0;
     }
 
@@ -265,6 +274,9 @@ class Simulator {
                 return 1;
             }
         }
+        if (tile == BARKED_MIMIC_CHEST && dir == DOWN) {
+            return 4;
+        }
         return 0;
     }
 
@@ -273,15 +285,24 @@ class Simulator {
     }
 
     boolean awakeAborigines(Board board, Cell cell) {
+        return awake(board, cell, ABORIGINE, ANGRY_ABORIGINE);
+    }
+
+    private boolean awakeMimics(Board board, Cell cell) {
+        return awake(board, cell, MIMIC_CHEST, BARKED_MIMIC_CHEST);
+    }
+
+    private boolean awake(Board board, Cell cell, TileType fromState, TileType toState) {
         boolean found = false;
         for (Direction dir : DIRS) {
             Cell to = cell.add(dir);
             if (!board.inside(to)) {
                 continue;
             }
-            if (board.get(to) == ABORIGINE) {
+
+            if (board.get(to) == fromState) {
                 found = true;
-                board.setInPlace(to, ANGRY_ABORIGINE);
+                board.setInPlace(to, toState);
             }
         }
         return found;

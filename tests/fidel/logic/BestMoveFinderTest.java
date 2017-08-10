@@ -174,12 +174,12 @@ public class BestMoveFinderTest {
                                 {EMPTY, EMPTY, ALIEN, ALIEN, MEDIKIT, ALIEN, EMPTY}
                         }), 3,
                 LevelType.ALIENS);
-        while(true) {
+        while (true) {
             BestMoveFinder.findBestMoves(gameState, gameParameters);
         }
     }
 
-    @Test (enabled = false)
+    @Test(enabled = false)
     void performance2() {
         GameState gameState = new GameState(
                 new Board(
@@ -324,6 +324,39 @@ public class BestMoveFinderTest {
                         {EMPTY, TURTLE_LEFT, EXIT},
                 },
                 Arrays.asList(ENTER, UP, UP, LEFT, LEFT)
+        );
+    }
+
+    @Test
+    void treasure() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, COIN},
+                        {TREASURE_CHEST, EXIT},
+                },
+                Arrays.asList(DOWN, RIGHT)
+        );
+    }
+
+    @Test
+    void mimicChest() {
+        check(
+                new TileType[][]{
+                        {EMPTY, EMPTY, EMPTY},
+                        {ENTRANCE, MIMIC_CHEST, EXIT},
+                },
+                Arrays.asList(UP, RIGHT, BARK, DOWN, RIGHT)
+        );
+    }
+
+    @Test
+    void mimicChest2() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, MIMIC_CHEST, EXIT},
+                        {EMPTY, EMPTY, EMPTY, EMPTY},
+                },
+                Arrays.asList(DOWN, RIGHT, RIGHT, UP)
         );
     }
 

@@ -1,47 +1,77 @@
 package fidel;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import fidel.common.Command;
-import fidel.common.GameParameters;
-import fidel.common.GameState;
+import fidel.common.*;
 import fidel.interaction.GameStateReader;
 import fidel.interaction.MoveMaker;
 import fidel.logic.BestMoveFinder;
+
 import static fidel.common.Command.*;
+import static fidel.common.TileType.CHEST;
 import static fidel.interaction.ExceptionHelper.*;
 
 public class Main {
 
-    static boolean auto = true;
+    static boolean shouldFinishLevel = true;
+    static final GameStateReader gameStateReader = new GameStateReader();
+    static final GameParameters gameParameters = new GameParameters();
+    static final MoveMaker moveMaker = new MoveMaker();
 
     public static void main(String[] args) {
-        MoveMaker moveMaker = new MoveMaker();
-
-        GameStateReader gameStateReader = new GameStateReader();
-        GameParameters gameParameters = new GameParameters();
-
         while (true) {
-            GameState gameState = gameStateReader.readGameState();
-
-            System.out.println(gameState);
+            GameState gameState = readGameState();
 
             List<Command> bestMoves = BestMoveFinder.findBestMoves(gameState, gameParameters);
 
-            if (auto) {
-                bestMoves = new ArrayList<>(bestMoves);
-                bestMoves.add(ENTER);
+            if (shouldFinishLevel) {
+                bestMoves = append(bestMoves, ENTER);
             }
 
             System.out.println(bestMoves);
 
             moveMaker.makeMoves(bestMoves);
-            if (auto) {
+            if (shouldFinishLevel) {
                 tryy(() -> Thread.sleep(1000));
             } else {
                 break;
             }
+        }
+    }
+
+    private static List<Command> append(List<Command> a, Command command) {
+        List<Command> r = new ArrayList<>(a);
+        r.add(command);
+        return r;
+    }
+
+    private static GameState readGameState() {
+        GameState gameState = gameStateReader.readGameState();
+
+        System.out.println(gameState);
+
+        investigateChests(gameState);
+
+        return gameState;
+    }
+
+    private static void investigateChests(GameState gameState) {
+        while (gameState.board.contains(CHEST)) {
+            Cell chestCell = gameState.board.find(CHEST);
+            List<Command> moves = BestMoveFinder.findInvestigateChestMoves(gameState, gameParameters, chestCell);
+            moves = append(moves, BARK);
+            moveMaker.makeMoves(moves);
+            GameState tmpGameState = gameStateReader.readGameState();
+            TileType tile = tmpGameState.board.get(chestCell);
+            gameState.board.setInPlace(chestCell, tile);
+            System.out.println(gameState);
+            List<Command> undoMoves = moves.stream()
+                    .filter(m -> m == RIGHT || m == DOWN || m == LEFT || m == UP || m == ENTER)
+                    .map(m -> m == ENTER ? ENTER : UNDO)
+                    .collect(Collectors.toList());
+            Collections.reverse(undoMoves);
+            moveMaker.makeMoves(undoMoves);
         }
     }
 }

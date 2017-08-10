@@ -35,6 +35,9 @@ public enum TileType {
     ROBO_MEDIKIT,
     ROBODOG,
     EGG,
+    TREASURE_CHEST,
+    MIMIC_CHEST,
+    BARKED_MIMIC_CHEST,
     GNOME;
 
     public final Direction dir;
