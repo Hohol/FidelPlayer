@@ -50,6 +50,7 @@ public class GameStateReader {
         int h = tileImages.length;
         int w = tileImages[0].length;
         int maxHp = getMaxHp(img);
+        int gold = getGold(img);
         Board board = new Board(h, w);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
@@ -64,15 +65,29 @@ public class GameStateReader {
             levelType = LevelType.ROBODOG;
             board.setInPlace(board.find(ROBODOG), EXIT);
         }
-        return new GameState(board, maxHp, levelType);
+        return new GameState(board, maxHp, gold, levelType);
     }
 
     private int getMaxHp(BufferedImage img) {
         int cnt = 0;
         for (int x = 27; x <= 400; x++) {
-            int red = getRed(img.getRGB(x, 754));
-            int prevRed = getRed(img.getRGB(x - 1, 754));
+            int rowPixel = 754;
+            int red = getRed(img.getRGB(x, rowPixel));
+            int prevRed = getRed(img.getRGB(x - 1, rowPixel));
             if (red >= 50 && prevRed < 50) {
+                cnt++;
+            }
+        }
+        return cnt;
+    }
+
+    private int getGold(BufferedImage img) {
+        int cnt = 0;
+        for (int x = 457; x <= 735; x++) {
+            int rowPixel = 808;
+            int red = getRed(img.getRGB(x, rowPixel));
+            int prevRed = getRed(img.getRGB(x - 1, rowPixel));
+            if (prevRed == 255 && red != 255) {
                 cnt++;
             }
         }
@@ -214,17 +229,17 @@ public class GameStateReader {
         double sum = 0;
         for (int i = 0; i < imageA.getWidth(); i++) {
             for (int j = 0; j < imageA.getHeight(); j++) {
-                int colourA = imageA.getRGB(i, j);
+                int colorA = imageA.getRGB(i, j);
 
-                int redA = getRed(colourA);
-                int greenA = (colourA & 0x0000ff00) >> 8;
-                int blueA = colourA & 0x000000ff;
+                int redA = getRed(colorA);
+                int greenA = getGreen(colorA);
+                int blueA = getBlue(colorA);
 
-                int colourB = imageB.getRGB(i, j);
+                int colorB = imageB.getRGB(i, j);
 
-                int redB = getRed(colourB);
-                int greenB = (colourB & 0x0000ff00) >> 8;
-                int blueB = colourB & 0x000000ff;
+                int redB = getRed(colorB);
+                int greenB = getGreen(colorB);
+                int blueB = getBlue(colorB);
 
                 long diff = Math.abs(redA - redB) + Math.abs(greenA - greenB) + Math.abs(blueA - blueB);
                 sum += diff;
@@ -234,6 +249,14 @@ public class GameStateReader {
             }
         }
         return sum;
+    }
+
+    private static int getBlue(int colourB) {
+        return colourB & 0x000000ff;
+    }
+
+    private static int getGreen(int colourA) {
+        return (colourA & 0x0000ff00) >> 8;
     }
 
     private static int getRed(int color) {

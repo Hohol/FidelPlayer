@@ -22,12 +22,14 @@ public class BestMoveFinderTest {
 
     LevelType levelType;
     int maxHp;
+    int gold;
     GameParameters gameParameters;
 
     @BeforeMethod
     void init() {
         levelType = LevelType.NORMAL;
         maxHp = 2;
+        gold = 0;
         gameParameters = new GameParameters();
     }
 
@@ -173,7 +175,7 @@ public class BestMoveFinderTest {
                                 {ALIEN, EMPTY, EMPTY, ALIEN, EMPTY, EMPTY, EMPTY},
                                 {EMPTY, EMPTY, ALIEN, ALIEN, MEDIKIT, ALIEN, EMPTY}
                         }), 3,
-                LevelType.ALIENS);
+                0, LevelType.ALIENS);
         while (true) {
             BestMoveFinder.findBestMoves(gameState, gameParameters);
         }
@@ -191,7 +193,7 @@ public class BestMoveFinderTest {
                                 {ENTRANCE, EMPTY, EMPTY, EXIT, EMPTY, EMPTY, EMPTY},
                                 {EMPTY, EMPTY, EMPTY, EMPTY, MEDIKIT, EMPTY, EMPTY}
                         }), 3,
-                LevelType.NORMAL);
+                0, LevelType.NORMAL);
         BestMoveFinder.findBestMoves(gameState, gameParameters);
     }
 
@@ -356,7 +358,7 @@ public class BestMoveFinderTest {
                         {ENTRANCE, SPIDER, MIMIC_CHEST, EXIT},
                         {EMPTY, EMPTY, EMPTY, EMPTY},
                 },
-                Arrays.asList(DOWN, RIGHT, RIGHT, UP)
+                Arrays.asList(RIGHT, DOWN, RIGHT, RIGHT, UP)
         );
     }
 
@@ -365,7 +367,7 @@ public class BestMoveFinderTest {
         if (board.contains(ALIEN)) {
             levelType = LevelType.ALIENS;
         }
-        GameState gameState = new GameState(board, maxHp, levelType);
+        GameState gameState = new GameState(board, maxHp, gold, levelType);
 
         List<Command> actual = BestMoveFinder.findBestMoves(gameState, gameParameters);
         assertEquals(actual, expected, actual.toString());

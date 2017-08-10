@@ -21,5 +21,6 @@ public class GameStateReaderTest {
         GameState gameState = gameStateReader.parseImage(img);
         assertEquals(gameState.maxHp, 3);
         assertEquals(gameState.levelType, LevelType.ALIENS);
+        assertEquals(gameState.gold, 9);
     }
 }
