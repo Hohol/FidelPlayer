@@ -4,7 +4,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import fidel.interaction.ExceptionHelper;
 import static fidel.common.TileType.ENTRANCE;
 import static fidel.common.TileType.EXIT;
 import static fidel.interaction.ExceptionHelper.fail;
@@ -26,12 +25,9 @@ public class Board {
     }
 
     public Board(Board board) {
-        this(board.height, board.width);
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                setInPlace(i, j, board.get(i, j));
-            }
-        }
+        height = board.height;
+        width = board.width;
+        map = board.map.clone();
     }
 
     public Board(TileType[][] tileTypes) {

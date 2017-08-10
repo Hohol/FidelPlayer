@@ -146,16 +146,16 @@ public class BestMoveFinder {
     }
 
     private boolean tooLate() {
-        //return false;
+//        return false;
         return System.currentTimeMillis() - start > 10000;
     }
 
     private boolean exitReachable(Board board, Cell cur, Cell exit) {
         curVisited++;
-        return dfs(board, cur, exit);
+        return dfsCheckPath(board, cur, exit);
     }
 
-    private boolean dfs(Board board, Cell cur, Cell exit) {
+    private boolean dfsCheckPath(Board board, Cell cur, Cell exit) {
         if (cur.equals(exit)) {
             return true;
         }
@@ -171,7 +171,7 @@ public class BestMoveFinder {
             if (visited[to.row][to.col] == curVisited) {
                 continue;
             }
-            if (dfs(board, to, exit)) {
+            if (dfsCheckPath(board, to, exit)) {
                 return true;
             }
         }

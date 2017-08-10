@@ -174,7 +174,9 @@ public class BestMoveFinderTest {
                                 {EMPTY, EMPTY, ALIEN, ALIEN, MEDIKIT, ALIEN, EMPTY}
                         }), 3,
                 LevelType.ALIENS);
-        BestMoveFinder.findBestMoves(gameState, gameParameters);
+        while(true) {
+            BestMoveFinder.findBestMoves(gameState, gameParameters);
+        }
     }
 
     @Test (enabled = false)
