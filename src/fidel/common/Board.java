@@ -2,7 +2,6 @@ package fidel.common;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static fidel.common.TileType.ENTRANCE;
 import static fidel.common.TileType.EXIT;
@@ -13,7 +12,7 @@ public class Board {
 
     public final int height;
     public final int width;
-    public final long[] map;
+    private final long[] map;
 
     public Board(int height, int width) {
         if (width > 10) {
@@ -44,14 +43,14 @@ public class Board {
         int shift = col * BITS_PER_CELL;
         long shiftedCellMask = cellMask << shift;
         map[row] &= ~shiftedCellMask;
-        map[row] |= ((long)tile.ordinal()) << shift;
+        map[row] |= ((long) tile.ordinal()) << shift;
     }
 
     public TileType get(int row, int col) {
         long cellMask = (1 << BITS_PER_CELL) - 1;
         int shift = col * BITS_PER_CELL;
         long ordinal = (map[row] >> shift) & cellMask;
-        return TileType.ALL[(int)ordinal];
+        return TileType.ALL[(int) ordinal];
     }
 
     public Board setAndCopy(int row, int col, TileType tile) {
@@ -75,7 +74,7 @@ public class Board {
     public Cell find(TileType tileType) {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                if (get(i,j) == tileType) {
+                if (get(i, j) == tileType) {
                     return new Cell(i, j);
                 }
             }
@@ -118,12 +117,13 @@ public class Board {
         int[] colWidth = IntStream.range(0, width).map(col ->
                 IntStream.range(0, height).map(row -> get(row, col).name().length()).max().getAsInt()
         ).toArray();
-        String s = Stream.of(map)
-                .map(row -> "{"
-                        // todo
-                        //+ IntStream.range(0, width).mapToObj(col -> padRight(row[col].name(), colWidth[col])).collect(Collectors.joining(", "))
-                        + "}"
+        String s = IntStream.range(0, height)
+                .mapToObj(row ->
+                        IntStream.range(0, width)
+                                .mapToObj(col -> padRight(get(row, col).name(), colWidth[col]))
+                                .collect(Collectors.joining(", "))
                 )
+                .map(rs -> "{" + rs + "}")
                 .collect(Collectors.joining(",\n"));
         return "\n\n" + s + "\n\n";
     }
