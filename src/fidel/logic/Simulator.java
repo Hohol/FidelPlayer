@@ -30,29 +30,29 @@ class Simulator {
     }
 
     MoveGameState simulateBark(Board board, Cell cur, PlayerState ps) { // returns null if nothing changed
-        Board newGameState = new Board(board);
+        Board newBoard = new Board(board);
         boolean somethingChanged = false;
 
         for (Direction dir : DIRS) {
             Cell to = cur.add(dir);
-            if (!newGameState.inside(to)) {
+            if (!newBoard.inside(to)) {
                 continue;
             }
-            TileType toTile = newGameState.get(to);
+            TileType toTile = newBoard.get(to);
             if (toTile.isTurtle()) {
                 for (TileType turtle : TileType.TURTLES) {
                     //noinspection ConstantConditions
                     if (turtle.dir.isOpposite(dir) && toTile != turtle) {
-                        newGameState.setInPlace(to, turtle);
+                        newBoard.setInPlace(to, turtle);
                         somethingChanged = true;
                         break;
                     }
                 }
             }
         }
-        somethingChanged |= awakeAborigines(newGameState, cur);
+        somethingChanged |= awakeAborigines(newBoard, cur);
         if (somethingChanged) {
-            return new MoveGameState(newGameState, ps);
+            return new MoveGameState(newBoard, ps);
         } else {
             return null;
         }
