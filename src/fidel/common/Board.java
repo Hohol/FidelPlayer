@@ -4,24 +4,29 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import fidel.interaction.ExceptionHelper;
 import static fidel.common.TileType.ENTRANCE;
 import static fidel.common.TileType.EXIT;
+import static fidel.interaction.ExceptionHelper.fail;
 
 public class Board {
+    private static final int BITS_PER_CELL = 6;
+
     public final int height;
     public final int width;
-    public final TileType[][] map;
+    public final long[] map;
 
     public Board(int height, int width) {
+        if (width > 10) {
+            fail("width > 10 is not supported");
+        }
         this.height = height;
         this.width = width;
-        map = new TileType[height][width];
+        map = new long[height];
     }
 
     public Board(Board board) {
-        height = board.height;
-        width = board.width;
-        map = new TileType[height][width];
+        this(board.height, board.width);
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 setInPlace(i, j, board.get(i, j));
@@ -30,13 +35,27 @@ public class Board {
     }
 
     public Board(TileType[][] tileTypes) {
-        map = tileTypes;
-        height = map.length;
-        width = map[0].length;
+        this(tileTypes.length, tileTypes[0].length);
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                setInPlace(i, j, tileTypes[i][j]);
+            }
+        }
     }
 
     public void setInPlace(int row, int col, TileType tile) {
-        map[row][col] = tile;
+        long cellMask = (1 << BITS_PER_CELL) - 1;
+        int shift = col * BITS_PER_CELL;
+        long shiftedCellMask = cellMask << shift;
+        map[row] &= ~shiftedCellMask;
+        map[row] |= ((long)tile.ordinal()) << shift;
+    }
+
+    public TileType get(int row, int col) {
+        long cellMask = (1 << BITS_PER_CELL) - 1;
+        int shift = col * BITS_PER_CELL;
+        long ordinal = (map[row] >> shift) & cellMask;
+        return TileType.ALL[(int)ordinal];
     }
 
     public Board setAndCopy(int row, int col, TileType tile) {
@@ -60,7 +79,7 @@ public class Board {
     public Cell find(TileType tileType) {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                if (map[i][j] == tileType) {
+                if (get(i,j) == tileType) {
                     return new Cell(i, j);
                 }
             }
@@ -74,10 +93,6 @@ public class Board {
 
     public TileType get(Cell cell) {
         return get(cell.row, cell.col);
-    }
-
-    public TileType get(int row, int col) {
-        return map[row][col];
     }
 
     public boolean inside(Cell to) {
@@ -105,11 +120,12 @@ public class Board {
     public String toString() {
         //noinspection ConstantConditions
         int[] colWidth = IntStream.range(0, width).map(col ->
-                IntStream.range(0, height).map(row -> map[row][col].name().length()).max().getAsInt()
+                IntStream.range(0, height).map(row -> get(row, col).name().length()).max().getAsInt()
         ).toArray();
         String s = Stream.of(map)
                 .map(row -> "{"
-                        + IntStream.range(0, width).mapToObj(col -> padRight(row[col].name(), colWidth[col])).collect(Collectors.joining(", "))
+                        // todo
+                        //+ IntStream.range(0, width).mapToObj(col -> padRight(row[col].name(), colWidth[col])).collect(Collectors.joining(", "))
                         + "}"
                 )
                 .collect(Collectors.joining(",\n"));

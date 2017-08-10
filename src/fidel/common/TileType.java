@@ -52,4 +52,6 @@ public enum TileType {
     }
 
     public static TileType[] TURTLES = {TURTLE_RIGHT, TURTLE_DOWN, TURTLE_LEFT, TURTLE_UP};
+
+    public static TileType[] ALL = values();
 }

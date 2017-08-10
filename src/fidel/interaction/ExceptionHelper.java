@@ -28,7 +28,7 @@ public class ExceptionHelper {
         fail("");
     }
 
-    private static void fail(String msg) {
+    public static void fail(String msg) {
         throw new RuntimeException(msg);
     }
 }
