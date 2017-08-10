@@ -184,7 +184,7 @@ public class BestMoveFinderTest {
         GameState gameState = new GameState(
                 new Board(
                         new TileType[][]{
-                                {EMPTY, MEDIKIT, EMPTY, WALL, EMPTY, EMPTY, EMPTY},
+                                {EMPTY, MEDIKIT, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
                                 {EMPTY, MEDIKIT, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
                                 {EMPTY, MEDIKIT, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
                                 {EMPTY, MEDIKIT, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},

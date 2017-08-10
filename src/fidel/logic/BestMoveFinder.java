@@ -97,7 +97,7 @@ public class BestMoveFinder {
         if (ps.hp < 0) {
             return;
         }
-        if (!exitReachable(board, cur, exit)) {
+        if (round % 3 == 0 && !exitReachable(board, cur, exit)) {
             return;
         }
         if (finished(cur, ps)) {
