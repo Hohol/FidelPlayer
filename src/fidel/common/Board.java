@@ -92,11 +92,13 @@ public class Board {
         setInPlace(to.row, to.col, tileType);
     }
 
-    public void swapGatesInPlace() {
+    public Board swapGates() {
         Cell entrance = findEntrance();
         Cell exit = findExit();
-        setInPlace(entrance, EXIT);
-        setInPlace(exit, ENTRANCE);
+        Board r = new Board(this);
+        r.setInPlace(entrance, EXIT);
+        r.setInPlace(exit, ENTRANCE);
+        return r;
     }
 
     @Override

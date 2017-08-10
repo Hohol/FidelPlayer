@@ -3,6 +3,9 @@ package fidel.logic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import fidel.common.Board;
 import fidel.common.Cell;
@@ -16,6 +19,7 @@ import fidel.common.TileType;
 import static fidel.common.Command.*;
 import static fidel.common.Direction.DIRS;
 import static fidel.common.TileType.*;
+import static fidel.interaction.ExceptionHelper.tryy;
 
 public class BestMoveFinder {
 
@@ -45,9 +49,16 @@ public class BestMoveFinder {
         if (gameState.levelType == LevelType.INTERMISSION2) {
             return Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT);
         }
-        MovesAndEvaluation first = new BestMoveFinder(gameState, gameParameters).findBestMoves0(gameState);
-        gameState.swapGatesInPlace();
-        MovesAndEvaluation second = new BestMoveFinder(gameState, gameParameters).findBestMoves0(gameState);
+        GameState secondGameState = gameState.swapGates();
+        ExecutorService executor = Executors.newCachedThreadPool();
+        Future<MovesAndEvaluation> firstFuture
+                = executor.submit(() -> new BestMoveFinder(gameState, gameParameters).findBestMoves0(gameState));
+        Future<MovesAndEvaluation> secondFuture
+                = executor.submit(() -> new BestMoveFinder(secondGameState, gameParameters).findBestMoves0(secondGameState));
+
+        MovesAndEvaluation first = tryy(() -> firstFuture.get());
+        MovesAndEvaluation second = tryy(() -> secondFuture.get());
+
         if (first.evaluation >= second.evaluation) {
             if (first.moves == null) {
                 throw new RuntimeException("no path found");

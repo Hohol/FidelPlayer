@@ -11,8 +11,8 @@ public class GameState {
         this.levelType = levelType;
     }
 
-    public void swapGatesInPlace() {
-        board.swapGatesInPlace();
+    public GameState swapGates() {
+        return new GameState(board.swapGates(), maxHp, levelType);
     }
 
     @Override
