@@ -299,7 +299,7 @@ public class GameStateReader {
 //        BufferedImage img = gameStateReader.getImageFromCapture();
         BufferedImage[][] tileImages = gameStateReader.getTileImages(img);
 
-        gameStateReader.saveTile(tileImages[3][6], ENTRANCE);
+        gameStateReader.saveTile(tileImages[1][4], ALIEN);
 
         /*BufferedImage img = new GameStateReader().getImageFromCapture();
         int cnt = 1;

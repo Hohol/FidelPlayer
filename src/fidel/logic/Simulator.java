@@ -27,7 +27,7 @@ class Simulator {
         if (newPs.xp > ps.xp) {
             awakeAborigines(newBoard, to);
         }
-        return new MoveGameState(newBoard, newPs, to);
+        return new MoveGameState(newBoard, to, newPs);
     }
 
     MoveGameState simulateBark(Board board, Cell cur, PlayerState ps) { // returns null if nothing changed
@@ -54,10 +54,30 @@ class Simulator {
         somethingChanged |= awakeAborigines(newBoard, cur);
         somethingChanged |= awakeMimics(newBoard, cur);
         if (somethingChanged) {
-            return new MoveGameState(newBoard, ps, cur);
+            return new MoveGameState(newBoard, cur, ps);
         } else {
             return null;
         }
+    }
+
+    public MoveGameState simulateHeal(Board board, Cell cur, PlayerState ps) {
+        if (ps.gold < 3) {
+            return null;
+        }
+        int hp = min(ps.hp + 1, ps.maxHp - ps.poison);
+        if (hp == ps.hp) {
+            return null;
+        }
+        return new MoveGameState(
+                board,
+                cur,
+                new PlayerState(
+                        ps.gold - 3,
+                        ps.xp, ps.streak, ps.afterTriple,
+                        hp,
+                        ps.poison, ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp
+                )
+        );
     }
 
     PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir, Board board, Cell cell, int round) {

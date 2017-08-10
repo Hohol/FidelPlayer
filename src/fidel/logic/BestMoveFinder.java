@@ -54,7 +54,7 @@ public class BestMoveFinder {
                 if (ps == null) {
                     return Double.NEGATIVE_INFINITY;
                 }
-                return ps.gold * 10 + ps.xp - moves.size() / 1000.0;
+                return ps.gold * 1.2 + ps.xp - moves.size() / 1000.0;
             }
 
             @Override
@@ -115,9 +115,9 @@ public class BestMoveFinder {
         start = System.currentTimeMillis();
         MoveGameState moveGameState = new MoveGameState(
                 gameState.board,
-                new PlayerState(0, 0, 0, false, gameState.maxHp, 0,
-                        gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType)),
-                gameState.board.findEntrance());
+                gameState.board.findEntrance(), new PlayerState(gameState.gold, 0, 0, false, gameState.maxHp, 0,
+                gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType))
+        );
         try {
             dfs(moveGameState, 1);
         } catch (TimeoutException e) {
@@ -131,9 +131,6 @@ public class BestMoveFinder {
         PlayerState ps = gameState.ps;
         Board board = gameState.board;
         Cell cur = gameState.cur;
-        if (ps.hp < 0) {
-            return;
-        }
         if (round % 3 == 0 && !exitReachable(board, cur, exit)) {
             return;
         }
@@ -153,6 +150,7 @@ public class BestMoveFinder {
 
         List<MoveAndState> moveAndStates = new ArrayList<>();
 
+        boolean shouldHeal = false;
         for (Direction dir : DIRS) {
             Cell to = cur.add(dir);
             if (!board.inside(to)) {
@@ -163,15 +161,23 @@ public class BestMoveFinder {
             }
 
             MoveGameState newGameState = simulator.simulateMove(board, ps, round, dir, to);
+            if (newGameState.ps.hp < 0) {
+                shouldHeal = true;
+                continue;
+            }
             moveAndStates.add(new MoveAndState(dir.command, newGameState));
         }
 
         moveAndStates.add(new MoveAndState(BARK, simulator.simulateBark(board, cur, ps)));
+        if (shouldHeal) {
+            moveAndStates.add(new MoveAndState(HEAL, simulator.simulateHeal(board, cur, ps)));
+        }
 
         for (MoveAndState moveAndState : moveAndStates) {
             if (moveAndState.gameState != null) {
                 curMoves.add(moveAndState.move);
-                dfs(moveAndState.gameState, round + 1);
+                int newRound = round + (moveAndState.gameState.cur.equals(cur) ? 0 : 1);
+                dfs(moveAndState.gameState, newRound);
                 pop(curMoves);
             }
         }

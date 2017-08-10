@@ -8,7 +8,7 @@ class MoveGameState {
     final PlayerState ps;
     final Cell cur;
 
-    public MoveGameState(Board board, PlayerState ps, Cell cur) {
+    public MoveGameState(Board board, Cell cur, PlayerState ps) {
         this.board = board;
         this.ps = ps;
         this.cur = cur;

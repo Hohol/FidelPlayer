@@ -362,6 +362,41 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void heal() {
+        gold = 3;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, SPIDER, SPIDER, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, HEAL, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void heal2() {
+        gold = 3;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, SPIDER, SPIDER, EXIT},
+                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                },
+                Arrays.asList(RIGHT, RIGHT, HEAL, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void heal3() {
+        gold = 3;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, SPIDER, EMPTY, SPIDER, EXIT},
+                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, DOWN, RIGHT, RIGHT, UP)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {
