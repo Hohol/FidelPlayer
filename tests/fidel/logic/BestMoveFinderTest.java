@@ -435,8 +435,17 @@ public class BestMoveFinderTest {
         );
     }
 
-    // todo все аборигены просыпаются от бомбы
-    // todo bomb when on exit?
+    @Test
+    void aboriginesFallAsleep() {
+        check(
+                new TileType[][]{
+                        {EMPTY, EMPTY, EMPTY, EMPTY},
+                        {EMPTY, EMPTY, EMPTY, EMPTY},
+                        {ENTRANCE, ABORIGINE, ABORIGINE, EXIT},
+                },
+                Arrays.asList(RIGHT, UP, UP, RIGHT, DOWN, DOWN, RIGHT)
+        );
+    }
 
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);

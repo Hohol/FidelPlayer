@@ -25,4 +25,8 @@ public enum Direction {
     public Direction opposite() {
         return DIRS[(ordinal() + 2) % 4];
     }
+
+    public Direction normal() {
+        return DIRS[(ordinal() + 1) % 4];
+    }
 }

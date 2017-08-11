@@ -11,11 +11,13 @@ class Simulator {
     private final LevelType levelType;
     private final Cell exit;
     private final GameParameters gameParameters;
+    private final boolean aborigineLevel;
 
-    public Simulator(LevelType levelType, Cell exit, GameParameters gameParameters) {
+    public Simulator(LevelType levelType, Cell exit, GameParameters gameParameters, boolean aborigineLevel) {
         this.levelType = levelType;
         this.exit = exit;
         this.gameParameters = gameParameters;
+        this.aborigineLevel = aborigineLevel;
     }
 
     MoveGameState simulateMove(Board board, PlayerState ps, int round, Direction dir, Cell to) {
@@ -27,7 +29,25 @@ class Simulator {
         if (newPs.xp > ps.xp) {
             awakeAborigines(newBoard, to);
         }
+        if (aborigineLevel) {
+            sleepAborigines(newBoard, to, dir);
+        }
         return new MoveGameState(newBoard, to, newPs);
+    }
+
+    private void sleepAborigines(Board board, Cell to, Direction dir) {
+        Direction opposite = dir.opposite();
+        Direction normal = dir.normal();
+        Cell c = to.add(opposite).add(opposite);
+        sleep(board, c);
+        sleep(board, c.add(normal));
+        sleep(board, c.add(normal.opposite()));
+    }
+
+    private void sleep(Board board, Cell c) {
+        if (board.inside(c) && board.get(c) == ANGRY_ABORIGINE) {
+            board.setInPlace(c, ABORIGINE);
+        }
     }
 
     MoveGameState simulateBark(Board board, Cell cur, PlayerState ps) { // returns null if nothing changed

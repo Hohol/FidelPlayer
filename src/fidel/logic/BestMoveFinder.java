@@ -35,7 +35,7 @@ public class BestMoveFinder {
         this.gameParameters = gameParameters;
         exit = gameState.board.findExit();
         levelType = gameState.levelType;
-        simulator = new Simulator(levelType, exit, gameParameters);
+        simulator = new Simulator(levelType, exit, gameParameters, gameState.board.contains(ABORIGINE));
         visited = new int[gameState.board.height][gameState.board.width];
         this.evaluator = evaluator;
     }
