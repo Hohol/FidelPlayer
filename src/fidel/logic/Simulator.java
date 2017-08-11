@@ -25,8 +25,11 @@ class Simulator {
         requiredXp = REQUIRED_XP[gameState.maxHp - 2];
     }
 
-    MoveGameState simulateMove(Board board, PlayerState ps, int round, Direction dir, Cell to) {
-        PlayerState newPs = calcNewPs(ps, board.get(to), dir, board, to, round);
+    MoveGameState simulateMove(MoveGameState gameState, Direction dir) {
+        Cell to = gameState.cur.add(dir);
+        PlayerState ps = gameState.ps;
+        Board board = gameState.board;
+        PlayerState newPs = calcNewPs(ps, board.get(to), dir, board, to, gameState.round);
         Board newBoard = board.setAndCopy(to, VISITED);
         if (levelType == LevelType.ROBODOG && ps.bossHp > 0) {
             newBoard.setInPlace(newBoard.getOppositeCell(to), EMPTY);
@@ -37,7 +40,7 @@ class Simulator {
         if (aborigineLevel) {
             sleepAborigines(newBoard, to, dir);
         }
-        return new MoveGameState(newBoard, to, newPs);
+        return new MoveGameState(newBoard, to, newPs, gameState.round + 1);
     }
 
     private void sleepAborigines(Board board, Cell to, Direction dir) {
@@ -55,8 +58,10 @@ class Simulator {
         }
     }
 
-    MoveGameState simulateBark(Board board, Cell cur, PlayerState ps) { // returns null if nothing changed
-        Board newBoard = new Board(board);
+    MoveGameState simulateBark(MoveGameState gameState) { // returns null if nothing changed
+        Cell cur = gameState.cur;
+
+        Board newBoard = new Board(gameState.board);
         boolean somethingChanged = false;
 
         for (Direction dir : DIRS) {
@@ -79,13 +84,15 @@ class Simulator {
         somethingChanged |= awakeAborigines(newBoard, cur);
         somethingChanged |= awakeMimics(newBoard, cur);
         if (somethingChanged) {
-            return new MoveGameState(newBoard, cur, ps);
+            return new MoveGameState(newBoard, cur, gameState.ps, gameState.round);
         } else {
             return null;
         }
     }
 
-    public MoveGameState simulateHeal(Board board, Cell cur, PlayerState ps) {
+    public MoveGameState simulateHeal(MoveGameState gameState) {
+        PlayerState ps = gameState.ps;
+
         if (ps.gold < 3) {
             return null;
         }
@@ -94,18 +101,20 @@ class Simulator {
             return null;
         }
         return new MoveGameState(
-                board,
-                cur,
+                gameState.board,
+                gameState.cur,
                 new PlayerState(
                         ps.gold - 3,
                         ps.xp, ps.streak, ps.afterTriple,
                         hp,
                         ps.poison, ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp,
-                        ps.usedBomb)
+                        ps.usedBomb),
+                gameState.round
         );
     }
 
-    public MoveGameState simulateSyringe(Board board, Cell cur, PlayerState ps) {
+    public MoveGameState simulateSyringe(MoveGameState gameState) {
+        PlayerState ps = gameState.ps;
         if (ps.gold < 9) {
             return null;
         }
@@ -113,19 +122,23 @@ class Simulator {
             return null;
         }
         return new MoveGameState(
-                board,
-                cur,
+                gameState.board,
+                gameState.cur,
                 new PlayerState(
                         ps.gold - 9,
                         ps.xp, ps.streak, ps.afterTriple,
                         ps.maxHp,
                         0,
                         ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp,
-                        ps.usedBomb)
+                        ps.usedBomb),
+                gameState.round
         );
     }
 
-    public MoveGameState simulateBomb(Board board, Cell cur, PlayerState ps) {
+    public MoveGameState simulateBomb(MoveGameState gameState) {
+        PlayerState ps = gameState.ps;
+        Board board = gameState.board;
+        Cell cur = gameState.cur;
         if (ps.gold < 6) {
             return null;
         }
@@ -149,7 +162,7 @@ class Simulator {
                 buttonsPressed++;
                 newBoard.setInPlace(to, EMPTY);
             }
-            
+
         }
         if (!found) {
             return null;
@@ -176,7 +189,8 @@ class Simulator {
                         ps.streak, ps.afterTriple, hp,
                         poison, maxHp, ps.switchUsed, buttonsPressed, ps.robotBars, ps.bossHp,
                         true
-                )
+                ),
+                gameState.round
         );
     }
 

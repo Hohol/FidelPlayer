@@ -13,7 +13,7 @@ import static fidel.common.Command.*;
 import static fidel.common.Direction.DIRS;
 import static fidel.common.TileType.*;
 import static fidel.interaction.ExceptionHelper.tryy;
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
 
 public class BestMoveFinder {
 
@@ -116,10 +116,11 @@ public class BestMoveFinder {
         MoveGameState initialGameState = new MoveGameState(
                 gameState.board,
                 gameState.board.findEntrance(), new PlayerState(gameState.gold, gameState.xp, 0, false, gameState.maxHp, 0,
-                gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType), false)
+                gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType), false),
+                1
         );
         try {
-            dfs(initialGameState, 1);
+            dfs(initialGameState);
         } catch (TimeoutException e) {
             System.out.println("timeout");
         }
@@ -127,7 +128,7 @@ public class BestMoveFinder {
         return new MovesAndEvaluation(bestMoves, evaluator.evaluate(bestState, bestMoves));
     }
 
-    private void dfs(MoveGameState gameState, int round) {
+    private void dfs(MoveGameState gameState) {
         PlayerState ps = gameState.ps;
         Board board = gameState.board;
         Cell cur = gameState.cur;
@@ -157,28 +158,27 @@ public class BestMoveFinder {
                 continue;
             }
 
-            MoveGameState newGameState = simulator.simulateMove(board, ps, round, dir, to);
+            MoveGameState newGameState = simulator.simulateMove(gameState, dir);
             if (newGameState.ps.hp < 0) {
                 shouldHeal = true;
                 continue;
             }
-            if (round % 3 == 0 && !exitReachable(newGameState.board, to)) {
+            if (gameState.round % 3 == 0 && !exitReachable(newGameState.board, to)) {
                 continue;
             }
             addMove(moveAndStates, dir.command, newGameState);
         }
 
-        addMove(moveAndStates, BARK, simulator.simulateBark(board, cur, ps));
+        addMove(moveAndStates, BARK, simulator.simulateBark(gameState));
         if (shouldHeal) {
-            addMove(moveAndStates, HEAL, simulator.simulateHeal(board, cur, ps));
-            addMove(moveAndStates, SYRINGE, simulator.simulateSyringe(board, cur, ps));
+            addMove(moveAndStates, HEAL, simulator.simulateHeal(gameState));
+            addMove(moveAndStates, SYRINGE, simulator.simulateSyringe(gameState));
         }
-        addMove(moveAndStates, BOMB, simulator.simulateBomb(board, cur, ps));
+        addMove(moveAndStates, BOMB, simulator.simulateBomb(gameState));
 
         for (MoveAndState moveAndState : moveAndStates) {
             curMoves.add(moveAndState.move);
-            int newRound = round + (moveAndState.gameState.cur.equals(cur) ? 0 : 1);
-            dfs(moveAndState.gameState, newRound);
+            dfs(moveAndState.gameState);
             pop(curMoves);
         }
     }
