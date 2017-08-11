@@ -8,16 +8,21 @@ import static fidel.common.TileType.*;
 import static java.lang.Math.*;
 
 class Simulator {
+
+    private final static int[] REQUIRED_XP = {60, 90, 100, 110, 120, 140};
+
     private final LevelType levelType;
     private final Cell exit;
     private final GameParameters gameParameters;
     private final boolean aborigineLevel;
+    private final int requiredXp;
 
-    public Simulator(LevelType levelType, Cell exit, GameParameters gameParameters, boolean aborigineLevel) {
-        this.levelType = levelType;
-        this.exit = exit;
+    public Simulator(GameState gameState, GameParameters gameParameters) {
+        this.levelType = gameState.levelType;
+        this.exit = gameState.board.find(EXIT);
+        this.aborigineLevel = gameState.board.contains(ABORIGINE);
         this.gameParameters = gameParameters;
-        this.aborigineLevel = aborigineLevel;
+        requiredXp = REQUIRED_XP[gameState.maxHp - 2];
     }
 
     MoveGameState simulateMove(Board board, PlayerState ps, int round, Direction dir, Cell to) {
@@ -142,14 +147,27 @@ class Simulator {
         if (!found) {
             return null;
         }
+
+        int xp = ps.xp + addXp;
+
+        int maxHp = ps.maxHp;
+        int hp = ps.hp;
+        int poison = ps.poison;
+
+        if (ps.xp < requiredXp && xp >= requiredXp) {
+            maxHp++;
+            hp = maxHp;
+            poison = 0;
+        }
+
         return new MoveGameState(
                 newBoard,
                 cur,
                 new PlayerState(
                         ps.gold - 6,
-                        ps.xp + addXp,
-                        ps.streak, ps.afterTriple, ps.hp,
-                        ps.poison, ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp,
+                        xp,
+                        ps.streak, ps.afterTriple, hp,
+                        poison, maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp,
                         true
                 )
         );
@@ -217,7 +235,14 @@ class Simulator {
             robotBars = 3;
         }
 
-        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, buttonsPressed, robotBars, bossHp, ps.usedBomb);
+        int maxHp = ps.maxHp;
+        if (hp >= 0 && ps.xp < requiredXp && xp >= requiredXp) {
+            maxHp++;
+            hp = maxHp;
+            poison = 0;
+        }
+
+        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, maxHp, switchUsed, buttonsPressed, robotBars, bossHp, ps.usedBomb);
     }
 
     private int calcBossHp(PlayerState ps, TileType tile, Cell cell, Board board, Direction dir) {

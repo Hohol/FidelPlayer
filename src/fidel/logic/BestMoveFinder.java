@@ -35,7 +35,7 @@ public class BestMoveFinder {
         this.gameParameters = gameParameters;
         exit = gameState.board.findExit();
         levelType = gameState.levelType;
-        simulator = new Simulator(levelType, exit, gameParameters, gameState.board.contains(ABORIGINE));
+        simulator = new Simulator(gameState, gameParameters);
         visited = new int[gameState.board.height][gameState.board.width];
         this.evaluator = evaluator;
     }
@@ -115,7 +115,7 @@ public class BestMoveFinder {
         start = System.currentTimeMillis();
         MoveGameState initialGameState = new MoveGameState(
                 gameState.board,
-                gameState.board.findEntrance(), new PlayerState(gameState.gold, 0, 0, false, gameState.maxHp, 0,
+                gameState.board.findEntrance(), new PlayerState(gameState.gold, gameState.xp, 0, false, gameState.maxHp, 0,
                 gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType), false)
         );
         try {

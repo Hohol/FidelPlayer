@@ -23,6 +23,7 @@ public class BestMoveFinderTest {
     LevelType levelType;
     int maxHp;
     int gold;
+    int xp;
     GameParameters gameParameters;
 
     @BeforeMethod
@@ -30,6 +31,7 @@ public class BestMoveFinderTest {
         levelType = LevelType.NORMAL;
         maxHp = 2;
         gold = 0;
+        xp = 0;
         gameParameters = new GameParameters();
     }
 
@@ -175,7 +177,7 @@ public class BestMoveFinderTest {
                                 {ALIEN, EMPTY, EMPTY, ALIEN, EMPTY, EMPTY, EMPTY},
                                 {EMPTY, EMPTY, ALIEN, ALIEN, MEDIKIT, ALIEN, EMPTY}
                         }), 3,
-                0, LevelType.ALIENS);
+                0, 0, LevelType.ALIENS);
         while (true) {
             BestMoveFinder.findBestMoves(gameState, gameParameters);
         }
@@ -193,7 +195,7 @@ public class BestMoveFinderTest {
                                 {ENTRANCE, EMPTY, EMPTY, EXIT, WALL, SPIDER, EMPTY},
                                 {WALL, EMPTY, EMPTY, EMPTY, MEDIKIT, EMPTY, SNAKE}
                         }), 3,
-                6, LevelType.NORMAL);
+                6, 0, LevelType.NORMAL);
         BestMoveFinder.findBestMoves(gameState, gameParameters);
     }
 
@@ -202,15 +204,15 @@ public class BestMoveFinderTest {
         GameState gameState = new GameState(
                 new Board(
                         new TileType[][]{
-                                {MEDIKIT , EMPTY  , EMPTY, ALIEN, EMPTY  , ALIEN, ALIEN  },
-                                {EMPTY   , ALIEN  , EMPTY, EMPTY, EMPTY  , EMPTY, MEDIKIT},
-                                {ALIEN   , ALIEN  , ALIEN, ALIEN, EMPTY  , EMPTY, ALIEN  },
-                                {ENTRANCE, ALIEN  , EMPTY, EXIT , ALIEN  , EMPTY, EMPTY  },
-                                {EMPTY   , MEDIKIT, ALIEN, EMPTY, ALIEN  , EMPTY, MEDIKIT},
-                                {ALIEN   , EMPTY  , ALIEN, EMPTY, EMPTY  , ALIEN, ALIEN  },
-                                {ALIEN   , ALIEN  , EMPTY, EMPTY, MEDIKIT, ALIEN, ALIEN  }
+                                {MEDIKIT, EMPTY, EMPTY, ALIEN, EMPTY, ALIEN, ALIEN},
+                                {EMPTY, ALIEN, EMPTY, EMPTY, EMPTY, EMPTY, MEDIKIT},
+                                {ALIEN, ALIEN, ALIEN, ALIEN, EMPTY, EMPTY, ALIEN},
+                                {ENTRANCE, ALIEN, EMPTY, EXIT, ALIEN, EMPTY, EMPTY},
+                                {EMPTY, MEDIKIT, ALIEN, EMPTY, ALIEN, EMPTY, MEDIKIT},
+                                {ALIEN, EMPTY, ALIEN, EMPTY, EMPTY, ALIEN, ALIEN},
+                                {ALIEN, ALIEN, EMPTY, EMPTY, MEDIKIT, ALIEN, ALIEN}
                         }), 3,
-                9, LevelType.ALIENS);
+                9, 0, LevelType.ALIENS);
         BestMoveFinder.findBestMoves(gameState, gameParameters);
     }
 
@@ -487,12 +489,35 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void levelUp() {
+        xp = 59;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, SPIDER, SPIDER, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void levelUpBomb() {
+        xp = 57;
+        gold = 6;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, VAMPIRE, ROBOT, SPIDER, VAMPIRE, EXIT},
+                },
+                Arrays.asList(BOMB, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {
             levelType = LevelType.ALIENS;
         }
-        GameState gameState = new GameState(board, maxHp, gold, levelType);
+        GameState gameState = new GameState(board, maxHp, gold, xp, levelType);
 
         List<Command> actual = BestMoveFinder.findBestMoves(gameState, gameParameters);
         assertEquals(actual, expected, actual.toString());

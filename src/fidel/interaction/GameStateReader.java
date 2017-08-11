@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import static fidel.common.TileType.*;
 import static fidel.interaction.ExceptionHelper.*;
@@ -51,6 +52,7 @@ public class GameStateReader {
         int w = tileImages[0].length;
         int maxHp = getMaxHp(img);
         int gold = getGold(img);
+        int xp = getXp(img);
         Board board = new Board(h, w);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
@@ -65,7 +67,7 @@ public class GameStateReader {
             levelType = LevelType.ROBODOG;
             board.setInPlace(board.find(ROBODOG), EXIT);
         }
-        return new GameState(board, maxHp, gold, levelType);
+        return new GameState(board, maxHp, gold, xp, levelType);
     }
 
     private int getMaxHp(BufferedImage img) {
@@ -92,6 +94,60 @@ public class GameStateReader {
             }
         }
         return cnt;
+    }
+
+    int getXp(BufferedImage img) {
+        BufferedImage[] imgs = IntStream.range(0, 10)
+                .mapToObj(digit -> readImg("digits/" + digit + ".png"))
+                .toArray(BufferedImage[]::new);
+        BufferedImage slash = readImg("digits/slash.png");
+        String s = "";
+        int bottomRow = 799;
+        int leftX = 27;
+        int rightX = 400;
+        //noinspection ConstantConditions
+        int acGreen = IntStream.rangeClosed(leftX, rightX)
+                .map(x -> getGreen(img.getRGB(x, bottomRow)))
+                .max().getAsInt();
+        for (int x = leftX; x <= rightX; x++) {
+            String symbol = getSymbol(img, x, bottomRow, imgs, slash, acGreen);
+            if ("/".equals(symbol)) {
+                break;
+            }
+            if (symbol != null) {
+                s += symbol;
+            }
+        }
+        return Integer.parseInt(s);
+    }
+
+    private String getSymbol(BufferedImage img, int leftX, int bottomY, BufferedImage[] digits, BufferedImage slash, int acGreen) {
+        for (int i = 0; i < digits.length; i++) {
+            if (symbolEquals(img, leftX, bottomY, digits[i], acGreen)) {
+                return String.valueOf(i);
+            }
+        }
+        if (symbolEquals(img, leftX, bottomY, slash, acGreen)) {
+            return "/";
+        }
+        return null;
+    }
+
+    private boolean symbolEquals(BufferedImage img, int leftX, int bottomY, BufferedImage expectedImg, int acGreen) {
+        //noinspection ConstantConditions
+        int eqGreen = IntStream.range(0, expectedImg.getWidth())
+                .map(x -> getGreen(expectedImg.getRGB(x, expectedImg.getHeight() / 2)))
+                .max().getAsInt();
+        for (int x = 0; x < expectedImg.getWidth(); x++) {
+            for (int y = 0; y < expectedImg.getHeight(); y++) {
+                boolean ex = getGreen(expectedImg.getRGB(x, y)) == eqGreen;
+                boolean ac = getGreen(img.getRGB(leftX + x, bottomY - expectedImg.getHeight() + 1 + y)) == acGreen;
+                if (ac != ex) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void saveTile(BufferedImage img, TileType tileType) {
@@ -126,18 +182,18 @@ public class GameStateReader {
 
     private boolean isFirstLevel(BufferedImage img) {
         BufferedImage actualImg = img.getSubimage(140, 290, 70, 50);
-        BufferedImage firstLevelImg = tryy(() -> ImageIO.read(new File("detect-1-lvl.png")));
+        BufferedImage firstLevelImg = readImg("detect-1-lvl.png");
         double diff = getDifference(actualImg, firstLevelImg, Double.POSITIVE_INFINITY);
         return diff < 1000;
     }
 
     LevelType checkIntermission(BufferedImage img) {
         BufferedImage actualImg = img.getSubimage(140, 290, 70, 50);
-        BufferedImage intermission1Img = tryy(() -> ImageIO.read(new File("detect-intermission1.png")));
+        BufferedImage intermission1Img = readImg("detect-intermission1.png");
         if (getDifference(actualImg, intermission1Img, Double.POSITIVE_INFINITY) < 100000) {
             return LevelType.INTERMISSION1;
         }
-        BufferedImage intermission2Img = tryy(() -> ImageIO.read(new File("detect-intermission2.png")));
+        BufferedImage intermission2Img = readImg("detect-intermission2.png");
         if (getDifference(actualImg, intermission2Img, Double.POSITIVE_INFINITY) == 0) {
             return LevelType.INTERMISSION2;
         }
@@ -196,7 +252,11 @@ public class GameStateReader {
     }
 
     private BufferedImage getImageFromFile() {
-        return tryy(() -> ImageIO.read(new File("img.png")));
+        return readImg("img.png");
+    }
+
+    private BufferedImage readImg(String pathname) {
+        return tryy(() -> ImageIO.read(new File(pathname)));
     }
 
     private static void writeImg(BufferedImage img, String name, boolean overwrite) {
@@ -266,18 +326,14 @@ public class GameStateReader {
     private static Map<TileType, List<BufferedImage>> loadTiles() {
         Map<TileType, List<BufferedImage>> r = new HashMap<>();
         for (File file : new File("tiles").listFiles()) {
-            try {
-                BufferedImage img = ImageIO.read(file);
-                TileType name = getTileType(file.getName());
-                List<BufferedImage> list = r.get(name);
-                if (list == null) {
-                    list = new ArrayList<>();
-                    r.put(name, list);
-                }
-                list.add(img);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            BufferedImage img = tryy(() -> ImageIO.read(file));
+            TileType name = getTileType(file.getName());
+            List<BufferedImage> list = r.get(name);
+            if (list == null) {
+                list = new ArrayList<>();
+                r.put(name, list);
             }
+            list.add(img);
         }
         return r;
     }
