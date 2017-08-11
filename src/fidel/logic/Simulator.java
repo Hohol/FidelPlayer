@@ -100,6 +100,26 @@ class Simulator {
         );
     }
 
+    public MoveGameState simulateSyringe(Board board, Cell cur, PlayerState ps) {
+        if (ps.gold < 9) {
+            return null;
+        }
+        if (ps.hp == ps.maxHp) {
+            return null;
+        }
+        return new MoveGameState(
+                board,
+                cur,
+                new PlayerState(
+                        ps.gold - 9,
+                        ps.xp, ps.streak, ps.afterTriple,
+                        ps.maxHp,
+                        0,
+                        ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp,
+                        ps.usedBomb)
+        );
+    }
+
     public MoveGameState simulateBomb(Board board, Cell cur, PlayerState ps) {
         if (ps.gold < 6) {
             return null;

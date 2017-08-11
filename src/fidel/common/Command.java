@@ -11,6 +11,7 @@ public enum Command {
     BARK(VK_CONTROL),
     HEAL(VK_1),
     BOMB(VK_2),
+    SYRINGE(VK_3),
     UNDO(VK_DELETE);
 
     public final int keyCode;

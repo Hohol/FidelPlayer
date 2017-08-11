@@ -447,6 +447,29 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void syringe() {
+        gold = 9;
+        maxHp = 4;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, ROBOT, ROBOT, ROBOT, ROBOT, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, SYRINGE, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void syringe2() {
+        gold = 9;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SNAKE, SNAKE, SNAKE, SPIDER, SPIDER, SNAKE, SNAKE, SNAKE, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, SYRINGE, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {

@@ -165,22 +165,27 @@ public class BestMoveFinder {
                 shouldHeal = true;
                 continue;
             }
-            moveAndStates.add(new MoveAndState(dir.command, newGameState));
+            addMove(moveAndStates, dir.command, newGameState);
         }
 
-        moveAndStates.add(new MoveAndState(BARK, simulator.simulateBark(board, cur, ps)));
+        addMove(moveAndStates, BARK, simulator.simulateBark(board, cur, ps));
         if (shouldHeal) {
-            moveAndStates.add(new MoveAndState(HEAL, simulator.simulateHeal(board, cur, ps)));
+            addMove(moveAndStates, HEAL, simulator.simulateHeal(board, cur, ps));
+            addMove(moveAndStates, SYRINGE, simulator.simulateSyringe(board, cur, ps));
         }
-        moveAndStates.add(new MoveAndState(BOMB, simulator.simulateBomb(board, cur, ps)));
+        addMove(moveAndStates, BOMB, simulator.simulateBomb(board, cur, ps));
 
         for (MoveAndState moveAndState : moveAndStates) {
-            if (moveAndState.gameState != null) {
-                curMoves.add(moveAndState.move);
-                int newRound = round + (moveAndState.gameState.cur.equals(cur) ? 0 : 1);
-                dfs(moveAndState.gameState, newRound);
-                pop(curMoves);
-            }
+            curMoves.add(moveAndState.move);
+            int newRound = round + (moveAndState.gameState.cur.equals(cur) ? 0 : 1);
+            dfs(moveAndState.gameState, newRound);
+            pop(curMoves);
+        }
+    }
+
+    private void addMove(List<MoveAndState> moveAndStates, Command move, MoveGameState state) {
+        if (state != null) {
+            moveAndStates.add(new MoveAndState(move, state));
         }
     }
 
