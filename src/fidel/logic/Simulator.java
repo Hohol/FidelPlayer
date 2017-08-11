@@ -75,8 +75,8 @@ class Simulator {
                         ps.gold - 3,
                         ps.xp, ps.streak, ps.afterTriple,
                         hp,
-                        ps.poison, ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp
-                )
+                        ps.poison, ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp,
+                        ps.usedBomb)
         );
     }
 
@@ -109,7 +109,8 @@ class Simulator {
                         ps.gold - 6,
                         ps.xp + addXp,
                         ps.streak, ps.afterTriple, ps.hp,
-                        ps.poison, ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp
+                        ps.poison, ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp,
+                        true
                 )
         );
     }
@@ -176,7 +177,7 @@ class Simulator {
             robotBars = 3;
         }
 
-        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, buttonsPressed, robotBars, bossHp);
+        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, ps.maxHp, switchUsed, buttonsPressed, robotBars, bossHp, ps.usedBomb);
     }
 
     private int calcBossHp(PlayerState ps, TileType tile, Cell cell, Board board, Direction dir) {
@@ -256,7 +257,11 @@ class Simulator {
             }
         }
         if (tile == ABORIGINE) {
-            return 0;
+            if (ps.usedBomb) {
+                return 2;
+            } else {
+                return 0;
+            }
         }
         if (tile == ANGRY_ABORIGINE) {
             return 2;
@@ -335,7 +340,11 @@ class Simulator {
             }
         }
         if (tile == ABORIGINE) {
-            return 3;
+            if (ps.usedBomb) {
+                return 1;
+            } else {
+                return 3;
+            }
         }
         if (tile == ANGRY_ABORIGINE) {
             return 1;

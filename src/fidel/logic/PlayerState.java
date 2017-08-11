@@ -12,8 +12,9 @@ class PlayerState {
     final int buttonsPressed;
     final int robotBars;
     final int bossHp;
+    final boolean usedBomb;
 
-    PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int buttonsPressed, int robotBars, int bossHp) {
+    PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int buttonsPressed, int robotBars, int bossHp, boolean usedBomb) {
         this.gold = gold;
         this.xp = xp;
         this.streak = streak;
@@ -25,6 +26,7 @@ class PlayerState {
         this.buttonsPressed = buttonsPressed;
         this.robotBars = robotBars;
         this.bossHp = bossHp;
+        this.usedBomb = usedBomb;
     }
 
     @Override

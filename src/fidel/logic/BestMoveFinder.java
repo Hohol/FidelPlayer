@@ -113,13 +113,13 @@ public class BestMoveFinder {
 
     private MovesAndEvaluation findBestMoves0(GameState gameState) {
         start = System.currentTimeMillis();
-        MoveGameState moveGameState = new MoveGameState(
+        MoveGameState initialGameState = new MoveGameState(
                 gameState.board,
                 gameState.board.findEntrance(), new PlayerState(gameState.gold, 0, 0, false, gameState.maxHp, 0,
-                gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType))
+                gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType), false)
         );
         try {
-            dfs(moveGameState, 1);
+            dfs(initialGameState, 1);
         } catch (TimeoutException e) {
             System.out.println("timeout");
         }

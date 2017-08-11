@@ -422,6 +422,19 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void bomb3() {
+        gold = 6;
+        check(
+                new TileType[][]{
+                        {SMALL_SPIDER, EMPTY, ABORIGINE},
+                        {ENTRANCE, SMALL_SPIDER, EMPTY},
+                        {SMALL_SPIDER, EXIT, ABORIGINE},
+                },
+                Arrays.asList(RIGHT, UP, RIGHT, DOWN, DOWN, LEFT)
+        );
+    }
+
     // todo все аборигены просыпаются от бомбы
     // todo bomb when on exit?
 

@@ -22,6 +22,7 @@ public class GameState {
         return "GameState{" +
                 "board=" + board +
                 ", maxHp=" + maxHp +
+                ", gold=" + gold +
                 ", levelType=" + levelType +
                 '}';
     }
