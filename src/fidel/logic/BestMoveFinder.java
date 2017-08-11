@@ -91,9 +91,9 @@ public class BestMoveFinder {
         GameState secondGameState = gameState.swapGates();
         ExecutorService executor = Executors.newCachedThreadPool();
         Future<MovesAndEvaluation> firstFuture
-                = executor.submit(() -> new BestMoveFinder(gameState, gameParameters, evaluator).findBestMoves0(gameState));
+                = executor.submit(() -> new BestMoveFinder(gameState, gameParameters, evaluator).findBestMoves0(gameState, false));
         Future<MovesAndEvaluation> secondFuture
-                = executor.submit(() -> new BestMoveFinder(secondGameState, gameParameters, evaluator).findBestMoves0(secondGameState));
+                = executor.submit(() -> new BestMoveFinder(secondGameState, gameParameters, evaluator).findBestMoves0(secondGameState, true));
 
         MovesAndEvaluation first = tryy(() -> firstFuture.get());
         MovesAndEvaluation second = tryy(() -> secondFuture.get());
@@ -104,14 +104,14 @@ public class BestMoveFinder {
             }
             return first.moves;
         } else {
-            List<Command> r = new ArrayList<>();
-            r.add(ENTER);
-            r.addAll(second.moves);
-            return r;
+            return second.moves;
         }
     }
 
-    private MovesAndEvaluation findBestMoves0(GameState gameState) {
+    private MovesAndEvaluation findBestMoves0(GameState gameState, boolean swapped) {
+        if (swapped) {
+            curMoves.add(ENTER);
+        }
         start = System.currentTimeMillis();
         MoveGameState initialGameState = new MoveGameState(
                 gameState.board,
