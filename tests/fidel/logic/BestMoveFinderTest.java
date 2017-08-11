@@ -216,15 +216,26 @@ public class BestMoveFinderTest {
         BestMoveFinder.findBestMoves(gameState, gameParameters);
     }
 
-    /*@Test
+    @Test
     void alienLaser() {
         gameParameters.alienBossHp = 2;
         check(
                 new TileType[][]{
-                        {ENTRANCE, ALIEN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, ALIEN, EXIT},
-                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                        {EMPTY, ENTRANCE},
+                        {EMPTY, ALIEN},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, ALIEN},
+                        {EMPTY, EXIT},
                 },
-                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, DOWN, RIGHT, RIGHT, UP, RIGHT)
+                Arrays.asList(DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, DOWN, RIGHT, DOWN, DOWN)
         );
     }
 
@@ -233,24 +244,23 @@ public class BestMoveFinderTest {
         gameParameters.alienBossHp = 1;
         check(
                 new TileType[][]{
-                        {ENTRANCE, ALIEN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, ALIEN, EXIT},
-                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                        {EMPTY, ENTRANCE},
+                        {EMPTY, ALIEN},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EMPTY, ALIEN},
+                        {EMPTY, EXIT},
                 },
-                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT)
+                Arrays.asList(DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN)
         );
     }
-
-    @Test
-    void alienLaser3() {
-        gameParameters.alienBossHp = 2;
-        check(
-                new TileType[][]{
-                        {ENTRANCE, ALIEN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, ALIEN, EXIT},
-                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                },
-                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, DOWN, RIGHT, RIGHT, UP, RIGHT)
-        );
-    }*/ // todo rework
 
     @Test
     void aborigine() {
