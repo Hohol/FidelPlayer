@@ -10,6 +10,7 @@ public enum Command {
     ENTER(VK_ENTER),
     BARK(VK_CONTROL),
     HEAL(VK_1),
+    BOMB(VK_2),
     UNDO(VK_DELETE);
 
     public final int keyCode;

@@ -13,4 +13,13 @@ class MoveGameState {
         this.ps = ps;
         this.cur = cur;
     }
+
+    @Override
+    public String toString() {
+        return "MoveGameState{" +
+                "board=" + board +
+                ", ps=" + ps +
+                ", cur=" + cur +
+                '}';
+    }
 }

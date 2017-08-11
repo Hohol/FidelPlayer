@@ -80,6 +80,59 @@ class Simulator {
         );
     }
 
+    public MoveGameState simulateBomb(Board board, Cell cur, PlayerState ps) {
+        if (ps.gold < 6) {
+            return null;
+        }
+        int addXp = 0;
+        Board newBoard = new Board(board);
+        boolean found = false;
+        for (Direction dir : DIRS) {
+            Cell to = cur.add(dir);
+            if (!board.inside(to)) {
+                continue;
+            }
+
+            if (bombable(board.get(to))) {
+                found = true;
+                addXp += 3;
+                newBoard.setInPlace(to, EMPTY);
+            }
+        }
+        if (!found) {
+            return null;
+        }
+        return new MoveGameState(
+                newBoard,
+                cur,
+                new PlayerState(
+                        ps.gold - 6,
+                        ps.xp + addXp,
+                        ps.streak, ps.afterTriple, ps.hp,
+                        ps.poison, ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp
+                )
+        );
+    }
+
+    private boolean bombable(TileType tile) {
+        return tile == SNAKE ||
+                tile == SPIDER ||
+                tile == SMALL_SPIDER ||
+                tile == RED_SPIDER ||
+                tile == VAMPIRE ||
+                tile == TURTLE_RIGHT ||
+                tile == TURTLE_DOWN ||
+                tile == TURTLE_LEFT ||
+                tile == TURTLE_UP ||
+                tile == CROWNED_SPIDER ||
+                tile == BIG_FLOWER ||
+                tile == ALIEN ||
+                tile == ABORIGINE ||
+                tile == ANGRY_ABORIGINE ||
+                tile == SMALL_FLOWER ||
+                tile == ROBOT;
+    }
+
     PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir, Board board, Cell cell, int round) {
         int gold = ps.gold;
         if (tile == COIN) {

@@ -397,6 +397,34 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void bomb() {
+        gold = 6;
+        maxHp = 6;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, VAMPIRE, RED_SPIDER, RED_SPIDER, RED_SPIDER, VAMPIRE, EXIT},
+                },
+                Arrays.asList(BOMB, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void bomb2() {
+        gold = 6;
+        check(
+                new TileType[][]{
+                        {SMALL_SPIDER, EMPTY},
+                        {ENTRANCE, SMALL_SPIDER},
+                        {SMALL_SPIDER, EXIT},
+                },
+                Arrays.asList(BOMB, RIGHT, DOWN)
+        );
+    }
+
+    // todo все аборигены просыпаются от бомбы
+    // todo bomb when on exit?
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {

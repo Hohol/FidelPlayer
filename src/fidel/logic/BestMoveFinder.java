@@ -172,6 +172,7 @@ public class BestMoveFinder {
         if (shouldHeal) {
             moveAndStates.add(new MoveAndState(HEAL, simulator.simulateHeal(board, cur, ps)));
         }
+        moveAndStates.add(new MoveAndState(BOMB, simulator.simulateBomb(board, cur, ps)));
 
         for (MoveAndState moveAndState : moveAndStates) {
             if (moveAndState.gameState != null) {
@@ -190,6 +191,14 @@ public class BestMoveFinder {
         MoveAndState(Command move, MoveGameState gameState) {
             this.move = move;
             this.gameState = gameState;
+        }
+
+        @Override
+        public String toString() {
+            return "MoveAndState{" +
+                    "move=" + move +
+                    ", gameState=" + gameState +
+                    '}';
         }
     }
 
