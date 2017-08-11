@@ -512,6 +512,19 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void bombButton() {
+        gold = 6;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, BUTTON},
+                        {RAISED_WALL, WALL},
+                        {EXIT, EMPTY},
+                },
+                Arrays.asList(BOMB, DOWN, DOWN)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {

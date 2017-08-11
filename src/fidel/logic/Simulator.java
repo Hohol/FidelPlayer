@@ -130,6 +130,7 @@ class Simulator {
             return null;
         }
         int addXp = 0;
+        int buttonsPressed = ps.buttonsPressed;
         Board newBoard = new Board(board);
         boolean found = false;
         for (Direction dir : DIRS) {
@@ -138,11 +139,17 @@ class Simulator {
                 continue;
             }
 
-            if (bombable(board.get(to))) {
+            TileType target = board.get(to);
+            if (bombableEnemy(target)) {
                 found = true;
                 addXp += 3;
                 newBoard.setInPlace(to, EMPTY);
+            } else if (target == BUTTON) {
+                found = true;
+                buttonsPressed++;
+                newBoard.setInPlace(to, EMPTY);
             }
+            
         }
         if (!found) {
             return null;
@@ -167,13 +174,13 @@ class Simulator {
                         ps.gold - 6,
                         xp,
                         ps.streak, ps.afterTriple, hp,
-                        poison, maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp,
+                        poison, maxHp, ps.switchUsed, buttonsPressed, ps.robotBars, ps.bossHp,
                         true
                 )
         );
     }
 
-    private boolean bombable(TileType tile) {
+    private boolean bombableEnemy(TileType tile) {
         return tile == SNAKE ||
                 tile == SPIDER ||
                 tile == SMALL_SPIDER ||
