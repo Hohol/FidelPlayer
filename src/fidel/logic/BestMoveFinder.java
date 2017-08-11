@@ -131,9 +131,6 @@ public class BestMoveFinder {
         PlayerState ps = gameState.ps;
         Board board = gameState.board;
         Cell cur = gameState.cur;
-        if (round % 3 == 0 && !exitReachable(board, cur, exit)) {
-            return;
-        }
         if (evaluator.finished(cur, ps, exit)) {
             double evaluation = evaluator.evaluate(ps, curMoves);
             if (evaluation > bestEvaluation) {
@@ -163,6 +160,9 @@ public class BestMoveFinder {
             MoveGameState newGameState = simulator.simulateMove(board, ps, round, dir, to);
             if (newGameState.ps.hp < 0) {
                 shouldHeal = true;
+                continue;
+            }
+            if (round % 3 == 0 && !exitReachable(newGameState.board, to)) {
                 continue;
             }
             addMove(moveAndStates, dir.command, newGameState);
@@ -212,12 +212,12 @@ public class BestMoveFinder {
         return System.currentTimeMillis() - start > 10000;
     }
 
-    private boolean exitReachable(Board board, Cell cur, Cell exit) {
+    private boolean exitReachable(Board board, Cell cur) {
         curVisited++;
-        return dfsCheckPath(board, cur, exit);
+        return dfsCheckPath(board, cur);
     }
 
-    private boolean dfsCheckPath(Board board, Cell cur, Cell exit) {
+    private boolean dfsCheckPath(Board board, Cell cur) {
         if (cur.equals(exit)) {
             return true;
         }
@@ -233,7 +233,7 @@ public class BestMoveFinder {
             if (visited[to.row][to.col] == curVisited) {
                 continue;
             }
-            if (dfsCheckPath(board, to, exit)) {
+            if (dfsCheckPath(board, to)) {
                 return true;
             }
         }

@@ -186,14 +186,14 @@ public class BestMoveFinderTest {
         GameState gameState = new GameState(
                 new Board(
                         new TileType[][]{
-                                {EMPTY, MEDIKIT, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                                {EMPTY, MEDIKIT, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                                {EMPTY, MEDIKIT, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                                {EMPTY, MEDIKIT, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                                {ENTRANCE, EMPTY, EMPTY, EXIT, EMPTY, EMPTY, EMPTY},
-                                {EMPTY, EMPTY, EMPTY, EMPTY, MEDIKIT, EMPTY, EMPTY}
+                                {EMPTY, MEDIKIT, EMPTY, EMPTY, EMPTY, EMPTY, VAMPIRE},
+                                {COIN, SPIDER, EMPTY, EMPTY, TURTLE_LEFT, EMPTY, EMPTY},
+                                {EMPTY, MEDIKIT, EMPTY, WALL, RED_SPIDER, EMPTY, EMPTY},
+                                {EMPTY, MEDIKIT, TURTLE_RIGHT, WALL, EMPTY, EMPTY, EMPTY},
+                                {ENTRANCE, EMPTY, EMPTY, EXIT, WALL, SPIDER, EMPTY},
+                                {WALL, EMPTY, EMPTY, EMPTY, MEDIKIT, EMPTY, SNAKE}
                         }), 3,
-                0, LevelType.NORMAL);
+                6, LevelType.NORMAL);
         BestMoveFinder.findBestMoves(gameState, gameParameters);
     }
 
