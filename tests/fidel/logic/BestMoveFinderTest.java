@@ -197,6 +197,23 @@ public class BestMoveFinderTest {
         BestMoveFinder.findBestMoves(gameState, gameParameters);
     }
 
+    @Test(enabled = false)
+    void performance3() {
+        GameState gameState = new GameState(
+                new Board(
+                        new TileType[][]{
+                                {MEDIKIT , EMPTY  , EMPTY, ALIEN, EMPTY  , ALIEN, ALIEN  },
+                                {EMPTY   , ALIEN  , EMPTY, EMPTY, EMPTY  , EMPTY, MEDIKIT},
+                                {ALIEN   , ALIEN  , ALIEN, ALIEN, EMPTY  , EMPTY, ALIEN  },
+                                {ENTRANCE, ALIEN  , EMPTY, EXIT , ALIEN  , EMPTY, EMPTY  },
+                                {EMPTY   , MEDIKIT, ALIEN, EMPTY, ALIEN  , EMPTY, MEDIKIT},
+                                {ALIEN   , EMPTY  , ALIEN, EMPTY, EMPTY  , ALIEN, ALIEN  },
+                                {ALIEN   , ALIEN  , EMPTY, EMPTY, MEDIKIT, ALIEN, ALIEN  }
+                        }), 3,
+                9, LevelType.ALIENS);
+        BestMoveFinder.findBestMoves(gameState, gameParameters);
+    }
+
     /*@Test
     void alienLaser() {
         gameParameters.alienBossHp = 2;
