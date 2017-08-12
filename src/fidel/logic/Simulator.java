@@ -258,6 +258,10 @@ public class Simulator {
 
         boolean switchUsed = ps.switchUsed || tile == SWITCH;
         int bossHp = calcBossHp(ps, tile, cell, board, dir);
+        if (bossHp == 0 && ps.bossHp != 0) {
+            xp += 15;
+        }
+
         int buttonsPressed = ps.buttonsPressed + (tile == BUTTON ? 1 : 0);
         int robotBars = max(0, ps.robotBars - (tile == BUTTON ? 1 : 0));
         if (addXp > 0) {
@@ -395,15 +399,8 @@ public class Simulator {
     }
 
     private int calcXp(TileType tile, Direction dir, boolean smallFlowersNearby, PlayerState ps) {
-        if (tile == SPIDER) {
+        if (tile == SPIDER || tile == ALIEN) {
             return 1;
-        }
-        if (tile == ALIEN) {
-            if (ps.bossHp == 1) {
-                return 16;
-            } else {
-                return 1;
-            }
         }
         if (tile == CROWNED_SPIDER) {
             return 3;

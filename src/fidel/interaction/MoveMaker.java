@@ -15,6 +15,7 @@ import static fidel.interaction.ExceptionHelper.*;
 
 public class MoveMaker {
 
+    public static final int SLEEP_TIME = 40;
     private final Robot robot = tryy(() -> new Robot());
 
     public void makeMoves(List<Command> commands, GameState gameState) {
@@ -27,7 +28,7 @@ public class MoveMaker {
         for (int i = 0; i < commands.size(); i++) {
             Command command = commands.get(i);
             robot.keyPress(command.keyCode);
-            tryy(() -> Thread.sleep(40));
+            tryy(() -> Thread.sleep(SLEEP_TIME));
             robot.keyRelease(command.keyCode);
 
             if (i != commands.size() - 1 && !intermission) {
@@ -36,11 +37,13 @@ public class MoveMaker {
                 System.out.println(nextState.ps.xp + " " + nextState.ps.hp);
                 int sleepTime;
                 if (nextState.ps.maxHp == state.ps.maxHp)
-                    sleepTime = 40;
+                    sleepTime = SLEEP_TIME;
                 else
                     sleepTime = 600;
                 tryy(() -> Thread.sleep(sleepTime));
                 state = nextState;
+            } else if (intermission) {
+                tryy(() -> Thread.sleep(SLEEP_TIME));
             }
         }
     }
@@ -48,9 +51,9 @@ public class MoveMaker {
     public void makeUndoMoves(List<Command> commands) {
         for (Command command : commands) {
             robot.keyPress(command.keyCode);
-            tryy(() -> Thread.sleep(40));
+            tryy(() -> Thread.sleep(SLEEP_TIME));
             robot.keyRelease(command.keyCode);
-            tryy(() -> Thread.sleep(40));
+            tryy(() -> Thread.sleep(SLEEP_TIME));
         }
     }
 }

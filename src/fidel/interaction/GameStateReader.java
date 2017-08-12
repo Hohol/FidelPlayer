@@ -194,7 +194,7 @@ public class GameStateReader {
     LevelType checkIntermission(BufferedImage img) {
         BufferedImage actualImg = img.getSubimage(140, 290, 70, 50);
         BufferedImage intermission1Img = readImg("detect-intermission1.png");
-        if (getDifference(actualImg, intermission1Img, Double.POSITIVE_INFINITY) < 100000) {
+        if (getDifference(actualImg, intermission1Img, Double.POSITIVE_INFINITY) < 150000) {
             return LevelType.INTERMISSION1;
         }
         BufferedImage intermission2Img = readImg("detect-intermission2.png");
