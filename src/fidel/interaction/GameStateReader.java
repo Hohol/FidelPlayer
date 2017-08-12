@@ -1,9 +1,6 @@
 package fidel.interaction;
 
-import fidel.common.Board;
-import fidel.common.GameState;
-import fidel.common.LevelType;
-import fidel.common.TileType;
+import fidel.common.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -11,7 +8,6 @@ import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +24,11 @@ public class GameStateReader {
     private static final int TILE_HEIGHT = 90;
 
     private final Robot robot = tryy(() -> new Robot());
+    private final Map<TileType, List<BufferedImage>> tileTypeImgs;
+
+    public GameStateReader() {
+        tileTypeImgs = loadTiles();
+    }
 
     public GameState readGameState() {
         BufferedImage img = getImageFromCapture();
@@ -47,7 +48,6 @@ public class GameStateReader {
             return null;
         }/**/
 
-        Map<TileType, List<BufferedImage>> tileTypeImgs = loadTiles();
         int h = tileImages.length;
         int w = tileImages[0].length;
         int maxHp = getMaxHp(img);
@@ -56,7 +56,7 @@ public class GameStateReader {
         Board board = new Board(h, w);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
-                board.setInPlace(row, col, findMostSimilar(tileTypeImgs, tileImages[row][col]));
+                board.setInPlace(row, col, findMostSimilar(tileImages[row][col]));
             }
         }
 
@@ -68,6 +68,10 @@ public class GameStateReader {
             board.setInPlace(board.find(ROBODOG), EXIT);
         }
         return new GameState(board, maxHp, gold, xp, levelType);
+    }
+
+    public TileType readTile(Cell cell) {
+        return findMostSimilar(getTileImages(getImageFromCapture())[cell.row][cell.col]);
     }
 
     private int getMaxHp(BufferedImage img) {
@@ -269,10 +273,10 @@ public class GameStateReader {
         });
     }
 
-    private static TileType findMostSimilar(Map<TileType, List<BufferedImage>> tiles, BufferedImage rectangle) {
+    private TileType findMostSimilar(BufferedImage rectangle) {
         double min = Double.POSITIVE_INFINITY;
         TileType r = null;
-        for (Map.Entry<TileType, List<BufferedImage>> entry : tiles.entrySet()) {
+        for (Map.Entry<TileType, List<BufferedImage>> entry : tileTypeImgs.entrySet()) {
             TileType name = entry.getKey();
             for (BufferedImage img : entry.getValue()) {
                 double diff = getDifference(img, rectangle, min);

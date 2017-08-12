@@ -33,7 +33,7 @@ public class Main {
 
             moveMaker.makeMoves(bestMoves, gameState);
             if (shouldFinishLevel) {
-                tryy(() -> Thread.sleep(1000));
+                tryy(() -> Thread.sleep(1100));
             } else {
                 break;
             }
@@ -62,8 +62,7 @@ public class Main {
             List<Command> moves = BestMoveFinder.findInvestigateChestMoves(gameState, gameParameters, chestCell);
             moves = append(moves, BARK);
             moveMaker.makeMoves(moves, gameState);
-            GameState tmpGameState = gameStateReader.readGameState();
-            TileType tile = tmpGameState.board.get(chestCell);
+            TileType tile = gameStateReader.readTile(chestCell);
             gameState.board.setInPlace(chestCell, tile);
             System.out.println(gameState);
             List<Command> undoMoves = moves.stream()
