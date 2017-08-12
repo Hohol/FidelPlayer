@@ -178,12 +178,10 @@ public class Simulator {
 
         int maxHp = ps.maxHp;
         int hp = ps.hp;
-        int poison = ps.poison;
 
         if (ps.xp < requiredXp && xp >= requiredXp) {
             maxHp++;
-            hp = maxHp;
-            poison = 0;
+            hp = maxHp - ps.poison;
         }
 
         return new MoveGameState(
@@ -193,7 +191,7 @@ public class Simulator {
                         ps.gold - 6,
                         xp,
                         ps.streak, ps.afterTriple, hp,
-                        poison, maxHp, ps.switchUsed, buttonsPressed, ps.robotBars, ps.bossHp,
+                        ps.poison, maxHp, ps.switchUsed, buttonsPressed, ps.robotBars, ps.bossHp,
                         true
                 ),
                 gameState.round
@@ -269,8 +267,7 @@ public class Simulator {
         int maxHp = ps.maxHp;
         if (hp >= 0 && ps.xp < requiredXp && xp >= requiredXp) {
             maxHp++;
-            hp = maxHp;
-            poison = 0;
+            hp = maxHp - ps.poison;
         }
 
         return new PlayerState(gold, xp, streak, afterTriple, hp, poison, maxHp, switchUsed, buttonsPressed, robotBars, bossHp, ps.usedBomb);
