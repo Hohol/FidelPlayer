@@ -4,6 +4,8 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 
+import static fidel.interaction.ExceptionHelper.*;
+
 public class SaveHelper {
 
     public static final String SAVE_LOCATION = "E:\\Users\\Hohol\\AppData\\Roaming\\fidel\\Local Store\\save.txt";
@@ -17,15 +19,11 @@ public class SaveHelper {
     }
 
     private static void undump(String name) {
-        ExceptionHelper.tryy(() -> {
-            FileUtils.copyFile(new File(dumpName(name)), new File(SAVE_LOCATION));
-        });
+        tryy(() -> FileUtils.copyFile(new File(dumpName(name)), new File(SAVE_LOCATION)));
     }
 
     public static void dump(String name) {
-        ExceptionHelper.tryy(() -> {
-            FileUtils.copyFile(new File(SAVE_LOCATION), new File(dumpName(name)));
-        });
+        tryy(() -> FileUtils.copyFile(new File(SAVE_LOCATION), new File(dumpName(name))));
     }
 
     private static String dumpName(String name) {
