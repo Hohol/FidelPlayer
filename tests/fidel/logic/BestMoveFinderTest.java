@@ -535,6 +535,19 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void alienBossXp() {
+        levelType = LevelType.ALIENS;
+        gameParameters.alienBossHp = 2;
+        xp = 43;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, ALIEN, ALIEN, ALIEN, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {

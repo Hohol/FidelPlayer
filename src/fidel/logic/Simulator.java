@@ -389,8 +389,15 @@ public class Simulator {
     }
 
     private int calcXp(TileType tile, Direction dir, boolean smallFlowersNearby, PlayerState ps) {
-        if (tile == SPIDER || tile == ALIEN) {
+        if (tile == SPIDER) {
             return 1;
+        }
+        if (tile == ALIEN) {
+            if (ps.bossHp == 1) {
+                return 16;
+            } else {
+                return 1;
+            }
         }
         if (tile == CROWNED_SPIDER) {
             return 3;

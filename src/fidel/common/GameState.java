@@ -31,6 +31,6 @@ public class GameState {
     }
 
     public static GameState intermission(LevelType intermissionLevelType) {
-        return new GameState(new Board(0, 0), 0, 0, 0, intermissionLevelType);
+        return new GameState(new Board(0, 0), 2, 0, 0, intermissionLevelType);
     }
 }
