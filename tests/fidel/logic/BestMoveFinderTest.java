@@ -548,6 +548,31 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void bombMedikit() {
+        gold = 6;
+        check(
+                new TileType[][]{
+                        {ENTRANCE},
+                        {SPIDER},
+                        {SPIDER},
+                        {MEDIKIT},
+                        {VAMPIRE},
+                        {COIN},
+                        {COIN},
+                        {COIN},
+                        {COIN},
+                        {COIN},
+                        {COIN},
+                        {COIN},
+                        {COIN},
+                        {COIN},
+                        {EXIT},
+                },
+                Arrays.asList(DOWN, DOWN, BOMB, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {

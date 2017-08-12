@@ -162,6 +162,11 @@ public class Simulator {
                 found = true;
                 buttonsPressed++;
                 newBoard.setInPlace(to, EMPTY);
+            } else if (bombableItem(target)) {
+                newBoard.setInPlace(to, EMPTY);
+                if (target == MEDIKIT) {
+                    found = true;
+                }
             }
 
         }
@@ -193,6 +198,10 @@ public class Simulator {
                 ),
                 gameState.round
         );
+    }
+
+    private boolean bombableItem(TileType tile) {
+        return tile == MEDIKIT;
     }
 
     private boolean bombableEnemy(TileType tile) {
