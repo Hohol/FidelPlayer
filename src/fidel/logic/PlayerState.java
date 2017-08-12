@@ -1,13 +1,13 @@
 package fidel.logic;
 
-class PlayerState {
+public class PlayerState {
     final int gold;
-    final int xp;
+    public final int xp;
     final int streak;
     final boolean afterTriple;
-    final int hp;
+    public final int hp;
     final int poison;
-    final int maxHp;
+    public final int maxHp;
     final boolean switchUsed;
     final int buttonsPressed;
     final int robotBars;

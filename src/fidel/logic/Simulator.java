@@ -5,9 +5,10 @@ import fidel.common.*;
 import static fidel.common.Direction.DIRS;
 import static fidel.common.Direction.DOWN;
 import static fidel.common.TileType.*;
+import static fidel.interaction.ExceptionHelper.fail;
 import static java.lang.Math.*;
 
-class Simulator {
+public class Simulator {
 
     private final static int[] REQUIRED_XP = {60, 90, 100, 110, 120, 140};
 
@@ -476,7 +477,7 @@ class Simulator {
         return found;
     }
 
-    int getInitialBossHp(LevelType levelType) {
+    public static int getInitialBossHp(LevelType levelType, GameParameters gameParameters) {
         if (levelType == LevelType.ALIENS) {
             return gameParameters.alienBossHp;
         }
@@ -484,5 +485,29 @@ class Simulator {
             return gameParameters.robodogMaxHp;
         }
         return 0;
+    }
+
+    public MoveGameState simulate(Command command, MoveGameState gameState) {
+        switch (command) {
+            case UP:
+                return simulateMove(gameState, Direction.UP);
+            case LEFT:
+                return simulateMove(gameState, Direction.LEFT);
+            case DOWN:
+                return simulateMove(gameState, Direction.DOWN);
+            case RIGHT:
+                return simulateMove(gameState, Direction.RIGHT);
+            case BARK:
+                return simulateBark(gameState);
+            case HEAL:
+                return simulateHeal(gameState);
+            case BOMB:
+                return simulateBomb(gameState);
+            case SYRINGE:
+                return simulateSyringe(gameState);
+            case ENTER:
+                return gameState.swapGates();
+        }
+        throw new RuntimeException("not supported: " + command);
     }
 }

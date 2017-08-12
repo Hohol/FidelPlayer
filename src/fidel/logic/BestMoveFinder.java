@@ -113,12 +113,7 @@ public class BestMoveFinder {
             curMoves.add(ENTER);
         }
         start = System.currentTimeMillis();
-        MoveGameState initialGameState = new MoveGameState(
-                gameState.board,
-                gameState.board.findEntrance(), new PlayerState(gameState.gold, gameState.xp, 0, false, gameState.maxHp, 0,
-                gameState.maxHp, false, 0, 3, simulator.getInitialBossHp(levelType), false),
-                1
-        );
+        MoveGameState initialGameState = new MoveGameState(gameState, gameParameters);
         try {
             dfs(initialGameState);
         } catch (TimeoutException e) {

@@ -31,7 +31,7 @@ public class Main {
 
             System.out.println(bestMoves);
 
-            moveMaker.makeMoves(bestMoves);
+            moveMaker.makeMoves(bestMoves, gameState);
             if (shouldFinishLevel) {
                 tryy(() -> Thread.sleep(1000));
             } else {
@@ -61,7 +61,7 @@ public class Main {
             Cell chestCell = gameState.board.find(CHEST);
             List<Command> moves = BestMoveFinder.findInvestigateChestMoves(gameState, gameParameters, chestCell);
             moves = append(moves, BARK);
-            moveMaker.makeMoves(moves);
+            moveMaker.makeMoves(moves, gameState);
             GameState tmpGameState = gameStateReader.readGameState();
             TileType tile = tmpGameState.board.get(chestCell);
             gameState.board.setInPlace(chestCell, tile);
@@ -71,7 +71,7 @@ public class Main {
                     .map(m -> m == ENTER ? ENTER : UNDO)
                     .collect(Collectors.toList());
             Collections.reverse(undoMoves);
-            moveMaker.makeMoves(undoMoves);
+            moveMaker.makeUndoMoves(undoMoves);
         }
     }
 }
