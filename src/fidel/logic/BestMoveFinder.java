@@ -97,6 +97,7 @@ public class BestMoveFinder {
 
         MovesAndEvaluation first = tryy(() -> firstFuture.get());
         MovesAndEvaluation second = tryy(() -> secondFuture.get());
+        executor.shutdown();
 
         if (first.evaluation >= second.evaluation) {
             if (first.moves == null) {
