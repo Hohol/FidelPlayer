@@ -41,6 +41,9 @@ public class Simulator {
         if (aborigineLevel) {
             sleepAborigines(newBoard, to, dir);
         }
+        if (board.get(to) == BIG_FLOWER) {
+            assignNearby(newBoard, to, SMALL_FLOWER, EMPTY);
+        }
         return new MoveGameState(newBoard, to, newPs, gameState.round + 1);
     }
 
@@ -464,14 +467,14 @@ public class Simulator {
     }
 
     boolean awakeAborigines(Board board, Cell cell) {
-        return awake(board, cell, ABORIGINE, ANGRY_ABORIGINE);
+        return assignNearby(board, cell, ABORIGINE, ANGRY_ABORIGINE);
     }
 
     private boolean awakeMimics(Board board, Cell cell) {
-        return awake(board, cell, MIMIC_CHEST, BARKED_MIMIC_CHEST);
+        return assignNearby(board, cell, MIMIC_CHEST, BARKED_MIMIC_CHEST);
     }
 
-    private boolean awake(Board board, Cell cell, TileType fromState, TileType toState) {
+    private boolean assignNearby(Board board, Cell cell, TileType fromState, TileType toState) {
         boolean found = false;
         for (Direction dir : DIRS) {
             Cell to = cell.add(dir);
