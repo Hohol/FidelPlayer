@@ -183,7 +183,7 @@ public class BestMoveFinder {
             if (!board.inside(to)) {
                 continue;
             }
-            if (!passableNow(ps, board, to)) {
+            if (!passableNow(ps, board, to, dir)) {
                 continue;
             }
 
@@ -198,7 +198,9 @@ public class BestMoveFinder {
             addMove(moveAndStates, dir.command, newGameState);
         }
 
-        addMove(moveAndStates, BARK, simulator.simulateBark(gameState));
+        if (curMoves.isEmpty() || curMoves.get(curMoves.size() - 1) != BARK) {
+            addMove(moveAndStates, BARK, simulator.simulateBark(gameState));
+        }
         if (shouldHeal) {
             addMove(moveAndStates, HEAL, simulator.simulateHeal(gameState));
             addMove(moveAndStates, SYRINGE, simulator.simulateSyringe(gameState));
@@ -274,7 +276,7 @@ public class BestMoveFinder {
         return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME;
     }
 
-    private boolean passableNow(PlayerState ps, Board board, Cell to) {
+    private boolean passableNow(PlayerState ps, Board board, Cell to, Direction dir) {
         TileType tile = board.get(to);
         if (!potentiallyPassable(tile)) {
             return false;
@@ -286,6 +288,15 @@ public class BestMoveFinder {
             return ps.buttonsPressed % 2 == 0;
         }
         if (levelType == LevelType.ROBODOG && ps.bossHp > 0 && board.getOpposite(to) == VISITED) {
+            return false;
+        }
+        if (tile == PAW_RIGHT) {
+            return dir == Direction.RIGHT;
+        }
+        if (tile == PAW_LEFT) {
+            return dir == Direction.LEFT;
+        }
+        if ((levelType == LevelType.ALIENS || levelType == LevelType.DRAGON) && ps.bossHp > 0 && to.equals(exit)) {
             return false;
         }
         return true;

@@ -27,14 +27,19 @@ public class Simulator {
         this.gameParameters = gameParameters;
         requiredXp = REQUIRED_XP[gameState.maxHp - 2];
         eggTiming = new Cell[100];
-        gameState.eggTiming.forEach((cell, round) -> eggTiming[round] = cell);
+        gameState.eggTiming.forEach((cell, round) -> {
+            if (round != -1) {
+                eggTiming[round] = cell;
+            }
+        });
     }
 
     MoveGameState simulateMove(MoveGameState gameState, Direction dir) {
         Cell to = gameState.cur.add(dir);
         PlayerState ps = gameState.ps;
         Board board = gameState.board;
-        PlayerState newPs = calcNewPs(ps, board.get(to), dir, board, to, gameState.round);
+        TileType oldTile = board.get(to);
+        PlayerState newPs = calcNewPs(ps, oldTile, dir, board, to, gameState.round);
         Board newBoard = board.setAndCopy(to, VISITED);
         if (levelType == LevelType.ROBODOG && ps.bossHp > 0) {
             newBoard.setInPlace(newBoard.getOppositeCell(to), EMPTY);
@@ -45,12 +50,15 @@ public class Simulator {
         if (aborigineLevel) {
             sleepAborigines(newBoard, to, dir);
         }
-        if (board.get(to) == BIG_FLOWER) {
+        if (oldTile == BIG_FLOWER) {
             assignNearby(newBoard, to, SMALL_FLOWER, EMPTY);
         }
         Cell spawningCell = eggTiming[gameState.round];
         if (spawningCell != null && newBoard.get(spawningCell) == EGG) {
             newBoard.setInPlace(spawningCell, SNAKE);
+        }
+        if (oldTile == SNOUT) {
+            newBoard.replaceAll(FIRE, SMALL_FIRE);
         }
         return new MoveGameState(newBoard, to, newPs, gameState.round + 1);
     }
@@ -95,11 +103,33 @@ public class Simulator {
         }
         somethingChanged |= awakeAborigines(newBoard, cur);
         somethingChanged |= awakeMimics(newBoard, cur);
+        somethingChanged |= turnPaws(newBoard, cur);
         if (somethingChanged) {
             return new MoveGameState(newBoard, cur, gameState.ps, gameState.round);
         } else {
             return null;
         }
+    }
+
+    private boolean turnPaws(Board board, Cell cur) {
+        boolean changedLeft = turnPaw(board, cur.add(Direction.LEFT));
+        boolean changedRight = turnPaw(board, cur.add(Direction.RIGHT));
+        return changedLeft || changedRight;
+    }
+
+    private boolean turnPaw(Board board, Cell cur) {
+        if (!board.inside(cur)) {
+            return false;
+        }
+        if (board.get(cur) == PAW_LEFT) {
+            board.setInPlace(cur, PAW_RIGHT);
+            return true;
+        }
+        if (board.get(cur) == PAW_RIGHT) {
+            board.setInPlace(cur, PAW_LEFT);
+            return true;
+        }
+        return false;
     }
 
     public MoveGameState simulateHeal(MoveGameState gameState) {
@@ -229,6 +259,15 @@ public class Simulator {
                 tile == ABORIGINE ||
                 tile == ANGRY_ABORIGINE ||
                 tile == SMALL_FLOWER ||
+
+                tile == DRAGON_SPIKE_1 ||
+                tile == DRAGON_SPIKE_2 ||
+                tile == PAW_LEFT ||
+                tile == PAW_RIGHT ||
+                tile == SNOUT ||
+                tile == EYE ||
+                tile == WING ||
+
                 tile == ROBOT;
     }
 
@@ -247,7 +286,7 @@ public class Simulator {
         int xp = ps.xp + addXp;
 
         int streak = ps.streak;
-        if (addXp > 0 || tile == SMALL_SPIDER) {
+        if (addXp > 0 || tile == SMALL_SPIDER || tile == SNOUT || tile == EYE || tile == WING) {
             streak++;
         } else {
             streak = 0;
@@ -292,17 +331,29 @@ public class Simulator {
         if (ps.bossHp == 0) {
             return 0;
         }
-        if (levelType == LevelType.ALIENS) {
-            return ps.bossHp - (tile == ALIEN ? 1 : 0);
-        }
         if (levelType == LevelType.ROBODOG) {
             TileType robodogTile = board.getOpposite(cell);
             if (robodogTile == ROBO_MEDIKIT) {
                 return gameParameters.robodogMaxHp;
             }
-            return max(0, ps.bossHp - calcRobodogDmg(robodogTile, ps, dir));
         }
-        return ps.bossHp;
+        return max(0, ps.bossHp - getBossDmg(ps, tile, cell, board, dir));
+    }
+
+    private int getBossDmg(PlayerState ps, TileType tile, Cell cell, Board board, Direction dir) {
+        if (levelType == LevelType.ALIENS) {
+            return tile == ALIEN ? 1 : 0;
+        }
+        if (levelType == LevelType.ROBODOG) {
+            return calcRobodogDmg(board.getOpposite(cell), ps, dir);
+        }
+        if (levelType == LevelType.DRAGON) {
+            if (tile == PAW_LEFT || tile == PAW_RIGHT || tile == DRAGON_SPIKE_1 || tile == EYE || tile == WING || tile == DRAGON_SPIKE_2
+                    || tile == SNOUT) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     private int calcRobodogDmg(TileType tile, PlayerState ps, Direction dir) {
@@ -382,6 +433,21 @@ public class Simulator {
             }
         }
         if (tile == MIMIC_CHEST || tile == BARKED_MIMIC_CHEST && dir != DOWN) {
+            return 2;
+        }
+        if (tile == FIRE) {
+            return 2;
+        }
+        if (tile == SMALL_FIRE) {
+            return 1;
+        }
+        if (tile == VORTEX) {
+            return 1;
+        }
+        if (tile == DRAGON_SPIKE_1) {
+            return 1;
+        }
+        if (tile == DRAGON_SPIKE_2) {
             return 2;
         }
         return 0;
@@ -467,6 +533,12 @@ public class Simulator {
         if (tile == BARKED_MIMIC_CHEST && dir == DOWN) {
             return 4;
         }
+        if (tile == PAW_LEFT || tile == PAW_RIGHT) {
+            return 3;
+        }
+        if (tile == DRAGON_SPIKE_1 || tile == DRAGON_SPIKE_2) {
+            return 1;
+        }
         return 0;
     }
 
@@ -506,7 +578,7 @@ public class Simulator {
             return gameParameters.robodogMaxHp;
         }
         if (levelType == LevelType.DRAGON) {
-            return 20;
+            return gameParameters.dragonHp;
         }
         return 0;
     }

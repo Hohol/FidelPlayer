@@ -620,6 +620,62 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void paw() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY, EMPTY},
+                        {PAW_LEFT, WALL, EMPTY},
+                        {EXIT, EMPTY, EMPTY},
+                },
+                Arrays.asList(RIGHT, RIGHT, DOWN, DOWN, LEFT, LEFT)
+        );
+    }
+
+    @Test
+    void pawBark() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, PAW_LEFT, PAW_RIGHT, EXIT},
+                },
+                Arrays.asList(BARK, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void pawXp() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, PAW_LEFT},
+                        {SPIDER, EXIT}
+                },
+                Arrays.asList(BARK, RIGHT, DOWN)
+        );
+    }
+
+    @Test
+    void pawDmg() {
+        levelType = LevelType.DRAGON;
+        gameParameters.dragonHp = 1;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, PAW_LEFT},
+                        {SNAKE, EXIT}
+                },
+                Arrays.asList(BARK, RIGHT, DOWN)
+        );
+    }
+
+    @Test
+    void snout() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SNOUT, FIRE, FIRE, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {

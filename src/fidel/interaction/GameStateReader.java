@@ -414,7 +414,7 @@ public class GameStateReader {
 //        BufferedImage img = gameStateReader.getImageFromCapture(true);
         BufferedImage[][] tileImages = gameStateReader.getTileImages(img);
 
-        gameStateReader.saveTile(tileImages[1][3], EGG);
+        gameStateReader.saveTile(tileImages[4][4], EMPTY);
 
         /*BufferedImage img = new GameStateReader().getImageFromCapture();
         int cnt = 1;

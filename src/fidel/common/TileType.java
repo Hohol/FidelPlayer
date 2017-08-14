@@ -42,6 +42,7 @@ public enum TileType {
     DRAGON_SPIKE_1,
     DRAGON_SPIKE_2,
     FIRE,
+    SMALL_FIRE,
     PAW_LEFT,
     PAW_RIGHT,
     VORTEX,
