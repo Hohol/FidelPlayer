@@ -95,34 +95,36 @@ public class Main {
 //                .put(new Cell(1, 3), 12)
                 .build();
 
-        List<Command> moves = BestMoveFinder.investigateEggsMoves(gameState, gameParameters);
-        int movesMade = moveMaker.makeMoves(moves, gameState,
-                round -> {
-                    List<Cell> unknownCells = eggTiming.entrySet().stream()
-                            .filter(e -> e.getValue() == UNKNOWN_EGG_TIMING)
-                            .map(e -> e.getKey())
-                            .collect(Collectors.toList());
-                    if (!unknownCells.isEmpty()) {
-                        tryy(() -> Thread.sleep(100));
-                        for (Cell cell : unknownCells) {
-                            TileType tile = gameStateReader.eggOrSnake(cell, board.height == 3);
+        while (eggTiming.values().stream().anyMatch(v -> v == UNKNOWN_EGG_TIMING)) {
+            List<Command> moves = BestMoveFinder.investigateEggsMoves(gameState, gameParameters);
+            int movesMade = moveMaker.makeMoves(moves, gameState,
+                    round -> {
+                        List<Cell> unknownCells = eggTiming.entrySet().stream()
+                                .filter(e -> e.getValue() == UNKNOWN_EGG_TIMING)
+                                .map(e -> e.getKey())
+                                .collect(Collectors.toList());
+                        if (!unknownCells.isEmpty()) {
+                            tryy(() -> Thread.sleep(100));
+                            for (Cell cell : unknownCells) {
+                                TileType tile = gameStateReader.eggOrSnake(cell, board.height == 3);
 
-                            Integer expectedRound = expected.get(cell);
-                            if (expectedRound != null && (round < expectedRound && tile == SNAKE || round >= expectedRound && tile == EGG)) {
-                                fail();
-                            }
+                                Integer expectedRound = expected.get(cell);
+                                if (expectedRound != null && (round < expectedRound && tile == SNAKE || round >= expectedRound && tile == EGG)) {
+                                    fail();
+                                }
 
-                            if (tile == SNAKE) {
-                                eggTiming.put(cell, round);
+                                if (tile == SNAKE) {
+                                    eggTiming.put(cell, round);
+                                }
                             }
                         }
+                        boolean ready = eggTiming.values().stream().allMatch(v -> v != UNKNOWN_EGG_TIMING);
+                        return !ready;
                     }
-                    boolean ready = eggTiming.values().stream().allMatch(v -> v != UNKNOWN_EGG_TIMING);
-                    return !ready;
-                }
-        );
-        moveMaker.undo(moves.subList(0, movesMade));
-        eggTiming.keySet().forEach(cell -> board.setInPlace(cell, EGG));
+            );
+            moveMaker.undo(moves.subList(0, movesMade));
+            eggTiming.keySet().forEach(cell -> board.setInPlace(cell, EGG));
+        }
         System.out.println(eggTiming);
         return eggTiming;
     }
