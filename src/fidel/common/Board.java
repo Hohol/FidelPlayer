@@ -139,4 +139,14 @@ public class Board {
     public TileType getOpposite(Cell cell) {
         return get(getOppositeCell(cell));
     }
+
+    public void replaceAll(TileType from, TileType to) {
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (get(i, j) == from) {
+                    setInPlace(i, j, to);
+                }
+            }
+        }
+    }
 }

@@ -10,7 +10,7 @@ import static java.lang.Math.min;
 
 public class Simulator {
 
-    private final static int[] REQUIRED_XP = {60, 90, 100, 110, 120, 140};
+    private final static int[] REQUIRED_XP = {60, 90, 100, 110, 120, 140, 100500}; // todo почему понадобилось 100500?
 
     private final LevelType levelType;
     private final Cell exit;
@@ -504,6 +504,9 @@ public class Simulator {
         }
         if (levelType == LevelType.ROBODOG) {
             return gameParameters.robodogMaxHp;
+        }
+        if (levelType == LevelType.DRAGON) {
+            return 20;
         }
         return 0;
     }

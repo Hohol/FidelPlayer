@@ -17,7 +17,7 @@ import static fidel.interaction.ExceptionHelper.tryy;
 
 public class Main {
 
-    static boolean shouldFinishLevel = true;
+    static boolean shouldFinishLevel = false;
     static final GameStateReader gameStateReader = new GameStateReader();
     static final GameParameters gameParameters = new GameParameters();
     static final MoveMaker moveMaker = new MoveMaker();

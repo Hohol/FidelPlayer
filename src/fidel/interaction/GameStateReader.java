@@ -59,6 +59,9 @@ public class GameStateReader {
         } else if (board.contains(ROBODOG)) {
             levelType = LevelType.ROBODOG;
             board.setInPlace(board.find(ROBODOG), EXIT);
+        } else if (board.width == 9) {
+            levelType = LevelType.DRAGON;
+            board.replaceAll(EMPTY, VORTEX); // todo detect vortex
         }
         return new GameState(board, maxHp, gold, xp, levelType, Collections.emptyMap());
     }
@@ -181,7 +184,9 @@ public class GameStateReader {
     }
 
     private LevelParameters getLevelParameters(BufferedImage img) {
-        if (isFirstLevel(img)) {
+        if (img.getWidth() == 939) {
+            return LevelParameters.DRAGON;
+        } else if (isFirstLevel(img)) {
             return LevelParameters.SMALL;
         } else {
             return LevelParameters.NORMAL;
@@ -191,6 +196,7 @@ public class GameStateReader {
     static class LevelParameters {
         public static final LevelParameters NORMAL = new LevelParameters(26, 58, 7, 7);
         public static final LevelParameters SMALL = new LevelParameters(26, 418, 3, 7);
+        public static final LevelParameters DRAGON = new LevelParameters(26, 58, 7, 9);
 
         final int startX;
         final int startY;

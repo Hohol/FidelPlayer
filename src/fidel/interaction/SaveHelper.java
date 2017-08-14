@@ -14,7 +14,7 @@ public class SaveHelper {
         if (args[0].equals("dump")) {
             dump("tmp");
         } else {
-            undump("eggs");
+            undump("tmp");
         }
     }
 

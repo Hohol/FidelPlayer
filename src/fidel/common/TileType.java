@@ -38,6 +38,17 @@ public enum TileType {
     TREASURE_CHEST,
     MIMIC_CHEST,
     BARKED_MIMIC_CHEST,
+
+    DRAGON_SPIKE_1,
+    DRAGON_SPIKE_2,
+    FIRE,
+    PAW_LEFT,
+    PAW_RIGHT,
+    VORTEX,
+    SNOUT,
+    EYE,
+    WING,
+
     GNOME;
 
     public final Direction dir;
