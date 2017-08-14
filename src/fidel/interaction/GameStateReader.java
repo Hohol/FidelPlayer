@@ -8,14 +8,12 @@ import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import static fidel.common.TileType.*;
-import static fidel.interaction.ExceptionHelper.*;
+import static fidel.interaction.ExceptionHelper.tryy;
 import static java.awt.Color.WHITE;
 
 public class GameStateReader {
@@ -24,14 +22,14 @@ public class GameStateReader {
     private static final int TILE_HEIGHT = 90;
 
     private final Robot robot = tryy(() -> new Robot());
-    private final Map<TileType, List<BufferedImage>> tileTypeImgs;
+    private final Map<TileType, List<BufferedImage>> allTypeImages;
 
     public GameStateReader() {
-        tileTypeImgs = loadTiles();
+        allTypeImages = loadTiles();
     }
 
     public GameState readGameState() {
-        BufferedImage img = getImageFromCapture();
+        BufferedImage img = getImageFromCapture(true);
         return parseImage(img);
     }
 
@@ -43,11 +41,6 @@ public class GameStateReader {
 
         BufferedImage[][] tileImages = getTileImages(img);
 
-        /*saveTile(tileImages[6][0], SPIDER);
-        if (true) {
-            return null;
-        }/**/
-
         int h = tileImages.length;
         int w = tileImages[0].length;
         int maxHp = getMaxHp(img);
@@ -56,7 +49,7 @@ public class GameStateReader {
         Board board = new Board(h, w);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
-                board.setInPlace(row, col, findMostSimilar(tileImages[row][col]));
+                board.setInPlace(row, col, findMostSimilar(tileImages[row][col], allTypeImages));
             }
         }
 
@@ -67,11 +60,28 @@ public class GameStateReader {
             levelType = LevelType.ROBODOG;
             board.setInPlace(board.find(ROBODOG), EXIT);
         }
-        return new GameState(board, maxHp, gold, xp, levelType);
+        return new GameState(board, maxHp, gold, xp, levelType, Collections.emptyMap());
     }
 
-    public TileType readTile(Cell cell) {
-        return findMostSimilar(getTileImages(getImageFromCapture())[cell.row][cell.col]);
+    public TileType readTile(Cell cell) { // todo remove
+        return findMostSimilar(getTileImages(getImageFromCapture(false))[cell.row][cell.col], allTypeImages);
+    }
+
+    public TileType eggOrSnake(Cell cell, boolean small) {
+        Map<TileType, List<BufferedImage>> tileTypeImgs = new HashMap<>();
+
+        tileTypeImgs.put(EGG, allTypeImages.get(EGG)); //todo candidates
+        tileTypeImgs.put(SNAKE, allTypeImages.get(SNAKE));
+
+        Rectangle rect = findWindow();
+        LevelParameters levelParameters = small ? LevelParameters.SMALL : LevelParameters.NORMAL;
+
+
+        BufferedImage tileImg = robot.createScreenCapture(new Rectangle(rect.x + levelParameters.startX + cell.col * TILE_WIDTH, rect.y + levelParameters.startY + cell.row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT));
+
+        TileType mostSimilar = findMostSimilar(tileImg, tileTypeImgs);
+        writeImg(tileImg, "tmp-" + mostSimilar, true);
+        return mostSimilar;
     }
 
     private int getMaxHp(BufferedImage img) {
@@ -167,11 +177,48 @@ public class GameStateReader {
     }
 
     private BufferedImage[][] getTileImages(BufferedImage img) {
+        return getTileImages(img, getLevelParameters(img));
+    }
+
+    private LevelParameters getLevelParameters(BufferedImage img) {
         if (isFirstLevel(img)) {
-            return getTileImages(img, 26, 418, 3, 7);
+            return LevelParameters.SMALL;
         } else {
-            return getTileImages(img, 26, 58, 7, 7);
+            return LevelParameters.NORMAL;
         }
+    }
+
+    static class LevelParameters {
+        public static final LevelParameters NORMAL = new LevelParameters(26, 58, 7, 7);
+        public static final LevelParameters SMALL = new LevelParameters(26, 418, 3, 7);
+
+        final int startX;
+        final int startY;
+        final int height;
+        final int width;
+
+        LevelParameters(int startX, int startY, int height, int width) {
+            this.startX = startX;
+            this.startY = startY;
+            this.height = height;
+            this.width = width;
+        }
+    }
+
+    private BufferedImage[][] getTileImages(BufferedImage img, LevelParameters levelParameters) {
+        int h = levelParameters.height;
+        int w = levelParameters.width;
+        BufferedImage[][] r = new BufferedImage[h][w];
+        for (int row = 0; row < h; row++) {
+            for (int col = 0; col < w; col++) {
+                r[row][col] = getTileImage(img, levelParameters.startX, levelParameters.startY, row, col);
+            }
+        }
+        return r;
+    }
+
+    private BufferedImage getTileImage(BufferedImage img, int startX, int startY, int row, int col) {
+        return img.getSubimage(startX + col * TILE_WIDTH, startY + row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
     }
 
     private BufferedImage[][] getTileImages(BufferedImage img, int startX, int startY, int h, int w) {
@@ -229,20 +276,22 @@ public class GameStateReader {
         writeImg(img, "marked_tiles", true);
     }
 
-    private BufferedImage getImageFromCapture() {
-        int[] a = GetWindowRect.getRect("Fidel Dungeon Rescue");
-        int x = a[0];
-        int y = a[1];
-        int w = a[2] - x + 1;
-        int h = a[3] - y + 1;
-        robot.mouseMove(x + 100, y + 10);
-        robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+    public BufferedImage getImageFromCapture(boolean shouldClick) {
+        Rectangle rect = findWindow();
+        if (shouldClick) {
+            robot.mouseMove(rect.x + 100, rect.y + 10);
+            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+        }
         tryy(() -> Thread.sleep(100));
 
-        BufferedImage img = robot.createScreenCapture(new Rectangle(x, y, w, h));
+        BufferedImage img = robot.createScreenCapture(rect);
         save(img);
         return img;
+    }
+
+    private Rectangle findWindow() {
+        return GetWindowRect.getRect("Fidel Dungeon Rescue");
     }
 
     private void save(BufferedImage img) {
@@ -273,7 +322,7 @@ public class GameStateReader {
         });
     }
 
-    private TileType findMostSimilar(BufferedImage rectangle) {
+    private static TileType findMostSimilar(BufferedImage rectangle, Map<TileType, List<BufferedImage>> tileTypeImgs) {
         double min = Double.POSITIVE_INFINITY;
         TileType r = null;
         for (Map.Entry<TileType, List<BufferedImage>> entry : tileTypeImgs.entrySet()) {
@@ -356,10 +405,10 @@ public class GameStateReader {
     public static void main(String[] args) {
         GameStateReader gameStateReader = new GameStateReader();
         BufferedImage img = gameStateReader.getImageFromFile();
-//        BufferedImage img = gameStateReader.getImageFromCapture();
+//        BufferedImage img = gameStateReader.getImageFromCapture(true);
         BufferedImage[][] tileImages = gameStateReader.getTileImages(img);
 
-        gameStateReader.saveTile(tileImages[4][6], ROBO_MEDIKIT);
+        gameStateReader.saveTile(tileImages[1][3], EGG);
 
         /*BufferedImage img = new GameStateReader().getImageFromCapture();
         int cnt = 1;

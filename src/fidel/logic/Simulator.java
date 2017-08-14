@@ -5,8 +5,8 @@ import fidel.common.*;
 import static fidel.common.Direction.DIRS;
 import static fidel.common.Direction.DOWN;
 import static fidel.common.TileType.*;
-import static fidel.interaction.ExceptionHelper.fail;
-import static java.lang.Math.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class Simulator {
 
@@ -17,13 +17,17 @@ public class Simulator {
     private final GameParameters gameParameters;
     private final boolean aborigineLevel;
     private final int requiredXp;
+    private final Cell[] eggTiming;
 
     public Simulator(GameState gameState, GameParameters gameParameters) {
+        Board board = gameState.board;
         this.levelType = gameState.levelType;
-        this.exit = gameState.board.find(EXIT);
-        this.aborigineLevel = gameState.board.contains(ABORIGINE);
+        this.exit = board.find(EXIT);
+        this.aborigineLevel = board.contains(ABORIGINE);
         this.gameParameters = gameParameters;
         requiredXp = REQUIRED_XP[gameState.maxHp - 2];
+        eggTiming = new Cell[100];
+        gameState.eggTiming.forEach((cell, round) -> eggTiming[round] = cell);
     }
 
     MoveGameState simulateMove(MoveGameState gameState, Direction dir) {
@@ -43,6 +47,10 @@ public class Simulator {
         }
         if (board.get(to) == BIG_FLOWER) {
             assignNearby(newBoard, to, SMALL_FLOWER, EMPTY);
+        }
+        Cell spawningCell = eggTiming[gameState.round];
+        if (spawningCell != null && newBoard.get(spawningCell) == EGG) {
+            newBoard.setInPlace(spawningCell, SNAKE);
         }
         return new MoveGameState(newBoard, to, newPs, gameState.round + 1);
     }
@@ -167,7 +175,7 @@ public class Simulator {
                 newBoard.setInPlace(to, EMPTY);
             } else if (bombableItem(target)) {
                 newBoard.setInPlace(to, EMPTY);
-                if (target == MEDIKIT) {
+                if (target == MEDIKIT || target == EGG) {
                     found = true;
                 }
             }
@@ -202,7 +210,7 @@ public class Simulator {
     }
 
     private boolean bombableItem(TileType tile) {
-        return tile == MEDIKIT;
+        return tile == MEDIKIT || tile == EGG;
     }
 
     private boolean bombableEnemy(TileType tile) {
@@ -274,7 +282,7 @@ public class Simulator {
         int maxHp = ps.maxHp;
         if (hp >= 0 && ps.xp < requiredXp && xp >= requiredXp) {
             maxHp++;
-            hp = maxHp - ps.poison;
+            hp = maxHp - poison;
         }
 
         return new PlayerState(gold, xp, streak, afterTriple, hp, poison, maxHp, switchUsed, buttonsPressed, robotBars, bossHp, ps.usedBomb);
@@ -382,7 +390,7 @@ public class Simulator {
     private int calcHp(PlayerState ps, TileType tile, int dmg, int poison) {
         int hp = ps.hp - dmg;
         hp = min(hp, ps.maxHp - poison);
-        if (tile == MEDIKIT) {
+        if (tile == MEDIKIT || tile == EGG) {
             hp = ps.maxHp - poison;
         }
         return hp;

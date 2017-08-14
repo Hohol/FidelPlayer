@@ -1,17 +1,14 @@
 package fidel.logic;
 
+import com.google.common.collect.ImmutableMap;
+import fidel.common.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-
-import fidel.common.Board;
-import fidel.common.Command;
-import fidel.common.GameParameters;
-import fidel.common.GameState;
-import fidel.common.LevelType;
-import fidel.common.TileType;
+import java.util.Map;
 
 import static fidel.common.Command.*;
 import static fidel.common.TileType.*;
@@ -25,6 +22,7 @@ public class BestMoveFinderTest {
     int gold;
     int xp;
     GameParameters gameParameters;
+    Map<Cell, Integer> eggTiming;
 
     @BeforeMethod
     void init() {
@@ -33,6 +31,7 @@ public class BestMoveFinderTest {
         gold = 0;
         xp = 0;
         gameParameters = new GameParameters();
+        eggTiming = Collections.emptyMap();
     }
 
     @Test
@@ -177,7 +176,7 @@ public class BestMoveFinderTest {
                                 {ALIEN, EMPTY, EMPTY, ALIEN, EMPTY, EMPTY, EMPTY},
                                 {EMPTY, EMPTY, ALIEN, ALIEN, MEDIKIT, ALIEN, EMPTY}
                         }), 3,
-                0, 0, LevelType.ALIENS);
+                0, 0, LevelType.ALIENS, eggTiming);
         while (true) {
             BestMoveFinder.findBestMoves(gameState, gameParameters);
         }
@@ -195,7 +194,7 @@ public class BestMoveFinderTest {
                                 {ENTRANCE, EMPTY, EMPTY, EXIT, WALL, SPIDER, EMPTY},
                                 {WALL, EMPTY, EMPTY, EMPTY, MEDIKIT, EMPTY, SNAKE}
                         }), 3,
-                6, 0, LevelType.NORMAL);
+                6, 0, LevelType.NORMAL, eggTiming);
         BestMoveFinder.findBestMoves(gameState, gameParameters);
     }
 
@@ -212,7 +211,7 @@ public class BestMoveFinderTest {
                                 {ALIEN, EMPTY, ALIEN, EMPTY, EMPTY, ALIEN, ALIEN},
                                 {ALIEN, ALIEN, EMPTY, EMPTY, MEDIKIT, ALIEN, ALIEN}
                         }), 3,
-                9, 0, LevelType.ALIENS);
+                9, 0, LevelType.ALIENS, eggTiming);
         BestMoveFinder.findBestMoves(gameState, gameParameters);
     }
 
@@ -573,12 +572,60 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void eggs() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, ROBOT, EGG, ROBOT, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void snakeSpawn() {
+        eggTiming = ImmutableMap.of(new Cell(2, 0), 3);
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EGG, EXIT},
+                },
+                Arrays.asList(RIGHT, DOWN, LEFT, DOWN, RIGHT)
+        );
+    }
+
+    @Test
+    void snakeSpawn2() {
+        eggTiming = ImmutableMap.of(new Cell(2, 0), 4);
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY},
+                        {EMPTY, EMPTY},
+                        {EGG, EXIT},
+                },
+                Arrays.asList(RIGHT, DOWN, DOWN)
+        );
+    }
+
+    @Test
+    void levelUpAndPoison() {
+        xp = 59;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SNAKE, ROBOT, SPIDER, EXIT},
+                        {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                },
+                Arrays.asList(ENTER, LEFT, LEFT, LEFT, LEFT)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {
             levelType = LevelType.ALIENS;
         }
-        GameState gameState = new GameState(board, maxHp, gold, xp, levelType);
+        GameState gameState = new GameState(board, maxHp, gold, xp, levelType, eggTiming);
 
         List<Command> actual = BestMoveFinder.findBestMoves(gameState, gameParameters);
         assertEquals(actual, expected, actual.toString());

@@ -25,7 +25,7 @@ public class BestMoveFinder {
 
     List<Command> bestMoves = null;
     double bestEvaluation = Double.NEGATIVE_INFINITY;
-    PlayerState bestState = null;
+    MoveGameState bestState = null;
     final List<Command> curMoves = new ArrayList<>();
     long start;
     final int[][] visited;
@@ -50,10 +50,11 @@ public class BestMoveFinder {
         }
         Evaluator standardEvaluator = new Evaluator() {
             @Override
-            public double evaluate(PlayerState ps, List<Command> moves) {
-                if (ps == null) {
+            public double evaluate(MoveGameState state, List<Command> moves) {
+                if (state == null) {
                     return Double.NEGATIVE_INFINITY;
                 }
+                PlayerState ps = state.ps;
                 return ps.gold * 1.2 + ps.xp - moves.size() / 1000.0;
             }
 
@@ -64,14 +65,19 @@ public class BestMoveFinder {
                 }
                 return cur.equals(exit);
             }
+
+            @Override
+            public boolean updateOnEachMove() {
+                return false;
+            }
         };
-        return findBestMovesTmp(gameState, gameParameters, standardEvaluator);
+        return findBestMoves(gameState, gameParameters, standardEvaluator);
     }
 
     public static List<Command> findInvestigateChestMoves(GameState gameState, GameParameters gameParameters, Cell chestCell) {
         Evaluator evaluator = new Evaluator() {
             @Override
-            public double evaluate(PlayerState ps, List<Command> moves) {
+            public double evaluate(MoveGameState state, List<Command> moves) {
                 return -moves.size();
             }
 
@@ -79,15 +85,40 @@ public class BestMoveFinder {
             public boolean finished(Cell cur, PlayerState ps, Cell exit) {
                 return dist(cur, chestCell) == 1;
             }
+
+            @Override
+            public boolean updateOnEachMove() {
+                return false;
+            }
         };
-        return findBestMovesTmp(gameState, gameParameters, evaluator);
+        return findBestMoves(gameState, gameParameters, evaluator);
+    }
+
+    public static List<Command> investigateEggsMoves(GameState gameState, GameParameters gameParameters) {
+        Evaluator evaluator = new Evaluator() {
+            @Override
+            public double evaluate(MoveGameState state, List<Command> moves) {
+                return state.round;
+            }
+
+            @Override
+            public boolean finished(Cell cur, PlayerState ps, Cell exit) {
+                return false;
+            }
+
+            @Override
+            public boolean updateOnEachMove() {
+                return true;
+            }
+        };
+        return findBestMoves(gameState, gameParameters, evaluator);
     }
 
     private static int dist(Cell a, Cell b) {
         return abs(a.row - b.row) + abs(a.col - b.col);
     }
 
-    private static List<Command> findBestMovesTmp(GameState gameState, GameParameters gameParameters, Evaluator evaluator) {
+    private static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters, Evaluator evaluator) {
         GameState secondGameState = gameState.swapGates();
         ExecutorService executor = Executors.newCachedThreadPool();
         Future<MovesAndEvaluation> firstFuture
@@ -120,7 +151,7 @@ public class BestMoveFinder {
         } catch (TimeoutException e) {
             System.out.println("timeout");
         }
-        System.out.println(bestState);
+        System.out.println(bestState == null ? "path not found" : bestState.ps);
         return new MovesAndEvaluation(bestMoves, evaluator.evaluate(bestState, bestMoves));
     }
 
@@ -128,15 +159,17 @@ public class BestMoveFinder {
         PlayerState ps = gameState.ps;
         Board board = gameState.board;
         Cell cur = gameState.cur;
-        if (evaluator.finished(cur, ps, exit)) {
-            double evaluation = evaluator.evaluate(ps, curMoves);
+        if (evaluator.updateOnEachMove() || evaluator.finished(cur, ps, exit)) {
+            double evaluation = evaluator.evaluate(gameState, curMoves);
             if (evaluation > bestEvaluation) {
                 bestEvaluation = evaluation;
-                bestState = ps;
+                bestState = gameState;
                 bestMoves = new ArrayList<>(curMoves);
                 //System.out.println("cur best " + ps);
             }
-            return;
+            if (!evaluator.updateOnEachMove()) {
+                return;
+            }
         }
         if (bestMoves != null && tooLate()) {
             throw new TimeoutException();
@@ -205,7 +238,7 @@ public class BestMoveFinder {
 
     private boolean tooLate() {
 //        return false;
-        return System.currentTimeMillis() - start > 10000;
+        return System.currentTimeMillis() - start > 1000;
     }
 
     private boolean exitReachable(Board board, Cell cur) {
@@ -238,7 +271,7 @@ public class BestMoveFinder {
 
 
     private static boolean potentiallyPassable(TileType tile) {
-        return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME && tile != EGG;
+        return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME;
     }
 
     private boolean passableNow(PlayerState ps, Board board, Cell to) {

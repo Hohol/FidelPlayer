@@ -20,7 +20,6 @@ public class GameStateReaderTest {
     void test() throws IOException {
         BufferedImage img = readImg("1");
         GameState gameState = gameStateReader.parseImage(img);
-        System.out.println(gameState);
         assertEquals(gameState.maxHp, 3);
         assertEquals(gameState.levelType, LevelType.ALIENS);
         assertEquals(gameState.gold, 9);

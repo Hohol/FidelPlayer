@@ -5,6 +5,8 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIOptions;
 
+import java.awt.*;
+
 public class GetWindowRect {
 
     public interface User32 extends StdCallLibrary {
@@ -16,7 +18,7 @@ public class GetWindowRect {
         int GetWindowRect(HWND handle, int[] rect);
     }
 
-    public static int[] getRect(String windowName) {
+    public static Rectangle getRect(String windowName) {
         HWND hwnd = User32.INSTANCE.FindWindow(null, windowName);
         if (hwnd == null) {
             throw new RuntimeException("window not found: " + windowName);
@@ -27,7 +29,11 @@ public class GetWindowRect {
         if (result == 0) {
             throw new RuntimeException("something went wrong: " + windowName);
         }
-        return rect;
+        int x = rect[0];
+        int y = rect[1];
+        int w = rect[2] - x + 1;
+        int h = rect[3] - y + 1;
+        return new Rectangle(x, y, w, h);
     }
 
     @SuppressWarnings("serial")

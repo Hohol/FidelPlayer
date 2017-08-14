@@ -9,7 +9,7 @@ public class MoveGameState {
     final Board board;
     public final PlayerState ps;
     final Cell cur;
-    final int round;
+    public final int round;
 
     public MoveGameState(Board board, Cell cur, PlayerState ps, int round) {
         this.board = board;
