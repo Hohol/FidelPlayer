@@ -62,6 +62,9 @@ public class GameStateReader {
         } else if (board.width == 9) {
             levelType = LevelType.DRAGON;
             board.replaceAll(EMPTY, VORTEX); // todo detect vortex
+        } else if (board.contains(EXIT_50_XP)) {
+            levelType = LevelType.BEFORE_DRAGON;
+            board.replaceAll(EXIT_50_XP, EXIT);
         }
         return new GameState(board, maxHp, gold, xp, levelType, Collections.emptyMap());
     }

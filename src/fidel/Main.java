@@ -36,7 +36,11 @@ public class Main {
 
             moveMaker.makeMoves(bestMoves, gameState);
             if (shouldFinishLevel) {
-                tryy(() -> Thread.sleep(1100));
+                tryy(() -> {
+                    int sleepTime = gameState.levelType == LevelType.BEFORE_DRAGON ? 11000 : 1100;
+                    Thread.sleep(sleepTime);
+                    System.out.println("wake up!");
+                });
             } else {
                 break;
             }

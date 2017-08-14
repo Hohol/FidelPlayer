@@ -50,6 +50,8 @@ public enum TileType {
     EYE,
     WING,
 
+    EXIT_50_XP,
+
     GNOME;
 
     public final Direction dir;
