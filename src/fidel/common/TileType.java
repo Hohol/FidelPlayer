@@ -51,7 +51,9 @@ public enum TileType {
     WING,
 
     EXIT_50_XP,
+    EXIT_15_XP,
     VOLCANO,
+    BOMBABLE_WALL,
     GNOME;
 
     public final Direction dir;

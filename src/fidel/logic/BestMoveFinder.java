@@ -24,6 +24,7 @@ public class BestMoveFinder {
     final GameParameters gameParameters;
     final Simulator simulator;
     final Evaluator evaluator;
+    final int requiredXp;
 
     List<Command> bestMoves = null;
     double bestEvaluation = Double.NEGATIVE_INFINITY;
@@ -40,6 +41,10 @@ public class BestMoveFinder {
         simulator = new Simulator(gameState, gameParameters);
         visited = new int[gameState.board.height][gameState.board.width];
         this.evaluator = evaluator;
+        requiredXp = gameState.xp +
+                (gameState.levelType == LevelType.LEVEL_15_XP ? 15 :
+                        gameState.levelType == LevelType.BEFORE_DRAGON ? 50 :
+                                0);
     }
 
     public static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters) {
@@ -328,6 +333,12 @@ public class BestMoveFinder {
             return dir == Direction.LEFT;
         }
         if ((levelType == LevelType.ALIENS || levelType == LevelType.DRAGON) && ps.bossHp > 0 && to.equals(exit)) {
+            return false;
+        }
+        if (ps.xp < requiredXp && to.equals(exit)) {
+            return false;
+        }
+        if (tile == BOMBABLE_WALL) {
             return false;
         }
         return true;

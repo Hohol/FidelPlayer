@@ -65,6 +65,11 @@ public class GameStateReader {
         } else if (board.contains(EXIT_50_XP)) {
             levelType = LevelType.BEFORE_DRAGON;
             board.replaceAll(EXIT_50_XP, EXIT);
+        } else if (board.contains(EXIT_15_XP)) {
+            levelType = LevelType.LEVEL_15_XP;
+            board.replaceAll(EXIT_15_XP, EXIT);
+        } else if (board.contains(BOMBABLE_WALL)) {
+            levelType = LevelType.BEFORE_ALIEN;
         }
         return new GameState(board, maxHp, gold, xp, levelType, Collections.emptyMap());
     }
