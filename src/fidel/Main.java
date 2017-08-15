@@ -9,9 +9,11 @@ import fidel.logic.BestMoveFinder;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static fidel.common.Command.*;
+import static fidel.common.Command.BARK;
+import static fidel.common.Command.ENTER;
 import static fidel.common.GameState.UNKNOWN_EGG_TIMING;
 import static fidel.common.TileType.*;
 import static fidel.interaction.ExceptionHelper.fail;
@@ -25,30 +27,56 @@ public class Main {
     static final MoveMaker moveMaker = new MoveMaker();
 
     public static void main(String[] args) {
-        Stopwatch stopwatch = Stopwatch.createStarted();
+        Stopwatch totalStopwatch = Stopwatch.createStarted();
+        List<PerformanceStats> performanceStats = new ArrayList<>();
+        int levelIndex = 0;
         while (true) {
-            GameState gameState = readGameState();
+            levelIndex++;
+            Stopwatch levelStopwatch = Stopwatch.createStarted();
+            GameState gameState = trackTime("reading", () -> readGameState());
 
-            List<Command> bestMoves = BestMoveFinder.findBestMoves(gameState, gameParameters);
-
-            if (shouldFinishLevel) {
-                bestMoves = append(bestMoves, ENTER);
-            }
+            List<Command> bestMoves = trackTime("calculating", () -> findBestMoves(gameState));
 
             System.out.println(bestMoves);
 
-            moveMaker.makeMoves(bestMoves, gameState);
-            if (shouldFinishLevel && gameState.levelType != LevelType.DRAGON) {
+            trackTime("moving", () -> moveMaker.makeMoves(bestMoves, gameState));
+
+            boolean proceedToNextLevel = shouldFinishLevel && gameState.levelType != LevelType.DRAGON;
+            if (proceedToNextLevel) {
                 tryy(() -> {
                     int sleepTime = gameState.levelType == LevelType.BEFORE_DRAGON ? 11000 : 1100;
                     Thread.sleep(sleepTime);
                     System.out.println("wake up!");
                 });
-            } else {
+            }
+            PerformanceStats ps = new PerformanceStats(levelStopwatch.elapsed(), levelIndex, gameState.levelType);
+            performanceStats.add(ps);
+            System.out.println(ps);
+            if (!proceedToNextLevel) {
                 break;
             }
         }
-        System.out.println("finished in " + stopwatch);
+        System.out.println();
+        performanceStats.stream()
+                .sorted(Comparator.comparing(s -> s.duration))
+                .forEach(System.out::println);
+        System.out.println();
+        System.out.println("Total time: " + totalStopwatch);
+    }
+
+    private static List<Command> findBestMoves(GameState gameState) {
+        List<Command> bestMoves = BestMoveFinder.findBestMoves(gameState, gameParameters);
+        if (shouldFinishLevel) {
+            bestMoves = append(bestMoves, ENTER);
+        }
+        return bestMoves;
+    }
+
+    private static <T> T trackTime(String msg, Supplier<T> f) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        T result = f.get();
+        System.out.println(msg + ": " + stopwatch);
+        return result;
     }
 
     private static List<Command> append(List<Command> a, Command command) {
@@ -100,8 +128,7 @@ public class Main {
         }
 
         Map<Cell, Integer> expected = ImmutableMap.<Cell, Integer>builder()
-                .put(new Cell(5, 1), 24)
-                .put(new Cell(5, 7), 18)
+//                .put(new Cell(5, 7), 18)
                 .build();
 
         while (eggTiming.values().stream().anyMatch(v -> v == UNKNOWN_EGG_TIMING)) {

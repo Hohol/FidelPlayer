@@ -21,8 +21,8 @@ public class MoveMaker {
     public static final int COMMON_SLEEP_TIME = 40;
     private final Robot robot = tryy(() -> new Robot());
 
-    public void makeMoves(List<Command> commands, GameState gameState) {
-        makeMoves(commands, gameState, null);
+    public int makeMoves(List<Command> commands, GameState gameState) {
+        return makeMoves(commands, gameState, null);
     }
 
     /**
@@ -45,8 +45,8 @@ public class MoveMaker {
                 tryy(() -> Thread.sleep(COMMON_SLEEP_TIME));
             } else if (onMoveMade != null || i != commands.size() - 1) {
                 MoveGameState nextState = simulator.simulate(command, state);
-                System.out.println(command);
-                System.out.println(nextState.round + " " + nextState.ps.xp + " " + nextState.ps.hp);
+                //System.out.println(command);
+                //System.out.println(nextState.round + " " + nextState.ps.xp + " " + nextState.ps.hp);
                 if (nextState.round != state.round && onMoveMade != null) {
                     boolean shouldContinue = onMoveMade.apply(state.round);
                     if (!shouldContinue) {
