@@ -208,6 +208,17 @@ public class Simulator {
                 if (target == MEDIKIT || target == EGG) {
                     found = true;
                 }
+            } else if (target == VOLCANO) {
+                newBoard.setInPlace(to, WALL);
+                for (int i = 0; i < newBoard.height; i++) {
+                    for (int j = 0; j < newBoard.width; j++) {
+                        if (newBoard.get(i, j) == EMPTY || newBoard.get(i, j) == TREASURE_CHEST) {
+                            newBoard.setInPlace(i, j, SMALL_FIRE);
+                        }
+                    }
+                }
+                addXp += 10;
+                found = true;
             }
 
         }

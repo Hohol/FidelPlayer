@@ -676,6 +676,42 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void volcano() {
+        gold = 6;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EXIT},
+                        {VOLCANO, EMPTY},
+                },
+                Arrays.asList(BOMB, RIGHT)
+        );
+    }
+
+    @Test
+    void volcano2() {
+        gold = 6;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY, EMPTY, EMPTY, EXIT},
+                        {VOLCANO, EMPTY, EMPTY, WALL, WALL},
+                },
+                Arrays.asList(ENTER, LEFT, LEFT, DOWN, LEFT, BOMB, UP, LEFT)
+        );
+    }
+
+    @Test (enabled = false)
+    void bombOnExit() { // todo
+        gold = 6;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY, EMPTY, EMPTY, EXIT},
+                        {VOLCANO, WALL, WALL, WALL, WALL},
+                },
+                Arrays.asList(BOMB, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {

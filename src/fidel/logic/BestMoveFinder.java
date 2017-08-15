@@ -273,7 +273,7 @@ public class BestMoveFinder {
 
 
     private static boolean potentiallyPassable(TileType tile) {
-        return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME;
+        return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME && tile != VOLCANO;
     }
 
     private boolean passableNow(PlayerState ps, Board board, Cell to, Direction dir) {
