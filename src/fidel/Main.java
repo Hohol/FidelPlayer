@@ -37,7 +37,7 @@ public class Main {
 
             List<Command> bestMoves = trackTime("calculating", () -> findBestMoves(gameState));
 
-            System.out.println(bestMoves);
+            //System.out.println(bestMoves);
 
             trackTime("moving", () -> moveMaker.makeMoves(bestMoves, gameState));
 
@@ -91,10 +91,12 @@ public class Main {
             fail("chests and eggs in one level is not supported");
         }
 
-        System.out.println(gameState);
+
 
         investigateChests(gameState);
         investigateEggTimings(gameState);
+
+        System.out.println(gameState);
 
         return gameState;
     }
@@ -107,7 +109,7 @@ public class Main {
             moveMaker.makeMoves(moves, gameState);
             TileType tile = gameStateReader.readTile(chestCell);
             gameState.board.setInPlace(chestCell, tile);
-            System.out.println(gameState);
+            //System.out.println(gameState);
             moveMaker.undo(moves);
         }
     }
@@ -165,7 +167,7 @@ public class Main {
                     }
             );
             moveMaker.undo(moves.subList(0, movesMade));
-            System.out.println(eggTiming);
+            //System.out.println(eggTiming);
             eggTiming.forEach((cell, round) -> {
                 if (round != UNKNOWN_EGG_TIMING) {
                     board.setInPlace(cell, EGG);

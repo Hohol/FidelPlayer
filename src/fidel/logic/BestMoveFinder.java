@@ -174,9 +174,9 @@ public class BestMoveFinder {
         try {
             dfs(initialGameState);
         } catch (TimeoutException e) {
-            System.out.println("timeout");
+            //System.out.println("timeout");
         }
-        System.out.println(bestState == null ? "path not found" : bestState.ps);
+        //System.out.println(bestState == null ? "path not found" : bestState.ps);
         return new MovesAndEvaluation(bestMoves, evaluator.evaluate(bestState, bestMoves));
     }
 

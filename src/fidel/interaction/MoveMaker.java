@@ -18,7 +18,7 @@ import static fidel.interaction.ExceptionHelper.tryy;
 
 public class MoveMaker {
 
-    public static final int COMMON_SLEEP_TIME = 40;
+    public static final int PRESS_TIME = 70;
     private final Robot robot = tryy(() -> new Robot());
 
     public int makeMoves(List<Command> commands, GameState gameState) {
@@ -38,12 +38,10 @@ public class MoveMaker {
         for (int i = 0; i < commands.size(); i++) {
             Command command = commands.get(i);
             robot.keyPress(command.keyCode);
-            tryy(() -> Thread.sleep(COMMON_SLEEP_TIME));
+            tryy(() -> Thread.sleep(PRESS_TIME));
             robot.keyRelease(command.keyCode);
 
-            if (intermission) {
-                tryy(() -> Thread.sleep(COMMON_SLEEP_TIME));
-            } else if (onMoveMade != null || i != commands.size() - 1) {
+            if (!intermission && (onMoveMade != null || i != commands.size() - 1)) {
                 MoveGameState nextState = simulator.simulate(command, state);
                 //System.out.println(command);
                 //System.out.println(nextState.round + " " + nextState.ps.xp + " " + nextState.ps.hp);
@@ -55,7 +53,7 @@ public class MoveMaker {
                 }
                 int sleepTime;
                 if (nextState.ps.maxHp == state.ps.maxHp)
-                    sleepTime = COMMON_SLEEP_TIME;
+                    sleepTime = 0;
                 else
                     sleepTime = 600;
                 tryy(() -> Thread.sleep(sleepTime));
@@ -74,9 +72,8 @@ public class MoveMaker {
 
         for (Command command : undoMoves) {
             robot.keyPress(command.keyCode);
-            tryy(() -> Thread.sleep(40));
+            tryy(() -> Thread.sleep(PRESS_TIME));
             robot.keyRelease(command.keyCode);
-            tryy(() -> Thread.sleep(40));
         }
     }
 }
