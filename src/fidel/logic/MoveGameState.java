@@ -6,7 +6,7 @@ import fidel.common.GameParameters;
 import fidel.common.GameState;
 
 public class MoveGameState {
-    final Board board;
+    public final Board board;
     public final PlayerState ps;
     final Cell cur;
     public final int round;

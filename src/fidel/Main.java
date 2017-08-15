@@ -62,7 +62,7 @@ public class Main {
         System.out.println(gameState);
 
         investigateChests(gameState);
-        gameState.eggTiming = getEggTiming(gameState);
+        investigateEggTimings(gameState);
 
         return gameState;
     }
@@ -80,10 +80,10 @@ public class Main {
         }
     }
 
-    private static Map<Cell, Integer> getEggTiming(GameState gameState) {
+    private static void investigateEggTimings(GameState gameState) {
         Board board = gameState.board;
         if (!board.contains(EGG)) {
-            return Collections.emptyMap();
+            return;
         }
         Map<Cell, Integer> eggTiming = new HashMap<>();
         for (int i = 0; i < board.height; i++) {
@@ -96,7 +96,7 @@ public class Main {
         }
 
         Map<Cell, Integer> expected = ImmutableMap.<Cell, Integer>builder()
-//                .put(new Cell(1, 3), 12)
+                //.put(new Cell(3, 6), 12)
                 .build();
 
         while (eggTiming.values().stream().anyMatch(v -> v == UNKNOWN_EGG_TIMING)) {
@@ -127,9 +127,13 @@ public class Main {
                     }
             );
             moveMaker.undo(moves.subList(0, movesMade));
-            eggTiming.keySet().forEach(cell -> board.setInPlace(cell, EGG));
+            System.out.println(eggTiming);
+            eggTiming.forEach((cell, round) -> {
+                if (round != UNKNOWN_EGG_TIMING) {
+                    board.setInPlace(cell, EGG);
+                }
+            });
+            gameState.eggTiming = new HashMap<>(eggTiming);
         }
-        System.out.println(eggTiming);
-        return eggTiming;
     }
 }

@@ -74,9 +74,9 @@ public class MoveMaker {
 
         for (Command command : undoMoves) {
             robot.keyPress(command.keyCode);
-            tryy(() -> Thread.sleep(COMMON_SLEEP_TIME));
+            tryy(() -> Thread.sleep(40));
             robot.keyRelease(command.keyCode);
-            tryy(() -> Thread.sleep(COMMON_SLEEP_TIME));
+            tryy(() -> Thread.sleep(40));
         }
     }
 }
