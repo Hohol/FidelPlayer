@@ -1,10 +1,12 @@
 package fidel.logic;
 
+import com.google.common.collect.ImmutableList;
 import fidel.common.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -70,6 +72,11 @@ public class BestMoveFinder {
             public boolean updateOnEachMove() {
                 return false;
             }
+
+            @Override
+            public boolean returnImmediately() {
+                return gameState.levelType == LevelType.DRAGON;
+            }
         };
         return findBestMoves(gameState, gameParameters, standardEvaluator);
     }
@@ -88,6 +95,11 @@ public class BestMoveFinder {
 
             @Override
             public boolean updateOnEachMove() {
+                return false;
+            }
+
+            @Override
+            public boolean returnImmediately() {
                 return false;
             }
         };
@@ -110,6 +122,11 @@ public class BestMoveFinder {
             public boolean updateOnEachMove() {
                 return true;
             }
+
+            @Override
+            public boolean returnImmediately() {
+                return false;
+            }
         };
         return findBestMoves(gameState, gameParameters, evaluator);
     }
@@ -121,23 +138,31 @@ public class BestMoveFinder {
     private static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters, Evaluator evaluator) {
         GameState secondGameState = gameState.swapGates();
         ExecutorService executor = Executors.newCachedThreadPool();
-        Future<MovesAndEvaluation> firstFuture
-                = executor.submit(() -> new BestMoveFinder(gameState, gameParameters, evaluator).findBestMoves0(gameState, false));
-        Future<MovesAndEvaluation> secondFuture
-                = executor.submit(() -> new BestMoveFinder(secondGameState, gameParameters, evaluator).findBestMoves0(secondGameState, true));
 
-        MovesAndEvaluation first = tryy(() -> firstFuture.get());
-        MovesAndEvaluation second = tryy(() -> secondFuture.get());
-        executor.shutdown();
+        Callable<MovesAndEvaluation> calcFirst = () -> new BestMoveFinder(gameState, gameParameters, evaluator).findBestMoves0(gameState, false);
+        Callable<MovesAndEvaluation> calcSecond = () -> new BestMoveFinder(secondGameState, gameParameters, evaluator).findBestMoves0(secondGameState, true);
 
-        if (first.evaluation >= second.evaluation) {
-            if (first.moves == null) {
-                throw new RuntimeException("no path found");
-            }
-            return first.moves;
+        List<Command> result;
+        if (evaluator.returnImmediately()) {
+            MovesAndEvaluation r = tryy(() -> executor.invokeAny(ImmutableList.of(calcFirst, calcSecond)));
+            result = r.moves;
         } else {
-            return second.moves;
+            Future<MovesAndEvaluation> firstFuture = executor.submit(calcFirst);
+            Future<MovesAndEvaluation> secondFuture = executor.submit(calcSecond);
+            MovesAndEvaluation first = tryy(() -> firstFuture.get());
+            MovesAndEvaluation second = tryy(() -> secondFuture.get());
+
+            if (first.evaluation >= second.evaluation) {
+                result = first.moves;
+            } else {
+                result = second.moves;
+            }
         }
+        if (result == null) {
+            throw new RuntimeException("no path found");
+        }
+        executor.shutdown();
+        return result;
     }
 
     private MovesAndEvaluation findBestMoves0(GameState gameState, boolean swapped) {
@@ -156,6 +181,9 @@ public class BestMoveFinder {
     }
 
     private void dfs(MoveGameState gameState) {
+        if (Thread.interrupted()) {
+            throw new TimeoutException();
+        }
         PlayerState ps = gameState.ps;
         Board board = gameState.board;
         Cell cur = gameState.cur;
@@ -166,6 +194,9 @@ public class BestMoveFinder {
                 bestState = gameState;
                 bestMoves = new ArrayList<>(curMoves);
                 //System.out.println("cur best " + ps);
+            }
+            if (evaluator.returnImmediately()) {
+                throw new TimeoutException(); // todo rework
             }
             if (!evaluator.updateOnEachMove()) {
                 return;
