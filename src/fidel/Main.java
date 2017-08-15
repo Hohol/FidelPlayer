@@ -1,5 +1,6 @@
 package fidel;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import fidel.common.*;
 import fidel.interaction.GameStateReader;
@@ -7,6 +8,7 @@ import fidel.interaction.MoveMaker;
 import fidel.logic.BestMoveFinder;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static fidel.common.Command.*;
@@ -23,6 +25,7 @@ public class Main {
     static final MoveMaker moveMaker = new MoveMaker();
 
     public static void main(String[] args) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
         while (true) {
             GameState gameState = readGameState();
 
@@ -35,7 +38,7 @@ public class Main {
             System.out.println(bestMoves);
 
             moveMaker.makeMoves(bestMoves, gameState);
-            if (shouldFinishLevel) {
+            if (shouldFinishLevel && gameState.levelType != LevelType.DRAGON) {
                 tryy(() -> {
                     int sleepTime = gameState.levelType == LevelType.BEFORE_DRAGON ? 11000 : 1100;
                     Thread.sleep(sleepTime);
@@ -45,6 +48,7 @@ public class Main {
                 break;
             }
         }
+        System.out.println("finished in " + stopwatch);
     }
 
     private static List<Command> append(List<Command> a, Command command) {
@@ -101,6 +105,7 @@ public class Main {
 
         while (eggTiming.values().stream().anyMatch(v -> v == UNKNOWN_EGG_TIMING)) {
             List<Command> moves = BestMoveFinder.investigateEggsMoves(gameState, gameParameters);
+            AtomicReference<Boolean> found = new AtomicReference<>(false);
             int movesMade = moveMaker.makeMoves(moves, gameState,
                     round -> {
                         List<Cell> unknownCells = eggTiming.entrySet().stream()
@@ -119,6 +124,7 @@ public class Main {
 
                                 if (tile == SNAKE) {
                                     eggTiming.put(cell, round);
+                                    found.set(true);
                                 }
                             }
                         }
@@ -134,6 +140,10 @@ public class Main {
                 }
             });
             gameState.eggTiming = new HashMap<>(eggTiming);
+            if (!found.get()) {
+                gameState.eggTiming.keySet().forEach(c -> board.setInPlace(c, EGG));
+                break;
+            }
         }
     }
 }
