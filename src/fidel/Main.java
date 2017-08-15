@@ -100,7 +100,8 @@ public class Main {
         }
 
         Map<Cell, Integer> expected = ImmutableMap.<Cell, Integer>builder()
-                //.put(new Cell(3, 6), 12)
+                .put(new Cell(5, 1), 24)
+                .put(new Cell(5, 7), 18)
                 .build();
 
         while (eggTiming.values().stream().anyMatch(v -> v == UNKNOWN_EGG_TIMING)) {
@@ -108,12 +109,16 @@ public class Main {
             AtomicReference<Boolean> found = new AtomicReference<>(false);
             int movesMade = moveMaker.makeMoves(moves, gameState,
                     round -> {
+                        //noinspection ConstantConditions
+                        if (round % 3 != 0 || round <= eggTiming.values().stream().max(Comparator.naturalOrder()).get()) {
+                            return true;
+                        }
                         List<Cell> unknownCells = eggTiming.entrySet().stream()
                                 .filter(e -> e.getValue() == UNKNOWN_EGG_TIMING)
                                 .map(e -> e.getKey())
                                 .collect(Collectors.toList());
                         if (!unknownCells.isEmpty()) {
-                            tryy(() -> Thread.sleep(100));
+                            tryy(() -> Thread.sleep(300));
                             for (Cell cell : unknownCells) {
                                 TileType tile = gameStateReader.eggOrSnake(cell, board.height == 3);
 
