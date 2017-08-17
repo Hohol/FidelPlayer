@@ -22,7 +22,7 @@ public class GameStateReader {
     private static final int TILE_HEIGHT = 90;
 
     private final Robot robot = tryy(() -> new Robot());
-    private final Map<TileType, List<BufferedImage>> allTypeImages;
+    private final Map<TileType, List<SimpleImage>> allTypeImages;
 
     public GameStateReader() {
         allTypeImages = loadTiles();
@@ -39,7 +39,7 @@ public class GameStateReader {
             return GameState.intermission(intermissionLevelType);
         }
 
-        BufferedImage[][] tileImages = getTileImages(img);
+        SimpleImage[][] tileImages = getTileImages(img);
 
         int h = tileImages.length;
         int w = tileImages[0].length;
@@ -79,7 +79,7 @@ public class GameStateReader {
     }
 
     public TileType eggOrSnake(Cell cell, boolean small) {
-        Map<TileType, List<BufferedImage>> tileTypeImgs = new HashMap<>();
+        Map<TileType, List<SimpleImage>> tileTypeImgs = new HashMap<>();
 
         tileTypeImgs.put(EGG, allTypeImages.get(EGG)); //todo candidates
         tileTypeImgs.put(SNAKE, allTypeImages.get(SNAKE));
@@ -88,10 +88,11 @@ public class GameStateReader {
         LevelParameters levelParameters = small ? LevelParameters.SMALL : LevelParameters.NORMAL;
 
 
-        BufferedImage tileImg = robot.createScreenCapture(new Rectangle(rect.x + levelParameters.startX + cell.col * TILE_WIDTH, rect.y + levelParameters.startY + cell.row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT));
+        SimpleImage tileImg = new SimpleImage(
+                robot.createScreenCapture(new Rectangle(rect.x + levelParameters.startX + cell.col * TILE_WIDTH, rect.y + levelParameters.startY + cell.row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)));
 
         TileType mostSimilar = findMostSimilar(tileImg, tileTypeImgs);
-        writeImg(tileImg, "tmp-" + mostSimilar, true);
+        //writeImg(tileImg, "tmp-" + mostSimilar, true);
         return mostSimilar;
     }
 
@@ -187,7 +188,7 @@ public class GameStateReader {
         }
     }
 
-    private BufferedImage[][] getTileImages(BufferedImage img) {
+    private SimpleImage[][] getTileImages(BufferedImage img) {
         return getTileImages(img, getLevelParameters(img));
     }
 
@@ -219,10 +220,10 @@ public class GameStateReader {
         }
     }
 
-    private BufferedImage[][] getTileImages(BufferedImage img, LevelParameters levelParameters) {
+    private SimpleImage[][] getTileImages(BufferedImage img, LevelParameters levelParameters) {
         int h = levelParameters.height;
         int w = levelParameters.width;
-        BufferedImage[][] r = new BufferedImage[h][w];
+        SimpleImage[][] r = new SimpleImage[h][w];
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
                 r[row][col] = getTileImage(img, levelParameters.startX, levelParameters.startY, row, col);
@@ -231,8 +232,8 @@ public class GameStateReader {
         return r;
     }
 
-    private BufferedImage getTileImage(BufferedImage img, int startX, int startY, int row, int col) {
-        return img.getSubimage(startX + col * TILE_WIDTH, startY + row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+    private SimpleImage getTileImage(BufferedImage img, int startX, int startY, int row, int col) {
+        return new SimpleImage(img.getSubimage(startX + col * TILE_WIDTH, startY + row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT));
     }
 
     private BufferedImage[][] getTileImages(BufferedImage img, int startX, int startY, int h, int w) {
@@ -248,17 +249,17 @@ public class GameStateReader {
     private boolean isFirstLevel(BufferedImage img) {
         BufferedImage actualImg = img.getSubimage(140, 290, 70, 50);
         BufferedImage firstLevelImg = readImg("detect-1-lvl.png");
-        double diff = getDifference(actualImg, firstLevelImg, Double.POSITIVE_INFINITY);
+        double diff = getDifference(new SimpleImage(actualImg), new SimpleImage(firstLevelImg), Double.POSITIVE_INFINITY);
         return diff < 1000;
     }
 
     LevelType checkIntermission(BufferedImage img) {
-        BufferedImage actualImg = img.getSubimage(140, 290, 70, 50);
-        BufferedImage intermission1Img = readImg("detect-intermission1.png");
+        SimpleImage actualImg = new SimpleImage(img.getSubimage(140, 290, 70, 50));
+        SimpleImage intermission1Img = new SimpleImage(readImg("detect-intermission1.png"));
         if (getDifference(actualImg, intermission1Img, Double.POSITIVE_INFINITY) < 150000) {
             return LevelType.INTERMISSION1;
         }
-        BufferedImage intermission2Img = readImg("detect-intermission2.png");
+        SimpleImage intermission2Img = new SimpleImage(readImg("detect-intermission2.png"));
         if (getDifference(actualImg, intermission2Img, Double.POSITIVE_INFINITY) == 0) {
             return LevelType.INTERMISSION2;
         }
@@ -336,12 +337,12 @@ public class GameStateReader {
         });
     }
 
-    private static TileType findMostSimilar(BufferedImage rectangle, Map<TileType, List<BufferedImage>> tileTypeImgs) {
+    private static TileType findMostSimilar(SimpleImage rectangle, Map<TileType, List<SimpleImage>> tileTypeImgs) {
         double min = Double.POSITIVE_INFINITY;
         TileType r = null;
-        for (Map.Entry<TileType, List<BufferedImage>> entry : tileTypeImgs.entrySet()) {
+        for (Map.Entry<TileType, List<SimpleImage>> entry : tileTypeImgs.entrySet()) {
             TileType name = entry.getKey();
-            for (BufferedImage img : entry.getValue()) {
+            for (SimpleImage img : entry.getValue()) {
                 double diff = getDifference(img, rectangle, min);
                 if (diff < min) {
                     min = diff;
@@ -352,7 +353,7 @@ public class GameStateReader {
         return r;
     }
 
-    private static double getDifference(BufferedImage imageA, BufferedImage imageB, double maxAllowed) {
+    private static double getDifference(SimpleImage imageA, SimpleImage imageB, double maxAllowed) {
         double sum = 0;
         for (int i = 0; i < imageA.getWidth(); i++) {
             for (int j = 0; j < imageA.getHeight(); j++) {
@@ -390,17 +391,13 @@ public class GameStateReader {
         return (color & 0x00ff0000) >> 16;
     }
 
-    private static Map<TileType, List<BufferedImage>> loadTiles() {
-        Map<TileType, List<BufferedImage>> r = new HashMap<>();
+    private static Map<TileType, List<SimpleImage>> loadTiles() {
+        Map<TileType, List<SimpleImage>> r = new HashMap<>();
         for (File file : new File("tiles").listFiles()) {
             BufferedImage img = tryy(() -> ImageIO.read(file));
             TileType name = getTileType(file.getName());
-            List<BufferedImage> list = r.get(name);
-            if (list == null) {
-                list = new ArrayList<>();
-                r.put(name, list);
-            }
-            list.add(img);
+            List<SimpleImage> list = r.computeIfAbsent(name, k -> new ArrayList<>());
+            list.add(new SimpleImage(img));
         }
         return r;
     }
@@ -420,9 +417,9 @@ public class GameStateReader {
         GameStateReader gameStateReader = new GameStateReader();
         BufferedImage img = gameStateReader.getImageFromFile();
 //        BufferedImage img = gameStateReader.getImageFromCapture(true);
-        BufferedImage[][] tileImages = gameStateReader.getTileImages(img);
+        SimpleImage[][] tileImages = gameStateReader.getTileImages(img);
 
-        gameStateReader.saveTile(tileImages[4][4], EMPTY);
+        //gameStateReader.saveTile(tileImages[4][4], EMPTY);
 
         /*BufferedImage img = new GameStateReader().getImageFromCapture();
         int cnt = 1;
