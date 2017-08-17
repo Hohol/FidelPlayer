@@ -53,6 +53,8 @@ public class GameStateReader {
             }
         }
 
+        showTiles(tileImages, board);
+
         LevelType levelType = LevelType.NORMAL;
         if (board.contains(ALIEN)) {
             levelType = LevelType.ALIENS;
@@ -72,6 +74,21 @@ public class GameStateReader {
             levelType = LevelType.BEFORE_ALIEN;
         }
         return new GameState(board, maxHp, gold, xp, levelType, Collections.emptyMap());
+    }
+
+    private void showTiles(SimpleImage[][] tileImages, Board board) {
+        BufferedImage img = new BufferedImage(board.width * TILE_WIDTH, board.height * TILE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        Graphics graphics = img.getGraphics();
+        for (int i = 0; i < board.height; i++) {
+            for (int j = 0; j < board.width; j++) {
+                int x = j * TILE_WIDTH;
+                int y = i * TILE_HEIGHT;
+                graphics.drawImage(tileImages[i][j].toBufferedImage(), x, y, null);
+                String name = board.get(i, j).shortName();
+                graphics.drawString(name, x, y + 50);
+            }
+        }
+        writeImg(img, "img-with-tiles", true);
     }
 
     public TileType readTile(Cell cell) { // todo remove

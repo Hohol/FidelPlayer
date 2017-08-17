@@ -29,4 +29,14 @@ public class SimpleImage {
     public int getRGB(int i, int j) {
         return rgb[i][j];
     }
+
+    public BufferedImage toBufferedImage() {
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                img.setRGB(x, y, getRGB(x, y));
+            }
+        }
+        return img;
+    }
 }

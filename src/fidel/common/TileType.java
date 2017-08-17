@@ -73,4 +73,17 @@ public enum TileType {
     public static TileType[] TURTLES = {TURTLE_RIGHT, TURTLE_DOWN, TURTLE_LEFT, TURTLE_UP};
 
     public static TileType[] ALL = values();
+
+    public String shortName() {
+        if (this == DRAGON_SPIKE_1) {
+            return "DS1";
+        }
+        if (this == DRAGON_SPIKE_2) {
+            return "DS2";
+        }
+        if (this == TREASURE_CHEST) {
+            return "TC";
+        }
+        return name();
+    }
 }
