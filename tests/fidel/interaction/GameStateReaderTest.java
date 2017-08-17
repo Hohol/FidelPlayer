@@ -49,8 +49,8 @@ public class GameStateReaderTest {
         assertEquals(board.get(0, 1), FIRE);
         assertEquals(board.get(0, 2), PAW_LEFT);
         assertEquals(board.get(4, 5), PAW_RIGHT);
-        assertEquals(board.get(3, 1), EMPTY); // todo detect vortex
-        assertEquals(board.get(0, 6), EMPTY); // todo detect vortex
+        assertEquals(board.get(3, 1), VORTEX); // todo detect vortex
+        assertEquals(board.get(0, 6), VORTEX); // todo detect vortex
         assertEquals(board.get(5, 4), SNOUT);
         assertEquals(board.get(2, 2), EYE);
         assertEquals(board.get(5, 0), WING);

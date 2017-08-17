@@ -654,19 +654,6 @@ public class BestMoveFinderTest {
     }
 
     @Test
-    void pawDmg() {
-        levelType = LevelType.DRAGON;
-        gameParameters.dragonHp = 1;
-        check(
-                new TileType[][]{
-                        {ENTRANCE, PAW_LEFT},
-                        {SNAKE, EXIT}
-                },
-                Arrays.asList(BARK, RIGHT, DOWN)
-        );
-    }
-
-    @Test
     void snout() {
         check(
                 new TileType[][]{
