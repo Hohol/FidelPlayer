@@ -1,21 +1,14 @@
 package fidel.logic;
 
-import com.google.common.collect.ImmutableList;
 import fidel.common.*;
+import fidel.logic.evaluators.Evaluator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import static fidel.common.Command.*;
 import static fidel.common.Direction.DIRS;
 import static fidel.common.TileType.*;
-import static fidel.interaction.ExceptionHelper.tryy;
-import static java.lang.Math.abs;
 
 public class BestMoveFinder {
 
@@ -47,130 +40,7 @@ public class BestMoveFinder {
                                 0);
     }
 
-    public static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters) {
-        if (gameState.levelType == LevelType.INTERMISSION1) {
-            return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
-                    UP, RIGHT, RIGHT);
-        }
-        if (gameState.levelType == LevelType.INTERMISSION2) {
-            return Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT);
-        }
-        Evaluator standardEvaluator = new Evaluator() {
-            @Override
-            public double evaluate(MoveGameState state, List<Command> moves) {
-                if (state == null) {
-                    return Double.NEGATIVE_INFINITY;
-                }
-                PlayerState ps = state.ps;
-                return ps.gold * 1.2 + ps.xp - moves.size() / 1000.0;
-            }
-
-            @Override
-            public boolean finished(Cell cur, PlayerState ps, Cell exit) {
-                if (ps.bossHp > 0) {
-                    return false;
-                }
-                return cur.equals(exit);
-            }
-
-            @Override
-            public boolean updateOnEachMove() {
-                return false;
-            }
-
-            @Override
-            public boolean returnImmediately() {
-                return gameState.levelType == LevelType.DRAGON;
-            }
-        };
-        return findBestMoves(gameState, gameParameters, standardEvaluator);
-    }
-
-    public static List<Command> findInvestigateChestMoves(GameState gameState, GameParameters gameParameters, Cell chestCell) {
-        Evaluator evaluator = new Evaluator() {
-            @Override
-            public double evaluate(MoveGameState state, List<Command> moves) {
-                return -moves.size();
-            }
-
-            @Override
-            public boolean finished(Cell cur, PlayerState ps, Cell exit) {
-                return dist(cur, chestCell) == 1;
-            }
-
-            @Override
-            public boolean updateOnEachMove() {
-                return false;
-            }
-
-            @Override
-            public boolean returnImmediately() {
-                return false;
-            }
-        };
-        return findBestMoves(gameState, gameParameters, evaluator);
-    }
-
-    public static List<Command> investigateEggsMoves(GameState gameState, GameParameters gameParameters) {
-        Evaluator evaluator = new Evaluator() {
-            @Override
-            public double evaluate(MoveGameState state, List<Command> moves) {
-                return state.round;
-            }
-
-            @Override
-            public boolean finished(Cell cur, PlayerState ps, Cell exit) {
-                return false;
-            }
-
-            @Override
-            public boolean updateOnEachMove() {
-                return true;
-            }
-
-            @Override
-            public boolean returnImmediately() {
-                return false;
-            }
-        };
-        return findBestMoves(gameState, gameParameters, evaluator);
-    }
-
-    private static int dist(Cell a, Cell b) {
-        return abs(a.row - b.row) + abs(a.col - b.col);
-    }
-
-    private static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters, Evaluator evaluator) {
-        GameState secondGameState = gameState.swapGates();
-        ExecutorService executor = Executors.newCachedThreadPool();
-
-        Callable<MovesAndEvaluation> calcFirst = () -> new BestMoveFinder(gameState, gameParameters, evaluator).findBestMoves0(gameState, false);
-        Callable<MovesAndEvaluation> calcSecond = () -> new BestMoveFinder(secondGameState, gameParameters, evaluator).findBestMoves0(secondGameState, true);
-
-        List<Command> result;
-        if (evaluator.returnImmediately()) {
-            MovesAndEvaluation r = tryy(() -> executor.invokeAny(ImmutableList.of(calcFirst, calcSecond)));
-            result = r.moves;
-        } else {
-            Future<MovesAndEvaluation> firstFuture = executor.submit(calcFirst);
-            Future<MovesAndEvaluation> secondFuture = executor.submit(calcSecond);
-            MovesAndEvaluation first = tryy(() -> firstFuture.get());
-            MovesAndEvaluation second = tryy(() -> secondFuture.get());
-
-            if (first.evaluation >= second.evaluation) {
-                result = first.moves;
-            } else {
-                result = second.moves;
-            }
-        }
-        if (result == null) {
-            throw new RuntimeException("no path found");
-        }
-        executor.shutdown();
-        return result;
-    }
-
-    private MovesAndEvaluation findBestMoves0(GameState gameState, boolean swapped) {
+    MovesAndEvaluation findBestMoves(GameState gameState, boolean swapped) {
         if (swapped) {
             curMoves.add(ENTER);
         }
@@ -182,7 +52,10 @@ public class BestMoveFinder {
             //System.out.println("timeout");
         }
         //System.out.println(bestState == null ? "path not found" : bestState.ps);
-        return new MovesAndEvaluation(bestMoves, evaluator.evaluate(bestState, bestMoves));
+        double evaluation = bestState == null ?
+                Double.NEGATIVE_INFINITY :
+                evaluator.evaluate(bestState, bestMoves);
+        return new MovesAndEvaluation(bestMoves, evaluation);
     }
 
     private void dfs(MoveGameState gameState) {

@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import fidel.common.*;
 import fidel.interaction.GameStateReader;
 import fidel.interaction.MoveMaker;
-import fidel.logic.BestMoveFinder;
+import fidel.logic.BMF;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -65,7 +65,7 @@ public class Main {
     }
 
     private static List<Command> findBestMoves(GameState gameState) {
-        List<Command> bestMoves = BestMoveFinder.findBestMoves(gameState, gameParameters);
+        List<Command> bestMoves = BMF.findBestMoves(gameState, gameParameters);
         if (shouldFinishLevel) {
             bestMoves = append(bestMoves, ENTER);
         }
@@ -104,7 +104,7 @@ public class Main {
     private static void investigateChests(GameState gameState) {
         while (gameState.board.contains(CHEST)) {
             Cell chestCell = gameState.board.find(CHEST);
-            List<Command> moves = BestMoveFinder.findInvestigateChestMoves(gameState, gameParameters, chestCell);
+            List<Command> moves = BMF.findInvestigateChestMoves(gameState, gameParameters, chestCell);
             moves = append(moves, BARK);
             moveMaker.makeMoves(moves, gameState);
             TileType tile = gameStateReader.readTile(chestCell);
@@ -134,7 +134,7 @@ public class Main {
                 .build();
 
         while (eggTiming.values().stream().anyMatch(v -> v == UNKNOWN_EGG_TIMING)) {
-            List<Command> moves = BestMoveFinder.investigateEggsMoves(gameState, gameParameters);
+            List<Command> moves = BMF.investigateEggsMoves(gameState, gameParameters);
             AtomicReference<Boolean> found = new AtomicReference<>(false);
             int movesMade = moveMaker.makeMoves(moves, gameState,
                     round -> {

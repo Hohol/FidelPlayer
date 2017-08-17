@@ -1,7 +1,7 @@
 package fidel.logic;
 
 public class PlayerState {
-    final int gold;
+    public final int gold;
     public final int xp;
     final int streak;
     final boolean afterTriple;
@@ -11,7 +11,7 @@ public class PlayerState {
     final boolean switchUsed;
     final int buttonsPressed;
     final int robotBars;
-    final int bossHp;
+    public final int bossHp;
     final boolean usedBomb;
 
     PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int buttonsPressed, int robotBars, int bossHp, boolean usedBomb) {
