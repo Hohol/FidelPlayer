@@ -41,5 +41,11 @@
             <artifactId>guava</artifactId>
             <version>23.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.truth</groupId>
+            <artifactId>truth</artifactId>
+            <version>0.34</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

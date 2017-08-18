@@ -178,7 +178,7 @@ public class BestMoveFinderTest {
                         }), 3,
                 0, 0, LevelType.ALIENS, eggTiming);
         while (true) {
-            BMF.findBestMoves(gameState, gameParameters);
+            BMF.findHighScoreMoves(gameState, gameParameters);
         }
     }
 
@@ -195,7 +195,7 @@ public class BestMoveFinderTest {
                                 {WALL, EMPTY, EMPTY, EMPTY, MEDIKIT, EMPTY, SNAKE}
                         }), 3,
                 6, 0, LevelType.NORMAL, eggTiming);
-        BMF.findBestMoves(gameState, gameParameters);
+        BMF.findHighScoreMoves(gameState, gameParameters);
     }
 
     @Test(enabled = false)
@@ -212,7 +212,7 @@ public class BestMoveFinderTest {
                                 {ALIEN, ALIEN, EMPTY, EMPTY, MEDIKIT, ALIEN, ALIEN}
                         }), 3,
                 9, 0, LevelType.ALIENS, eggTiming);
-        BMF.findBestMoves(gameState, gameParameters);
+        BMF.findHighScoreMoves(gameState, gameParameters);
     }
 
     @Test
@@ -706,7 +706,7 @@ public class BestMoveFinderTest {
         }
         GameState gameState = new GameState(board, maxHp, gold, xp, levelType, eggTiming);
 
-        List<Command> actual = BMF.findBestMoves(gameState, gameParameters);
+        List<Command> actual = BMF.findHighScoreMoves(gameState, gameParameters);
         assertEquals(actual, expected, actual.toString());
     }
 }

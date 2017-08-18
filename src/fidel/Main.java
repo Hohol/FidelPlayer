@@ -34,8 +34,12 @@ public class Main {
             levelIndex++;
             Stopwatch levelStopwatch = Stopwatch.createStarted();
             GameState gameState = trackTime("reading", () -> readGameState());
+            System.out.println("level = " + levelIndex);
+            System.out.println("xp = " + gameState.xp);
+            System.out.println();
 
-            List<Command> bestMoves = trackTime("calculating", () -> findBestMoves(gameState));
+            int finalLevelIndex = levelIndex;
+            List<Command> bestMoves = trackTime("calculating", () -> findBestMoves(gameState, finalLevelIndex));
 
             //System.out.println(bestMoves);
 
@@ -46,12 +50,11 @@ public class Main {
                 tryy(() -> {
                     int sleepTime = gameState.levelType == LevelType.BEFORE_DRAGON ? 11000 : 1100;
                     Thread.sleep(sleepTime);
-                    System.out.println("wake up!");
                 });
             }
             PerformanceStats ps = new PerformanceStats(levelStopwatch.elapsed(), levelIndex, gameState.levelType);
-            performanceStats.add(ps);
-            System.out.println(ps);
+            //performanceStats.add(ps);
+            //System.out.println(ps);
             if (!proceedToNextLevel) {
                 break;
             }
@@ -64,8 +67,9 @@ public class Main {
         System.out.println("Total time: " + totalStopwatch);
     }
 
-    private static List<Command> findBestMoves(GameState gameState) {
-        List<Command> bestMoves = BMF.findBestMoves(gameState, gameParameters);
+    private static List<Command> findBestMoves(GameState gameState, int levelIndex) {
+        List<Command> bestMoves = BMF.findHighScoreMoves(gameState, gameParameters);
+//        List<Command> bestMoves = BMF.findSpeedRunMoves(gameState, gameParameters, levelIndex);
         if (shouldFinishLevel) {
             bestMoves = append(bestMoves, ENTER);
         }
@@ -75,7 +79,7 @@ public class Main {
     private static <T> T trackTime(String msg, Supplier<T> f) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         T result = f.get();
-        System.out.println(msg + ": " + stopwatch);
+        //System.out.println(msg + ": " + stopwatch);
         return result;
     }
 
@@ -91,12 +95,10 @@ public class Main {
             fail("chests and eggs in one level is not supported");
         }
 
-
-
         investigateChests(gameState);
         investigateEggTimings(gameState);
 
-        System.out.println(gameState);
+        //System.out.println(gameState);
 
         return gameState;
     }

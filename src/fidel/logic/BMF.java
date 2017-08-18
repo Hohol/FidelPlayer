@@ -15,7 +15,7 @@ import static fidel.common.Command.*;
 import static fidel.interaction.ExceptionHelper.tryy;
 
 public class BMF {
-    public static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters) {
+    public static List<Command> findHighScoreMoves(GameState gameState, GameParameters gameParameters) {
         if (gameState.levelType == LevelType.INTERMISSION1) {
             return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
                     UP, RIGHT, RIGHT);
@@ -24,6 +24,17 @@ public class BMF {
             return Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT);
         }
         return findBestMoves(gameState, gameParameters, new HighScoreEvaluator());
+    }
+
+    public static List<Command> findSpeedRunMoves(GameState gameState, GameParameters gameParameters, int levelIndex) {
+        if (gameState.levelType == LevelType.INTERMISSION1) {
+            return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
+                    UP, RIGHT, RIGHT);
+        }
+        if (gameState.levelType == LevelType.INTERMISSION2) {
+            return Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT);
+        }
+        return findBestMoves(gameState, gameParameters, new SpeedRunEvaluator(levelIndex, gameState.levelType));
     }
 
     public static List<Command> findInvestigateChestMoves(GameState gameState, GameParameters gameParameters, Cell chestCell) {
