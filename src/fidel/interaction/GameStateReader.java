@@ -442,17 +442,6 @@ public class GameStateReader {
 //        BufferedImage img = gameStateReader.getImageFromCapture(true);
         SimpleImage[][] tileImages = gameStateReader.getTileImages(img);
 
-        gameStateReader.saveTile(tileImages[2][3], SPIKES);
-
-        /*BufferedImage img = new GameStateReader().getImageFromCapture();
-        int cnt = 1;
-        while (true) {
-            String name = "tests/imgs/" + cnt;
-            if (!(new File(name + ".png").exists())) {
-                writeImg(img, name, false);
-                break;
-            }
-            cnt++;
-        }*/
+        gameStateReader.saveTile(tileImages[6][0], ABORIGINE);
     }
 }

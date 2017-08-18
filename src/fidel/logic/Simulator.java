@@ -2,8 +2,7 @@ package fidel.logic;
 
 import fidel.common.*;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.*;
 
 import static fidel.common.Direction.DIRS;
 import static fidel.common.Direction.DOWN;
@@ -53,8 +52,17 @@ public class Simulator {
             gnome = true;
         }
         Board newBoard = board.setAndCopy(to, VISITED);
+        boolean killedGnome = false;
 
-        boolean killedGnome = gnome && checkKilledGnome(to, newBoard, dir);
+        if (gnome) {
+            List<Cell> gnomePositions = checkKilledGnome(to, newBoard, dir);
+            if (gnomePositions.size() > 1) {
+                return null;
+            } else if (gnomePositions.isEmpty()) {
+                killedGnome = true;
+            }
+        }
+
         PlayerState newPs = calcNewPs(ps, oldTile, dir, board, to, gameState.round, killedGnome);
 
         if (levelType == LevelType.ROBODOG && ps.bossHp > 0) {
@@ -79,37 +87,38 @@ public class Simulator {
         return new MoveGameState(newBoard, to, newPs, gameState.round + 1);
     }
 
-    private boolean checkKilledGnome(Cell cell, Board newBoard, Direction dir) {
-        Cell gnomeTo = getGnomeNewPosition(cell, dir, newBoard);
-        if (gnomeTo == null) {
-            return true;
+    private List<Cell> checkKilledGnome(Cell cell, Board newBoard, Direction dir) {
+        List<Cell> gnomePositions = getNewGnomePositions(cell, dir, newBoard);
+        if (gnomePositions.size() != 1) {
+            return gnomePositions;
         }
-        TileType tile = newBoard.get(gnomeTo);
+        TileType tile = newBoard.get(gnomePositions.get(0));
         TileType newTile = GNOME;
         if (tile == SPIKES) {
             newTile = GNOME_AND_SPIKES;
         }
-        newBoard.setInPlace(gnomeTo, newTile);
-        return false;
+        newBoard.setInPlace(gnomePositions.get(0), newTile);
+        return gnomePositions;
     }
 
-    private Cell getGnomeNewPosition(Cell cell, Direction playerDir, Board board) {
+    private List<Cell> getNewGnomePositions(Cell cell, Direction playerDir, Board board) {
         Direction[] dirs = {playerDir, RIGHT, UP, LEFT, DOWN};
         for (Direction dir : dirs) {
             Cell to = cell.add(dir);
             if (board.inside(to) && isEmptyForGnome(board.get(to))) {
-                return to;
+                return Collections.singletonList(to);
             }
         }
 
         return gnomeBfs(cell, board);
     }
 
-    private Cell gnomeBfs(Cell cell, Board board) {
+    private List<Cell> gnomeBfs(Cell cell, Board board) {
         boolean[][] visited = new boolean[board.height][board.width];
         Queue<Cell> q = new ArrayDeque<>();
         q.add(cell);
         visited[cell.row][cell.col] = true;
+        List<Cell> r = new ArrayList<>();
         while (!q.isEmpty()) {
             Cell cur = q.remove();
             for (Direction dir : Direction.DIRS) {
@@ -122,7 +131,10 @@ public class Simulator {
                 }
                 TileType tile = board.get(to);
                 if (isEmptyForGnome(tile)) {
-                    return to;
+                    r.add(to);
+                    if (r.size() > 1) {
+                        return r;
+                    }
                 }
                 if (tile == VISITED) {
                     continue;
@@ -131,7 +143,7 @@ public class Simulator {
                 q.add(to);
             }
         }
-        return null;
+        return r;
     }
 
     private boolean isEmptyForGnome(TileType tile) {

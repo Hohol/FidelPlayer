@@ -744,20 +744,6 @@ public class BestMoveFinderTest {
         );
     }
 
-    @Test
-    void gnomeTeleportsToClosestCell() {
-        GameState gameState = getGameState(new Board(
-                new TileType[][]{
-                        {ENTRANCE, GNOME, SPIDER, SPIDER, EMPTY},
-                        {WALL, SPIDER, SPIDER, SPIDER, SPIDER},
-                        {WALL, MEDIKIT, SPIDER, SPIDER, EXIT}
-                }
-        ));
-        Simulator simulator = new Simulator(gameState, gameParameters);
-        MoveGameState moveGameState = simulator.simulateMove(new MoveGameState(gameState, gameParameters), Direction.RIGHT);
-        assertEquals(moveGameState.board.get(2, 1), GNOME);
-    }
-
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {

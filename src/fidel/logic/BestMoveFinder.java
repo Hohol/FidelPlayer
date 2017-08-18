@@ -97,6 +97,9 @@ public class BestMoveFinder {
             }
 
             MoveGameState newGameState = simulator.simulateMove(gameState, dir);
+            if (newGameState == null) {
+                continue;
+            }
             if (newGameState.ps.hp < 0) {
                 shouldHeal = true;
                 continue;

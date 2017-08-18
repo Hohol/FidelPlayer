@@ -34,6 +34,7 @@ public class Main {
             levelIndex++;
             Stopwatch levelStopwatch = Stopwatch.createStarted();
             GameState gameState = trackTime("reading", () -> readGameState());
+            System.out.println(gameState);
             System.out.println("level = " + levelIndex);
             System.out.println("xp = " + gameState.xp);
             System.out.println();
