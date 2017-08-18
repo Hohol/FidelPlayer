@@ -149,4 +149,16 @@ public class Board {
             }
         }
     }
+
+    public int count(TileType tile) {
+        int cnt = 0;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (get(i, j) == tile) {
+                    cnt++;
+                }
+            }
+        }
+        return cnt;
+    }
 }

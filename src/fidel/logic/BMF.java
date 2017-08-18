@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 
 import fidel.common.*;
 import fidel.logic.evaluators.*;
+
 import static fidel.common.Command.*;
 import static fidel.interaction.ExceptionHelper.tryy;
 
@@ -61,6 +62,12 @@ public class BMF {
             Future<MovesAndEvaluation> secondFuture = executor.submit(calcSecond);
             MovesAndEvaluation first = tryy(() -> firstFuture.get());
             MovesAndEvaluation second = tryy(() -> secondFuture.get());
+
+//            System.out.println(first.moves);
+//            System.out.println(first.moveGameState);
+//            System.out.println();
+//            System.out.println(second.moveGameState);
+//            System.out.println(second.moves);
 
             if (first.evaluation >= second.evaluation) {
                 result = first.moves;

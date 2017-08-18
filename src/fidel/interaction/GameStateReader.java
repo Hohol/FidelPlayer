@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static fidel.common.TileType.*;
+import static fidel.interaction.ExceptionHelper.fail;
 import static fidel.interaction.ExceptionHelper.tryy;
 import static java.awt.Color.WHITE;
 
@@ -54,6 +55,11 @@ public class GameStateReader {
         }
 
         showTiles(tileImages, board);
+
+        if (board.count(SWITCH) > 1) {
+            System.out.println(board);
+            fail("too many switches!");
+        }
 
         LevelType levelType = LevelType.NORMAL;
         if (board.contains(ALIEN)) {
@@ -193,12 +199,12 @@ public class GameStateReader {
         return true;
     }
 
-    private void saveTile(BufferedImage img, TileType tileType) {
+    private void saveTile(SimpleImage img, TileType tileType) {
         int cnt = 0;
         while (true) {
             String name = "tiles/" + tileType + (cnt == 0 ? "" : ("-" + cnt));
             if (!(new File(name + ".png").exists())) {
-                writeImg(img, name, false);
+                writeImg(img.toBufferedImage(), name, false);
                 break;
             }
             cnt++;
@@ -436,7 +442,7 @@ public class GameStateReader {
 //        BufferedImage img = gameStateReader.getImageFromCapture(true);
         SimpleImage[][] tileImages = gameStateReader.getTileImages(img);
 
-        //gameStateReader.saveTile(tileImages[4][4], EMPTY);
+        gameStateReader.saveTile(tileImages[2][3], SPIKES);
 
         /*BufferedImage img = new GameStateReader().getImageFromCapture();
         int cnt = 1;

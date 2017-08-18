@@ -55,7 +55,7 @@ public class BestMoveFinder {
         double evaluation = bestState == null ?
                 Double.NEGATIVE_INFINITY :
                 evaluator.evaluate(bestState, bestMoves);
-        return new MovesAndEvaluation(bestMoves, evaluation);
+        return new MovesAndEvaluation(bestMoves, evaluation, bestState);
     }
 
     private void dfs(MoveGameState gameState) {
@@ -182,7 +182,7 @@ public class BestMoveFinder {
 
 
     private static boolean potentiallyPassable(TileType tile) {
-        return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != GNOME && tile != VOLCANO;
+        return tile != ENTRANCE && tile != VISITED && tile != CHEST && tile != WALL && tile != VOLCANO;
     }
 
     private boolean passableNow(PlayerState ps, Board board, Cell to, Direction dir) {

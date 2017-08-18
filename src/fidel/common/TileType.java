@@ -54,6 +54,7 @@ public enum TileType {
     EXIT_15_XP,
     VOLCANO,
     BOMBABLE_WALL,
+    GNOME_AND_SPIKES,
     GNOME;
 
     public final Direction dir;

@@ -12,7 +12,7 @@ import java.util.Map;
 
 import static fidel.common.Command.*;
 import static fidel.common.TileType.*;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 @Test
 public class BestMoveFinderTest {
@@ -687,7 +687,7 @@ public class BestMoveFinderTest {
         );
     }
 
-    @Test (enabled = false)
+    @Test(enabled = false)
     void bombOnExit() { // todo
         gold = 6;
         check(
@@ -699,14 +699,77 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void gnome() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EMPTY, EMPTY, EXIT},
+                        {WALL, GNOME, EMPTY, WALL},
+                },
+                Arrays.asList(RIGHT, DOWN, RIGHT, UP, RIGHT)
+        );
+    }
+
+    @Test
+    void gnomeEscapes2() {
+        check(
+                new TileType[][]{
+                        {WALL, WALL, EMPTY},
+                        {ENTRANCE, EMPTY, GNOME},
+                        {SPIDER, EMPTY, EXIT},
+                },
+                Arrays.asList(DOWN, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void gnomeSpikes() {
+        check(
+                new TileType[][]{
+                        {ENTRANCE, SPIDER, GNOME, SPIKES},
+                        {WALL, WALL, EXIT, EMPTY},
+                },
+                Arrays.asList(RIGHT, RIGHT, DOWN)
+        );
+    }
+
+    @Test
+    void gnomeStreak() {
+        xp = 40;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, GNOME, SPIDER, SPIDER, ROBOT, EXIT},
+                },
+                Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT)
+        );
+    }
+
+    @Test
+    void gnomeTeleportsToClosestCell() {
+        GameState gameState = getGameState(new Board(
+                new TileType[][]{
+                        {ENTRANCE, GNOME, SPIDER, SPIDER, EMPTY},
+                        {WALL, SPIDER, SPIDER, SPIDER, SPIDER},
+                        {WALL, MEDIKIT, SPIDER, SPIDER, EXIT}
+                }
+        ));
+        Simulator simulator = new Simulator(gameState, gameParameters);
+        MoveGameState moveGameState = simulator.simulateMove(new MoveGameState(gameState, gameParameters), Direction.RIGHT);
+        assertEquals(moveGameState.board.get(2, 1), GNOME);
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {
             levelType = LevelType.ALIENS;
         }
-        GameState gameState = new GameState(board, maxHp, gold, xp, levelType, eggTiming);
+        GameState gameState = getGameState(board);
 
         List<Command> actual = BMF.findHighScoreMoves(gameState, gameParameters);
         assertEquals(actual, expected, actual.toString());
+    }
+
+    private GameState getGameState(Board board) {
+        return new GameState(board, maxHp, gold, xp, levelType, eggTiming);
     }
 }

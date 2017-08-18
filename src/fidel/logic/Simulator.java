@@ -2,8 +2,14 @@ package fidel.logic;
 
 import fidel.common.*;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+
 import static fidel.common.Direction.DIRS;
 import static fidel.common.Direction.DOWN;
+import static fidel.common.Direction.LEFT;
+import static fidel.common.Direction.RIGHT;
+import static fidel.common.Direction.UP;
 import static fidel.common.TileType.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -39,8 +45,18 @@ public class Simulator {
         PlayerState ps = gameState.ps;
         Board board = gameState.board;
         TileType oldTile = board.get(to);
-        PlayerState newPs = calcNewPs(ps, oldTile, dir, board, to, gameState.round);
+        boolean gnome = false;
+        if (oldTile == GNOME) {
+            gnome = true;
+        } else if (oldTile == GNOME_AND_SPIKES) {
+            oldTile = SPIKES;
+            gnome = true;
+        }
         Board newBoard = board.setAndCopy(to, VISITED);
+
+        boolean killedGnome = gnome && checkKilledGnome(to, newBoard, dir);
+        PlayerState newPs = calcNewPs(ps, oldTile, dir, board, to, gameState.round, killedGnome);
+
         if (levelType == LevelType.ROBODOG && ps.bossHp > 0) {
             newBoard.setInPlace(newBoard.getOppositeCell(to), EMPTY);
         }
@@ -61,6 +77,65 @@ public class Simulator {
             newBoard.replaceAll(FIRE, SMALL_FIRE);
         }
         return new MoveGameState(newBoard, to, newPs, gameState.round + 1);
+    }
+
+    private boolean checkKilledGnome(Cell cell, Board newBoard, Direction dir) {
+        Cell gnomeTo = getGnomeNewPosition(cell, dir, newBoard);
+        if (gnomeTo == null) {
+            return true;
+        }
+        TileType tile = newBoard.get(gnomeTo);
+        TileType newTile = GNOME;
+        if (tile == SPIKES) {
+            newTile = GNOME_AND_SPIKES;
+        }
+        newBoard.setInPlace(gnomeTo, newTile);
+        return false;
+    }
+
+    private Cell getGnomeNewPosition(Cell cell, Direction playerDir, Board board) {
+        Direction[] dirs = {playerDir, RIGHT, UP, LEFT, DOWN};
+        for (Direction dir : dirs) {
+            Cell to = cell.add(dir);
+            if (board.inside(to) && isEmptyForGnome(board.get(to))) {
+                return to;
+            }
+        }
+
+        return gnomeBfs(cell, board);
+    }
+
+    private Cell gnomeBfs(Cell cell, Board board) {
+        boolean[][] visited = new boolean[board.height][board.width];
+        Queue<Cell> q = new ArrayDeque<>();
+        q.add(cell);
+        visited[cell.row][cell.col] = true;
+        while (!q.isEmpty()) {
+            Cell cur = q.remove();
+            for (Direction dir : Direction.DIRS) {
+                Cell to = cur.add(dir);
+                if (!board.inside(to)) {
+                    continue;
+                }
+                if (visited[to.row][to.col]) {
+                    continue;
+                }
+                TileType tile = board.get(to);
+                if (isEmptyForGnome(tile)) {
+                    return to;
+                }
+                if (tile == VISITED) {
+                    continue;
+                }
+                visited[to.row][to.col] = true;
+                q.add(to);
+            }
+        }
+        return null;
+    }
+
+    private boolean isEmptyForGnome(TileType tile) {
+        return tile == EMPTY || tile == MEDIKIT || tile == COIN || tile == SPIKES;
     }
 
     private void sleepAborigines(Board board, Cell to, Direction dir) {
@@ -282,7 +357,7 @@ public class Simulator {
                 tile == ROBOT;
     }
 
-    PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir, Board board, Cell cell, int round) {
+    PlayerState calcNewPs(PlayerState ps, TileType tile, Direction dir, Board board, Cell cell, int round, boolean killedGnome) {
         int gold = ps.gold;
         if (tile == COIN) {
             gold++;
@@ -292,7 +367,7 @@ public class Simulator {
         }
         gold = min(9, gold);
         boolean smallFlowersNearby = tile == BIG_FLOWER && smallFlowersNearby(board, cell);
-        int addXp = calcXp(tile, dir, smallFlowersNearby, ps);
+        int addXp = calcXp(tile, dir, smallFlowersNearby, ps, killedGnome);
         int dmg = calcDmg(tile, dir, smallFlowersNearby, ps);
         int xp = ps.xp + addXp;
 
@@ -486,7 +561,7 @@ public class Simulator {
         return false;
     }
 
-    private int calcXp(TileType tile, Direction dir, boolean smallFlowersNearby, PlayerState ps) {
+    private int calcXp(TileType tile, Direction dir, boolean smallFlowersNearby, PlayerState ps, boolean killedGnome) {
         if (tile == SPIDER || tile == ALIEN) {
             return 1;
         }
@@ -549,6 +624,9 @@ public class Simulator {
         }
         if (tile == DRAGON_SPIKE_1 || tile == DRAGON_SPIKE_2) {
             return 1;
+        }
+        if (killedGnome) {
+            return 15;
         }
         return 0;
     }
