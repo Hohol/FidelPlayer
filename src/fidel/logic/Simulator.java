@@ -280,9 +280,7 @@ public class Simulator {
                 newBoard.setInPlace(to, EMPTY);
             } else if (bombableItem(target)) {
                 newBoard.setInPlace(to, EMPTY);
-                if (target == MEDIKIT || target == EGG) {
-                    found = true;
-                }
+                found = true;
             } else if (target == VOLCANO) {
                 newBoard.setInPlace(to, WALL);
                 for (int i = 0; i < newBoard.height; i++) {
@@ -326,7 +324,7 @@ public class Simulator {
     }
 
     private boolean bombableItem(TileType tile) {
-        return tile == MEDIKIT || tile == EGG;
+        return tile == MEDIKIT || tile == EGG || tile == SWITCH;
     }
 
     private boolean bombableEnemy(TileType tile) {
