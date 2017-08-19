@@ -2,11 +2,11 @@ package fidel.logic.evaluators;
 
 import java.util.List;
 
+import fidel.common.Board;
 import fidel.common.Cell;
 import fidel.common.Command;
 import fidel.common.LevelType;
 import fidel.logic.MoveGameState;
-import fidel.logic.PlayerState;
 
 public class SpeedRunEvaluator implements Evaluator {
     private final int levelIndex;
@@ -54,11 +54,11 @@ public class SpeedRunEvaluator implements Evaluator {
     }
 
     @Override
-    public boolean finished(Cell cur, PlayerState ps, Cell exit) {
-        if (ps.bossHp > 0) {
+    public boolean finished(MoveGameState gameState, Cell exit) {
+        if (gameState.ps.bossHp > 0) {
             return false;
         }
-        return cur.equals(exit);
+        return gameState.cur.equals(exit);
     }
 
     @Override
@@ -69,5 +69,10 @@ public class SpeedRunEvaluator implements Evaluator {
     @Override
     public boolean returnImmediately() {
         return levelType == LevelType.DRAGON;
+    }
+
+    @Override
+    public Cell getExit(Board board) {
+        return board.findExit();
     }
 }

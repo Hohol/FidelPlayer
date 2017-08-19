@@ -1,26 +1,31 @@
 package fidel.logic.evaluators;
 
+import java.util.List;
+
 import fidel.common.Board;
 import fidel.common.Cell;
 import fidel.common.Command;
 import fidel.logic.MoveGameState;
+import fidel.logic.PlayerState;
 
-import java.util.List;
-
-public class InvestigateEggsEvaluator implements Evaluator {
+public class SimpleHighScoreEvaluator implements Evaluator {
     @Override
     public double evaluate(MoveGameState state, List<Command> moves) {
-        return state.round - moves.size() / 1000.0;
+        PlayerState ps = state.ps;
+        return ps.gold * 1.2 + ps.xp - moves.size() / 1000.0;
     }
 
     @Override
     public boolean finished(MoveGameState gameState, Cell exit) {
-        return false;
+        if (gameState.ps.bossHp > 0) {
+            return false;
+        }
+        return gameState.cur.equals(exit);
     }
 
     @Override
     public boolean updateOnEachMove() {
-        return true;
+        return false;
     }
 
     @Override
@@ -30,6 +35,6 @@ public class InvestigateEggsEvaluator implements Evaluator {
 
     @Override
     public Cell getExit(Board board) {
-        return null;
+        return board.findExit();
     }
 }

@@ -29,11 +29,11 @@ public class BestMoveFinder {
 
     public BestMoveFinder(GameState gameState, GameParameters gameParameters, Evaluator evaluator) {
         this.gameParameters = gameParameters;
-        exit = gameState.board.findExit();
         levelType = gameState.levelType;
         simulator = new Simulator(gameState, gameParameters);
         visited = new int[gameState.board.height][gameState.board.width];
         this.evaluator = evaluator;
+        exit = evaluator.getExit(gameState.board);
         requiredXp = gameState.xp +
                 (gameState.levelType == LevelType.LEVEL_15_XP ? 15 :
                         gameState.levelType == LevelType.BEFORE_DRAGON ? 50 :
@@ -65,7 +65,7 @@ public class BestMoveFinder {
         PlayerState ps = gameState.ps;
         Board board = gameState.board;
         Cell cur = gameState.cur;
-        if (evaluator.updateOnEachMove() || evaluator.finished(cur, ps, exit)) {
+        if (evaluator.updateOnEachMove() || evaluator.finished(gameState, exit)) {
             double evaluation = evaluator.evaluate(gameState, curMoves);
             if (evaluation > bestEvaluation) {
                 bestEvaluation = evaluation;
@@ -156,6 +156,9 @@ public class BestMoveFinder {
     }
 
     private boolean exitReachable(Board board, Cell cur) {
+        if (exit == null) {
+            return true;
+        }
         curVisited++;
         return dfsCheckPath(board, cur);
     }
@@ -208,7 +211,7 @@ public class BestMoveFinder {
         if (tile == PAW_LEFT) {
             return dir == Direction.LEFT;
         }
-        if ((levelType == LevelType.ALIENS || levelType == LevelType.DRAGON) && ps.bossHp > 0 && to.equals(exit)) {
+        if (ps.bossHp > 0 && tile == EXIT) {
             return false;
         }
         if (ps.xp < requiredXp && to.equals(exit)) {

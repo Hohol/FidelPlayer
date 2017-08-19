@@ -13,10 +13,11 @@ import fidel.common.*;
 import fidel.logic.evaluators.*;
 
 import static fidel.common.Command.*;
+import static fidel.common.TileType.*;
 import static fidel.interaction.ExceptionHelper.tryy;
 
 public class BMF {
-    public static List<Command> findHighScoreMoves(GameState gameState, GameParameters gameParameters) {
+    public static List<Command> findSimpleHighScoreMoves(GameState gameState, GameParameters gameParameters) {
         if (gameState.levelType == LevelType.INTERMISSION1) {
             return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
                     UP, RIGHT, RIGHT);
@@ -24,7 +25,20 @@ public class BMF {
         if (gameState.levelType == LevelType.INTERMISSION2) {
             return Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT);
         }
-        return findBestMoves(gameState, gameParameters, new HighScoreEvaluator());
+        return findBestMoves(gameState, gameParameters, new SimpleHighScoreEvaluator());
+    }
+
+    public static List<Command> findHighScoreMoves(GameState gameState, GameParameters gameParameters, int levelIndex) {
+        if (gameState.levelType == LevelType.INTERMISSION1) {
+            return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
+                    UP, RIGHT, RIGHT);
+        }
+        if (gameState.levelType == LevelType.INTERMISSION2) {
+            return Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT);
+        }
+        Board board = gameState.board;
+        boolean shouldUsePortal = board.contains(PORTAL) && gameState.gold + board.count(COIN) >= 6;
+        return findBestMoves(gameState, gameParameters, new HighScoreEvaluator(levelIndex, gameState.levelType, board.find(BOMBABLE_WALL), shouldUsePortal));
     }
 
     public static List<Command> findSpeedRunMoves(GameState gameState, GameParameters gameParameters, int levelIndex) {

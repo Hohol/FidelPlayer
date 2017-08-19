@@ -186,6 +186,9 @@ public class Simulator {
                         break;
                     }
                 }
+            } else if (toTile == CANDLE) {
+                somethingChanged = true;
+                newBoard.setInPlace(to, EMPTY);
             }
         }
         somethingChanged |= awakeAborigines(newBoard, cur);
@@ -291,8 +294,8 @@ public class Simulator {
                 buttonsPressed++;
                 newBoard.setInPlace(to, EMPTY);
             } else if (bombableItem(target)) {
-                newBoard.setInPlace(to, EMPTY);
                 found = true;
+                newBoard.setInPlace(to, EMPTY);
             } else if (target == VOLCANO) {
                 newBoard.setInPlace(to, WALL);
                 for (int i = 0; i < newBoard.height; i++) {
@@ -304,8 +307,10 @@ public class Simulator {
                 }
                 addXp += 10;
                 found = true;
+            } else if (target == BOMBABLE_WALL) {
+                found = true;
+                newBoard.setInPlace(to, CANDLE);
             }
-
         }
         if (!found) {
             return null;
@@ -545,6 +550,9 @@ public class Simulator {
         }
         if (tile == DRAGON_SPIKE_2) {
             return 2;
+        }
+        if (tile == CANDLE) {
+            return 1;
         }
         return 0;
     }

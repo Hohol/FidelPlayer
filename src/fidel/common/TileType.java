@@ -54,6 +54,9 @@ public enum TileType {
     EXIT_15_XP,
     VOLCANO,
     BOMBABLE_WALL,
+    PORTAL,
+    CANDLE,
+
     GNOME_AND_SPIKES,
     GNOME;
 

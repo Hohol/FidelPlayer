@@ -1,12 +1,12 @@
 package fidel.logic.evaluators;
 
-import java.util.List;
-
+import fidel.common.Board;
 import fidel.common.Cell;
 import fidel.common.Command;
 import fidel.common.Utils;
 import fidel.logic.MoveGameState;
-import fidel.logic.PlayerState;
+
+import java.util.List;
 
 public class InvestigateChestEvaluator implements Evaluator {
     private final Cell chestCell;
@@ -21,8 +21,8 @@ public class InvestigateChestEvaluator implements Evaluator {
     }
 
     @Override
-    public boolean finished(Cell cur, PlayerState ps, Cell exit) {
-        return Utils.dist(cur, chestCell) == 1;
+    public boolean finished(MoveGameState gameState, Cell exit) {
+        return Utils.dist(gameState.cur, chestCell) == 1;
     }
 
     @Override
@@ -33,5 +33,10 @@ public class InvestigateChestEvaluator implements Evaluator {
     @Override
     public boolean returnImmediately() {
         return false;
+    }
+
+    @Override
+    public Cell getExit(Board board) {
+        return null;
     }
 }

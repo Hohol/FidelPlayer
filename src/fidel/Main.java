@@ -22,6 +22,7 @@ import static fidel.interaction.ExceptionHelper.tryy;
 public class Main {
 
     static boolean shouldFinishLevel = true;
+    
     static final GameStateReader gameStateReader = new GameStateReader();
     static final GameParameters gameParameters = new GameParameters();
     static final MoveMaker moveMaker = new MoveMaker();
@@ -69,8 +70,10 @@ public class Main {
     }
 
     private static List<Command> findBestMoves(GameState gameState, int levelIndex) {
-        List<Command> bestMoves = BMF.findHighScoreMoves(gameState, gameParameters);
 //        List<Command> bestMoves = BMF.findSpeedRunMoves(gameState, gameParameters, levelIndex);
+        
+//        List<Command> bestMoves = BMF.findSimpleHighScoreMoves(gameState, gameParameters);
+        List<Command> bestMoves = BMF.findHighScoreMoves(gameState, gameParameters, levelIndex);
         if (shouldFinishLevel) {
             bestMoves = append(bestMoves, ENTER);
         }

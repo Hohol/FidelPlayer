@@ -56,10 +56,7 @@ public class GameStateReader {
 
         showTiles(tileImages, board);
 
-        if (board.count(SWITCH) > 1) {
-            System.out.println(board);
-            fail("too many switches!");
-        }
+        validate(board);
 
         LevelType levelType = LevelType.NORMAL;
         if (board.contains(ALIEN)) {
@@ -80,6 +77,17 @@ public class GameStateReader {
             levelType = LevelType.BEFORE_ALIEN;
         }
         return new GameState(board, maxHp, gold, xp, levelType, Collections.emptyMap());
+    }
+
+    private void validate(Board board) {
+        if (board.count(SWITCH) > 1) {
+            System.out.println(board);
+            fail("too many switches!");
+        }
+        if (board.count(PORTAL) > 1) {
+            System.out.println(board);
+            fail("too many portals!");
+        }
     }
 
     private void showTiles(SimpleImage[][] tileImages, Board board) {
@@ -442,6 +450,6 @@ public class GameStateReader {
 //        BufferedImage img = gameStateReader.getImageFromCapture(true);
         SimpleImage[][] tileImages = gameStateReader.getTileImages(img);
 
-        gameStateReader.saveTile(tileImages[6][0], ABORIGINE);
+        gameStateReader.saveTile(tileImages[4][6], PORTAL);
     }
 }

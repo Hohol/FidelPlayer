@@ -8,7 +8,7 @@ import fidel.common.GameState;
 public class MoveGameState {
     public final Board board;
     public final PlayerState ps;
-    final Cell cur;
+    public final Cell cur;
     public final int round;
 
     public MoveGameState(Board board, Cell cur, PlayerState ps, int round) {

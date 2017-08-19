@@ -178,7 +178,7 @@ public class BestMoveFinderTest {
                         }), 3,
                 0, 0, LevelType.ALIENS, eggTiming);
         while (true) {
-            BMF.findHighScoreMoves(gameState, gameParameters);
+            BMF.findSimpleHighScoreMoves(gameState, gameParameters);
         }
     }
 
@@ -195,7 +195,7 @@ public class BestMoveFinderTest {
                                 {WALL, EMPTY, EMPTY, EMPTY, MEDIKIT, EMPTY, SNAKE}
                         }), 3,
                 6, 0, LevelType.NORMAL, eggTiming);
-        BMF.findHighScoreMoves(gameState, gameParameters);
+        BMF.findSimpleHighScoreMoves(gameState, gameParameters);
     }
 
     @Test(enabled = false)
@@ -212,7 +212,7 @@ public class BestMoveFinderTest {
                                 {ALIEN, ALIEN, EMPTY, EMPTY, MEDIKIT, ALIEN, ALIEN}
                         }), 3,
                 9, 0, LevelType.ALIENS, eggTiming);
-        BMF.findHighScoreMoves(gameState, gameParameters);
+        BMF.findSimpleHighScoreMoves(gameState, gameParameters);
     }
 
     @Test
@@ -744,6 +744,31 @@ public class BestMoveFinderTest {
         );
     }
 
+    @Test
+    void portal() {
+        gold = 6;
+        levelType = LevelType.BEFORE_ALIEN;
+        GameState gameState = getGameState(new Board(new TileType[][]{
+                {ENTRANCE, BOMBABLE_WALL, PORTAL, EXIT},
+        }));
+
+        List<Command> actual = BMF.findHighScoreMoves(gameState, gameParameters, 4);
+        assertEquals(actual, Arrays.asList(BOMB, RIGHT, RIGHT), actual.toString());
+    }
+
+    @Test
+    void portal2() {
+        gold = 6;
+        levelType = LevelType.BEFORE_ALIEN;
+        GameState gameState = getGameState(new Board(new TileType[][]{
+                {ENTRANCE, EMPTY, PORTAL},
+                {EMPTY, BOMBABLE_WALL, EXIT},
+        }));
+
+        List<Command> actual = BMF.findHighScoreMoves(gameState, gameParameters, 4);
+        assertEquals(actual, Arrays.asList(RIGHT, BOMB, BARK, RIGHT), actual.toString());
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {
@@ -751,7 +776,7 @@ public class BestMoveFinderTest {
         }
         GameState gameState = getGameState(board);
 
-        List<Command> actual = BMF.findHighScoreMoves(gameState, gameParameters);
+        List<Command> actual = BMF.findSimpleHighScoreMoves(gameState, gameParameters);
         assertEquals(actual, expected, actual.toString());
     }
 
