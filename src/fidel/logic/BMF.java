@@ -30,11 +30,10 @@ public class BMF {
 
     public static List<Command> findHighScoreMoves(GameState gameState, GameParameters gameParameters, int levelIndex) {
         if (gameState.levelType == LevelType.INTERMISSION1) {
-            return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
-                    UP, RIGHT, RIGHT);
+            return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT, UP, RIGHT, RIGHT);
         }
         if (gameState.levelType == LevelType.INTERMISSION2) {
-            return Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT);
+            return Arrays.asList(RIGHT, UP, BARK, UP, UP, UP, BARK, RIGHT, RIGHT, BARK, RIGHT, DOWN, DOWN, BARK, DOWN, LEFT, UP, UP);
         }
         Board board = gameState.board;
         boolean shouldUsePortal = board.contains(PORTAL) && gameState.gold + board.count(COIN) >= 6;
