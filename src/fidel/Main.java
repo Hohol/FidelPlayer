@@ -181,9 +181,11 @@ public class Main {
             });
             gameState.eggTiming = new HashMap<>(eggTiming);
             if (!found.get()) {
+                System.out.println("Could not fully investigate egg timing!");
                 gameState.eggTiming.keySet().forEach(c -> board.setInPlace(c, EGG));
                 break;
             }
         }
+        System.out.println(gameState.eggTiming);
     }
 }
