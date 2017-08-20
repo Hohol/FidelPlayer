@@ -13,8 +13,10 @@ public class PlayerState {
     final int robotBars;
     public final int bossHp;
     final boolean usedBomb;
+    final int chessLost;
+    final int chessKilledCnt;
 
-    PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int buttonsPressed, int robotBars, int bossHp, boolean usedBomb) {
+    PlayerState(int gold, int xp, int streak, boolean afterTriple, int hp, int poison, int maxHp, boolean switchUsed, int buttonsPressed, int robotBars, int bossHp, boolean usedBomb, int chessLost, int chessKilledCnt) {
         this.gold = gold;
         this.xp = xp;
         this.streak = streak;
@@ -27,6 +29,8 @@ public class PlayerState {
         this.robotBars = robotBars;
         this.bossHp = bossHp;
         this.usedBomb = usedBomb;
+        this.chessLost = chessLost;
+        this.chessKilledCnt = chessKilledCnt;
     }
 
     @Override

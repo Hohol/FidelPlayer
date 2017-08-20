@@ -769,6 +769,44 @@ public class BestMoveFinderTest {
         assertEquals(actual, Arrays.asList(RIGHT, BOMB, BARK, RIGHT), actual.toString());
     }
 
+    @Test
+    void chess() {
+        levelType = LevelType.CHESS;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, EXIT},
+                        {PAWN, EMPTY},
+                },
+                Arrays.asList(DOWN, RIGHT, UP)
+        );
+    }
+
+    @Test
+    void bishop() {
+        levelType = LevelType.CHESS;
+        check(
+                new TileType[][]{
+                        {ENTRANCE, PAWN, EMPTY},
+                        {BISHOP, EMPTY, EMPTY},
+                        {EMPTY, EMPTY, EXIT},
+                },
+                Arrays.asList(DOWN, RIGHT, UP, RIGHT, DOWN, DOWN)
+        );
+    }
+
+    @Test
+    void king() {
+        levelType = LevelType.CHESS;
+        check(
+                new TileType[][]{
+                        {EMPTY, EMPTY, EXIT},
+                        {PAWN, EMPTY, EMPTY},
+                        {ENTRANCE, PAWN, KING},
+                },
+                Arrays.asList(UP, RIGHT, RIGHT, UP)
+        );
+    }
+
     private void check(TileType[][] map, List<Command> expected) {
         Board board = new Board(map);
         if (board.contains(ALIEN)) {

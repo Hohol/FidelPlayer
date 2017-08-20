@@ -75,6 +75,11 @@ public class GameStateReader {
             board.replaceAll(EXIT_15_XP, EXIT);
         } else if (board.contains(BOMBABLE_WALL)) {
             levelType = LevelType.BEFORE_ALIEN;
+        } else if (board.contains(KING)) {
+            levelType = LevelType.CHESS;
+            if (board.count(KING) != 1 || board.count(BISHOP) != 1 || board.count(KNIGHT) != 1 || board.count(PAWN) != 9) {
+                fail("wrong chess board");
+            }
         }
         return new GameState(board, maxHp, gold, xp, levelType, Collections.emptyMap());
     }

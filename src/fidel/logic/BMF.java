@@ -66,10 +66,9 @@ public class BMF {
         Callable<MovesAndEvaluation> calcFirst = () -> new BestMoveFinder(gameState, gameParameters, evaluator).findBestMoves(gameState, false);
         Callable<MovesAndEvaluation> calcSecond = () -> new BestMoveFinder(secondGameState, gameParameters, evaluator).findBestMoves(secondGameState, true);
 
-        List<Command> result;
+        MovesAndEvaluation result;
         if (evaluator.returnImmediately()) {
-            MovesAndEvaluation r = tryy(() -> executor.invokeAny(ImmutableList.of(calcFirst, calcSecond)));
-            result = r.moves;
+            result = tryy(() -> executor.invokeAny(ImmutableList.of(calcFirst, calcSecond)));
         } else {
             Future<MovesAndEvaluation> firstFuture = executor.submit(calcFirst);
             Future<MovesAndEvaluation> secondFuture = executor.submit(calcSecond);
@@ -83,15 +82,16 @@ public class BMF {
 //            System.out.println(second.moves);
 
             if (first.evaluation >= second.evaluation) {
-                result = first.moves;
+                result = first;
             } else {
-                result = second.moves;
+                result = second;
             }
         }
         if (result == null) {
             throw new RuntimeException("no path found");
         }
         executor.shutdown();
-        return result;
+        System.out.println(result.moveGameState);
+        return result.moves;
     }
 }

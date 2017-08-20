@@ -94,7 +94,7 @@ public class Board {
         return inside(to.row, to.col);
     }
 
-    private boolean inside(int row, int col) {
+    public boolean inside(int row, int col) {
         return row >= 0 && col >= 0 && row < height && col < width;
     }
 

@@ -57,6 +57,11 @@ public enum TileType {
     PORTAL,
     CANDLE,
 
+    KING,
+    BISHOP,
+    KNIGHT,
+    PAWN,
+
     GNOME_AND_SPIKES,
     GNOME;
 

@@ -23,6 +23,7 @@ public class Simulator {
     private final boolean aborigineLevel;
     private final int requiredXp;
     private final Cell[] eggTiming;
+    private final ChessSimulator chessSimulator;
 
     public Simulator(GameState gameState, GameParameters gameParameters) {
         Board board = gameState.board;
@@ -37,6 +38,7 @@ public class Simulator {
                 eggTiming[round] = cell;
             }
         });
+        chessSimulator = levelType == LevelType.CHESS ? new ChessSimulator(gameState) : null;
     }
 
     MoveGameState simulateMove(MoveGameState gameState, Direction dir) {
@@ -63,7 +65,10 @@ public class Simulator {
             }
         }
 
-        PlayerState newPs = calcNewPs(ps, oldTile, dir, board, to, gameState.round, killedGnome);
+        PlayerState newPs = calcNewPs(ps, oldTile, dir, newBoard, to, gameState.round, killedGnome);
+        if (newPs.chessLost > 2) {
+            return null;
+        }
 
         if (levelType == LevelType.ROBODOG && ps.bossHp > 0) {
             newBoard.setInPlace(newBoard.getOppositeCell(to), EMPTY);
@@ -240,7 +245,7 @@ public class Simulator {
                         ps.xp, ps.streak, ps.afterTriple,
                         hp,
                         ps.poison, ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp,
-                        ps.usedBomb),
+                        ps.usedBomb, ps.chessLost, ps.chessKilledCnt),
                 gameState.round
         );
     }
@@ -262,7 +267,7 @@ public class Simulator {
                         ps.maxHp,
                         0,
                         ps.maxHp, ps.switchUsed, ps.buttonsPressed, ps.robotBars, ps.bossHp,
-                        ps.usedBomb),
+                        ps.usedBomb, ps.chessLost, ps.chessKilledCnt),
                 gameState.round
         );
     }
@@ -334,8 +339,8 @@ public class Simulator {
                         xp,
                         ps.streak, ps.afterTriple, hp,
                         ps.poison, maxHp, ps.switchUsed, buttonsPressed, ps.robotBars, ps.bossHp,
-                        true
-                ),
+                        true,
+                        ps.chessLost, ps.chessKilledCnt), // todo?
                 gameState.round
         );
     }
@@ -400,6 +405,18 @@ public class Simulator {
             streak = 0;
         }
 
+        int chessLost = ps.chessLost;
+        int chessKilledCnt = ps.chessKilledCnt;
+        if (levelType == LevelType.CHESS) {
+            if (addXp > 0) {
+                chessKilledCnt++;
+            }
+            ChessSimulator.ChessInfo chessInfo = chessSimulator.simulateChess(board, cell, chessKilledCnt);
+            chessLost += chessInfo.chessLost;
+            chessKilledCnt = chessInfo.chessKilledCnt;
+            xp += chessInfo.addXp;
+        }
+
         int poison = min(ps.maxHp, ps.poison + (tile == SNAKE ? 1 : 0));
 
         int hp = calcHp(ps, tile, dmg, poison);
@@ -425,7 +442,7 @@ public class Simulator {
             hp = maxHp - poison;
         }
 
-        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, maxHp, switchUsed, buttonsPressed, robotBars, bossHp, ps.usedBomb);
+        return new PlayerState(gold, xp, streak, afterTriple, hp, poison, maxHp, switchUsed, buttonsPressed, robotBars, bossHp, ps.usedBomb, chessLost, chessKilledCnt);
     }
 
     private int calcBossHp(PlayerState ps, TileType tile, Cell cell, Board board, Direction dir) {
@@ -645,6 +662,12 @@ public class Simulator {
         }
         if (killedGnome) {
             return 15;
+        }
+        if (tile == PAWN) {
+            return 1;
+        }
+        if (tile == KNIGHT || tile == BISHOP) {
+            return 3;
         }
         return 0;
     }

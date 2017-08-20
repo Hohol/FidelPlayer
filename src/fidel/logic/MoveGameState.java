@@ -25,8 +25,8 @@ public class MoveGameState {
                 new PlayerState(
                         gameState.gold, gameState.xp, 0, false, gameState.maxHp, 0,
                         gameState.maxHp, false, 0, 3,
-                        Simulator.getInitialBossHp(gameState.levelType, gameParameters), false
-                ),
+                        Simulator.getInitialBossHp(gameState.levelType, gameParameters), false,
+                        0, 0),
                 1
         );
     }
