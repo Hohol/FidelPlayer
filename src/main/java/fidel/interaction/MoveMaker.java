@@ -70,7 +70,7 @@ public class MoveMaker {
 
         for (Command command : undoMoves) {
             robot.keyPress(command.keyCode);
-            tryy(() -> Thread.sleep(70));
+            tryy(() -> Thread.sleep(80));
             robot.keyRelease(command.keyCode);
         }
     }

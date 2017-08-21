@@ -4,6 +4,7 @@ import fidel.common.*;
 import fidel.logic.evaluators.Evaluator;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static fidel.common.Command.*;
@@ -122,6 +123,8 @@ public class BestMoveFinder {
         }
         addMove(moveAndStates, BOMB, simulator.simulateBomb(gameState));
 
+        moveAndStates.sort(Comparator.comparingDouble((MoveAndState a) -> a.evaluation).reversed());
+
         for (MoveAndState moveAndState : moveAndStates) {
             curMoves.add(moveAndState.move);
             dfs(moveAndState.gameState);
@@ -131,17 +134,20 @@ public class BestMoveFinder {
 
     private void addMove(List<MoveAndState> moveAndStates, Command move, MoveGameState state) {
         if (state != null) {
-            moveAndStates.add(new MoveAndState(move, state));
+            double evaluation = evaluator.evaluate(state, curMoves);
+            moveAndStates.add(new MoveAndState(move, state, evaluation));
         }
     }
 
     static class MoveAndState {
         final Command move;
         final MoveGameState gameState;
+        final double evaluation;
 
-        MoveAndState(Command move, MoveGameState gameState) {
+        MoveAndState(Command move, MoveGameState gameState, double evaluation) {
             this.move = move;
             this.gameState = gameState;
+            this.evaluation = evaluation;
         }
 
         @Override

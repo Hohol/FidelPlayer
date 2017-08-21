@@ -17,7 +17,7 @@ public class InvestigateChestEvaluator implements Evaluator {
 
     @Override
     public double evaluate(MoveGameState state, List<Command> moves) {
-        return -moves.size();
+        return -moves.size() - Utils.dist(state.cur, chestCell);
     }
 
     @Override

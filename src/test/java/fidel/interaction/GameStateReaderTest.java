@@ -3,7 +3,6 @@ package fidel.interaction;
 import fidel.common.Board;
 import fidel.common.GameState;
 import fidel.common.LevelType;
-import fidel.common.TileType;
 import org.testng.annotations.Test;
 
 import javax.imageio.ImageIO;

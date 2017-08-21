@@ -17,7 +17,7 @@ import static fidel.common.TileType.*;
 import static fidel.interaction.ExceptionHelper.tryy;
 
 public class BMF {
-    private static final int NORMAL_TIMEOUT = 10000;
+    private static final int NORMAL_TIMEOUT = 3000;
     private static final int SPEEDRUN_TIMEOUT = 1000;
     private static final int INVESTIGATION_TIMEOUT = 1000;
 

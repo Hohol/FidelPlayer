@@ -9,10 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static fidel.common.Command.DOWN;
-import static fidel.common.Command.ENTER;
-import static fidel.common.Command.LEFT;
-import static fidel.common.Command.RIGHT;
+import static fidel.common.Command.*;
 import static fidel.common.TileType.*;
 import static org.testng.Assert.assertEquals;
 

@@ -446,7 +446,7 @@ public class GameStateReader {
                 return type;
             }
         }
-        throw new RuntimeException("tile tipe not found for name: " + name);
+        throw new RuntimeException("tile type not found for name: " + name);
     }
 
     public static void main(String[] args) {

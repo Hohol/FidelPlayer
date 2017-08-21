@@ -54,7 +54,7 @@ public class ChessSimulator {
                 board.setInPlace(kingPosition, EMPTY);
             } else {
                 if (chessKilledCnt == chessCnt - 1) {
-                    addXp = 15; // todo 15?
+                    addXp = 15;
                     board.setInPlace(kingPosition, EMPTY);
                 }
             }
