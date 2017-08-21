@@ -160,9 +160,9 @@ public class GameStateReader {
 
     int getXp(BufferedImage img) {
         BufferedImage[] imgs = IntStream.range(0, 10)
-                .mapToObj(digit -> readImg("digits/" + digit + ".png"))
+                .mapToObj(digit -> readImg("imgs/digits/" + digit + ".png"))
                 .toArray(BufferedImage[]::new);
-        BufferedImage slash = readImg("digits/slash.png");
+        BufferedImage slash = readImg("imgs/digits/slash.png");
         String s = "";
         int bottomRow = 799;
         int leftX = 27;
@@ -215,7 +215,7 @@ public class GameStateReader {
     private void saveTile(SimpleImage img, TileType tileType) {
         int cnt = 0;
         while (true) {
-            String name = "tiles/" + tileType + (cnt == 0 ? "" : ("-" + cnt));
+            String name = "imgs/tiles/" + tileType + (cnt == 0 ? "" : ("-" + cnt));
             if (!(new File(name + ".png").exists())) {
                 writeImg(img.toBufferedImage(), name, false);
                 break;
@@ -284,18 +284,18 @@ public class GameStateReader {
 
     private boolean isFirstLevel(BufferedImage img) {
         BufferedImage actualImg = img.getSubimage(140, 290, 70, 50);
-        BufferedImage firstLevelImg = readImg("detect-1-lvl.png");
+        BufferedImage firstLevelImg = readImg("imgs/detect-1-lvl.png");
         double diff = getDifference(new SimpleImage(actualImg), new SimpleImage(firstLevelImg), Double.POSITIVE_INFINITY);
         return diff < 1000;
     }
 
     LevelType checkIntermission(BufferedImage img) {
         SimpleImage actualImg = new SimpleImage(img.getSubimage(140, 290, 70, 50));
-        SimpleImage intermission1Img = new SimpleImage(readImg("detect-intermission1.png"));
+        SimpleImage intermission1Img = new SimpleImage(readImg("imgs/detect-intermission1.png"));
         if (getDifference(actualImg, intermission1Img, Double.POSITIVE_INFINITY) < 150000) {
             return LevelType.INTERMISSION1;
         }
-        SimpleImage intermission2Img = new SimpleImage(readImg("detect-intermission2.png"));
+        SimpleImage intermission2Img = new SimpleImage(readImg("imgs/detect-intermission2.png"));
         if (getDifference(actualImg, intermission2Img, Double.POSITIVE_INFINITY) == 0) {
             return LevelType.INTERMISSION2;
         }
@@ -429,7 +429,7 @@ public class GameStateReader {
 
     private static Map<TileType, List<SimpleImage>> loadTiles() {
         Map<TileType, List<SimpleImage>> r = new HashMap<>();
-        for (File file : new File("tiles").listFiles()) {
+        for (File file : new File("imgs/tiles").listFiles()) {
             BufferedImage img = tryy(() -> ImageIO.read(file));
             TileType name = getTileType(file.getName());
             List<SimpleImage> list = r.computeIfAbsent(name, k -> new ArrayList<>());
