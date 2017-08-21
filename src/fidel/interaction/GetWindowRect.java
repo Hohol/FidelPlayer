@@ -9,7 +9,7 @@ import java.awt.*;
 
 public class GetWindowRect {
 
-    public interface User32 extends StdCallLibrary {
+    interface User32 extends StdCallLibrary {
         User32 INSTANCE = (User32) Native.loadLibrary("user32", User32.class,
                 W32APIOptions.DEFAULT_OPTIONS);
 
@@ -34,20 +34,5 @@ public class GetWindowRect {
         int w = rect[2] - x + 1;
         int h = rect[3] - y + 1;
         return new Rectangle(x, y, w, h);
-    }
-
-    @SuppressWarnings("serial")
-    public static class WindowNotFoundException extends Exception {
-        public WindowNotFoundException(String className, String windowName) {
-            super(String.format("Window null for className: %s; windowName: %s",
-                    className, windowName));
-        }
-    }
-
-    @SuppressWarnings("serial")
-    public static class GetWindowRectException extends Exception {
-        public GetWindowRectException(String windowName) {
-            super("Window Rect not found for " + windowName);
-        }
     }
 }
