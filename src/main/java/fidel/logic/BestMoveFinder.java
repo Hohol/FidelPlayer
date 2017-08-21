@@ -19,6 +19,8 @@ public class BestMoveFinder {
     final Evaluator evaluator;
     final int requiredXp;
 
+    final int timeout;
+
     List<Command> bestMoves = null;
     double bestEvaluation = Double.NEGATIVE_INFINITY;
     MoveGameState bestState = null;
@@ -27,7 +29,7 @@ public class BestMoveFinder {
     final int[][] visited;
     int curVisited;
 
-    public BestMoveFinder(GameState gameState, GameParameters gameParameters, Evaluator evaluator) {
+    public BestMoveFinder(GameState gameState, GameParameters gameParameters, Evaluator evaluator, int timeout) {
         this.gameParameters = gameParameters;
         levelType = gameState.levelType;
         simulator = new Simulator(gameState, gameParameters);
@@ -38,6 +40,7 @@ public class BestMoveFinder {
                 (gameState.levelType == LevelType.LEVEL_15_XP ? 15 :
                         gameState.levelType == LevelType.BEFORE_DRAGON ? 50 :
                                 0);
+        this.timeout = timeout;
     }
 
     MovesAndEvaluation findBestMoves(GameState gameState, boolean swapped) {
@@ -152,7 +155,7 @@ public class BestMoveFinder {
 
     private boolean tooLate() {
 //        return false;
-        return System.currentTimeMillis() - start > 1000;
+        return System.currentTimeMillis() - start > timeout;
     }
 
     private boolean exitReachable(Board board, Cell cur) {

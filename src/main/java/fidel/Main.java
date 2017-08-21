@@ -18,10 +18,11 @@ import static fidel.common.GameState.UNKNOWN_EGG_TIMING;
 import static fidel.common.TileType.*;
 import static fidel.interaction.ExceptionHelper.fail;
 import static fidel.interaction.ExceptionHelper.tryy;
+import static java.lang.Math.max;
 
 public class Main {
 
-    static boolean shouldFinishLevel = true;
+    static boolean shouldFinishLevel = false;
     
     static final GameStateReader gameStateReader = new GameStateReader();
     static final GameParameters gameParameters = new GameParameters();
@@ -71,9 +72,9 @@ public class Main {
 
     private static List<Command> findBestMoves(GameState gameState, int levelIndex) {
 //        List<Command> bestMoves = BMF.findSpeedRunMoves(gameState, gameParameters, levelIndex);
-        
-//        List<Command> bestMoves = BMF.findSimpleHighScoreMoves(gameState, gameParameters);
-        List<Command> bestMoves = BMF.findHighScoreMoves(gameState, gameParameters, levelIndex);
+
+        List<Command> bestMoves = BMF.findSimpleHighScoreMoves(gameState, gameParameters);
+//        List<Command> bestMoves = BMF.findHighScoreMoves(gameState, gameParameters, levelIndex);
         if (shouldFinishLevel) {
             bestMoves = append(bestMoves, ENTER);
         }
@@ -153,7 +154,7 @@ public class Main {
                                 .map(e -> e.getKey())
                                 .collect(Collectors.toList());
                         if (!unknownCells.isEmpty()) {
-                            tryy(() -> Thread.sleep(300));
+                            tryy(() -> Thread.sleep(max(0, 370 - MoveMaker.PRESS_TIME)));
                             for (Cell cell : unknownCells) {
                                 TileType tile = gameStateReader.eggOrSnake(cell, board.height == 3);
 

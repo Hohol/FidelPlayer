@@ -17,6 +17,10 @@ import static fidel.common.TileType.*;
 import static fidel.interaction.ExceptionHelper.tryy;
 
 public class BMF {
+    private static final int NORMAL_TIMEOUT = 10000;
+    private static final int SPEEDRUN_TIMEOUT = 1000;
+    private static final int INVESTIGATION_TIMEOUT = 1000;
+
     public static List<Command> findSimpleHighScoreMoves(GameState gameState, GameParameters gameParameters) {
         if (gameState.levelType == LevelType.INTERMISSION1) {
             return Arrays.asList(DOWN, RIGHT, RIGHT, RIGHT, RIGHT,
@@ -25,7 +29,7 @@ public class BMF {
         if (gameState.levelType == LevelType.INTERMISSION2) {
             return Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT);
         }
-        return findBestMoves(gameState, gameParameters, new SimpleHighScoreEvaluator());
+        return findBestMoves(gameState, gameParameters, new SimpleHighScoreEvaluator(), NORMAL_TIMEOUT);
     }
 
     public static List<Command> findHighScoreMoves(GameState gameState, GameParameters gameParameters, int levelIndex) {
@@ -37,7 +41,8 @@ public class BMF {
         }
         Board board = gameState.board;
         boolean shouldUsePortal = board.contains(PORTAL) && gameState.gold + board.count(COIN) >= 6;
-        return findBestMoves(gameState, gameParameters, new HighScoreEvaluator(levelIndex, gameState.levelType, board.find(BOMBABLE_WALL), shouldUsePortal));
+        HighScoreEvaluator evaluator = new HighScoreEvaluator(levelIndex, gameState.levelType, board.find(BOMBABLE_WALL), shouldUsePortal);
+        return findBestMoves(gameState, gameParameters, evaluator, NORMAL_TIMEOUT);
     }
 
     public static List<Command> findSpeedRunMoves(GameState gameState, GameParameters gameParameters, int levelIndex) {
@@ -48,23 +53,24 @@ public class BMF {
         if (gameState.levelType == LevelType.INTERMISSION2) {
             return Arrays.asList(RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT);
         }
-        return findBestMoves(gameState, gameParameters, new SpeedRunEvaluator(levelIndex, gameState.levelType));
+        SpeedRunEvaluator evaluator = new SpeedRunEvaluator(levelIndex, gameState.levelType);
+        return findBestMoves(gameState, gameParameters, evaluator, SPEEDRUN_TIMEOUT);
     }
 
     public static List<Command> findInvestigateChestMoves(GameState gameState, GameParameters gameParameters, Cell chestCell) {
-        return findBestMoves(gameState, gameParameters, new InvestigateChestEvaluator(chestCell));
+        return findBestMoves(gameState, gameParameters, new InvestigateChestEvaluator(chestCell), INVESTIGATION_TIMEOUT);
     }
 
     public static List<Command> investigateEggsMoves(GameState gameState, GameParameters gameParameters) {
-        return findBestMoves(gameState, gameParameters, new InvestigateEggsEvaluator());
+        return findBestMoves(gameState, gameParameters, new InvestigateEggsEvaluator(), INVESTIGATION_TIMEOUT);
     }
 
-    static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters, Evaluator evaluator) {
+    static List<Command> findBestMoves(GameState gameState, GameParameters gameParameters, Evaluator evaluator, int timeout) {
         GameState secondGameState = gameState.swapGates();
         ExecutorService executor = Executors.newCachedThreadPool();
 
-        Callable<MovesAndEvaluation> calcFirst = () -> new BestMoveFinder(gameState, gameParameters, evaluator).findBestMoves(gameState, false);
-        Callable<MovesAndEvaluation> calcSecond = () -> new BestMoveFinder(secondGameState, gameParameters, evaluator).findBestMoves(secondGameState, true);
+        Callable<MovesAndEvaluation> calcFirst = () -> new BestMoveFinder(gameState, gameParameters, evaluator, timeout).findBestMoves(gameState, false);
+        Callable<MovesAndEvaluation> calcSecond = () -> new BestMoveFinder(secondGameState, gameParameters, evaluator, timeout).findBestMoves(secondGameState, true);
 
         MovesAndEvaluation result;
         if (evaluator.returnImmediately()) {
