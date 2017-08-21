@@ -124,7 +124,7 @@ public class Simulator {
         q.add(cell);
         visited[cell.row][cell.col] = true;
         List<Cell> r = new ArrayList<>();
-        while (!q.isEmpty()) {
+        while (q.isEmpty()) {
             Cell cur = q.remove();
             for (Direction dir : Direction.DIRS) {
                 Cell to = cur.add(dir);

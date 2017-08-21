@@ -63,6 +63,6 @@ public class GameStateReaderTest {
     }
 
     private BufferedImage readImg(String imgName) {
-        return tryy(() -> ImageIO.read(new File("tests/imgs/" + imgName + ".png")));
+        return tryy(() -> ImageIO.read(new File("src/test/java/imgs/" + imgName + ".png")));
     }
 }

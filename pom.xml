@@ -9,11 +9,17 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>1.2.2</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <targetClasses>
+                        <param>fidel.logic.Simulator</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>fidel.logic.BestMoveFinderTest</param>
+                        <param>fidel.logic.BmfMutationTesting</param>
+                    </targetTests>
                 </configuration>
             </plugin>
         </plugins>
@@ -47,5 +53,14 @@
             <version>0.34</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.2.2</version>
+        </dependency>
     </dependencies>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
 </project>

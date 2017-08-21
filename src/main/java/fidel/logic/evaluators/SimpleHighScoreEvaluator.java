@@ -17,9 +17,6 @@ public class SimpleHighScoreEvaluator implements Evaluator {
 
     @Override
     public boolean finished(MoveGameState gameState, Cell exit) {
-        if (gameState.ps.bossHp > 0) {
-            return false;
-        }
         return gameState.cur.equals(exit);
     }
 

@@ -38,9 +38,6 @@ public class HighScoreEvaluator implements Evaluator {
 
     @Override
     public boolean finished(MoveGameState gameState, Cell exit) {
-        if (gameState.ps.bossHp > 0) {
-            return false;
-        }
         if (shouldUsePortal) {
             TileType tile = gameState.board.get(bombableWallPosition);
             if (tile != EMPTY && tile != VISITED) {

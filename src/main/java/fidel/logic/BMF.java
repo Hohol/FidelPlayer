@@ -87,7 +87,7 @@ public class BMF {
                 result = second;
             }
         }
-        if (result == null) {
+        if (result == null || result.moves == null) {
             throw new RuntimeException("no path found");
         }
         executor.shutdown();
